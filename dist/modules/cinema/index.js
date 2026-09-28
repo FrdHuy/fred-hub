@@ -1,12 +1,12 @@
-import { parseFilms, filmMeta, starCells, viewFilms, TYPES, ORDERS } from './films.js?v=22';
-import { pose } from './flow.js?v=22';
+import { parseFilms, filmMeta, starCells, viewFilms, TYPES, ORDERS } from './films.js?v=23';
+import { pose } from './flow.js?v=23';
 
 const poster = name => new URL(`./posters/${name}`, import.meta.url).href;
 const pad = number => String(number).padStart(2, '0');
 const svg = body => `<svg viewBox="0 0 40 32" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 // Hand-drawn line art: a jewel case with a disc slipping out, a loose cross, and two slider strokes.
-// Disc and case share one centre line (y 18); the disc peeks out on the right with its hole showing.
-const CASE_ICON = svg('<circle cx="25" cy="18" r="9"/><circle cx="25" cy="18" r="1.9"/><path fill="#0f0d0c" d="M3.3 7.2c6-.3 11.8-.3 17.6-.1.3 7.3.2 14.6.1 21.8-5.9.2-11.7.2-17.6 0-.3-7.2-.3-14.5-.1-21.7z"/><path d="M6.4 7.4c-.2 7.1-.2 14.1 0 21.3"/>');
+// A single disc: outer rim, a faint groove, the hub ring and the hole.
+const CASE_ICON = svg('<circle cx="20" cy="16" r="12.5"/><path d="M11.6 11.2c1.6-2.9 4.4-4.8 7.6-5.2" opacity=".55"/><circle cx="20" cy="16" r="4.2"/><circle cx="20" cy="16" r="1.4"/>');
 const CLOSE_ICON = svg('<path d="M12.2 7.6c5.2 5.3 10.4 11 15.9 16.6"/><path d="M27.4 7.2c-5.6 5.4-10.6 11.2-15.6 17.2"/>');
 const SORT_ICON = svg('<path d="M7.2 11.1c8.4-.3 17-.2 25.6.2"/><path d="M7.4 21.2c8.5.2 17 .1 25.4-.3"/><circle cx="15.4" cy="11.2" r="2.6" fill="#0f0d0c"/><circle cx="25.2" cy="21" r="2.6" fill="#0f0d0c"/>');
 

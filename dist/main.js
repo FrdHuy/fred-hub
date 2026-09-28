@@ -1,7 +1,7 @@
-import { createInteraction } from './experience.js?v=22';
-import { mountModule } from './modules/index.js?v=22';
-import { modules, getModule, createCover } from './catalog.js?v=22';
-import { CollectionGallery } from './gallery.js?v=22';
+import { createInteraction } from './experience.js?v=23';
+import { mountModule } from './modules/index.js?v=23';
+import { modules, getModule, createCover } from './catalog.js?v=23';
+import { CollectionGallery } from './gallery.js?v=23';
 import { readRoute, navigate } from './router.js';
 
 const $ = selector => document.querySelector(selector);
