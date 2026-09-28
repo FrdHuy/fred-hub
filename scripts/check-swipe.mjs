@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import { createSwipe,sampleSwipe,swipeSucceeded } from '../dist/swipe.js';
+const run=points=>{const s=createSwipe();points.forEach(([x,y])=>sampleSwipe(s,x,y));return swipeSucceeded(s);};
+assert.equal(run([[-110,0],[-60,2],[0,4],[65,0]]),true,'complete left to right');
+assert.equal(run([[100,0],[0,0],[-100,0]]),false,'reverse swipe');
+assert.equal(run([[-100,0],[0,0],[20,0]]),false,'incomplete');
+assert.equal(run([[-100,0],[0,90],[90,0]]),false,'off-sensor excursion');
+assert.equal(run([[-100,0],[0,0],[-50,0],[90,0]]),false,'reversal during scan');
+assert.equal(run([[-100,0],[100,0]]),true,'fast clean swipe');
+assert.equal(run([[-100,0],[-80,2],[-50,3],[-30,1],[0,0],[40,0],[80,0]]),true,'slow clean swipe');
+assert.equal(run([[0,0],[100,0]]),false,'started halfway');
+console.log('PASS: swipe direction, coverage, deviation, fast/slow and retry isolation');

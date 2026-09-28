@@ -1,0 +1,102 @@
+/* An unbound manuscript sheet, with the same warm material palette as the collection. */
+[data-module="bucketlist"]{--hand:"Kaiti SC","STKaiti","KaiTi","Songti SC",serif;--pencil:#52594c;--sheet:#f6f2e7}
+[data-module="bucketlist"] .collectible--list{background:none;display:grid;place-items:center;filter:drop-shadow(0 16px 15px #51493616)}
+[data-module="bucketlist"] .wish-paper{width:68%;height:84%;position:relative;box-sizing:border-box;padding:12% 8% 7%;color:var(--pencil);text-align:left;transform:rotate(-5deg);transform-origin:50% 80%;border-radius:2px 5px 3px 1px;background:repeating-linear-gradient(0deg,#96866804 0 1px,transparent 1px 3px),linear-gradient(115deg,#fffcf2,var(--sheet));box-shadow:inset 0 1px #fff,1px 2px 1px #cdc7b0,3px 5px 0 -2px #f4efdf,5px 7px 0 -3px #d6d0bc;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+[data-module="bucketlist"] .wish-paper:after{content:'';position:absolute;right:0;bottom:0;width:30px;height:30px;background:linear-gradient(135deg,transparent 49%,#e4decc 50%,#fefcf5 80%);clip-path:polygon(100% 0,100% 100%,0 100%)}
+[data-module="bucketlist"] .wish-clip{position:absolute;width:16px;height:45px;left:65%;top:-12px;border:2px solid #969b8d;border-radius:10px;transform:rotate(12deg);box-shadow:1px 1px 1px #fff9,2px 2px 2px #54554120}
+[data-module="bucketlist"] .wish-clip:after{content:'';position:absolute;inset:3px 3px 8px;border:1px solid #969b8d;border-bottom:0;border-radius:7px}
+[data-module="bucketlist"] .wish-paper small{font:8px/1.2 monospace;letter-spacing:.2em;color:#91937e}
+[data-module="bucketlist"] .wish-paper strong{display:block;font:28px/1.7 var(--hand);letter-spacing:.08em;margin-top:8px}
+[data-module="bucketlist"] .wish-underline{display:block;width:72%;height:2px;background:#ac5c47;transform:rotate(-2deg);border-radius:50%;opacity:.7}
+[data-module="bucketlist"] .wish-preview{display:grid;gap:18px;margin-top:27px;font:15px/1.4 var(--hand)}
+[data-module="bucketlist"] .wish-preview>span{display:flex;align-items:center;gap:10px;white-space:nowrap}
+[data-module="bucketlist"] .wish-preview i{width:13px;height:13px;flex:none;border:1px solid #858978;border-radius:2px 4px 1px 3px;font:15px/9px var(--hand);font-style:normal}
+[data-module="bucketlist"] .wish-preview .crossed{text-decoration:line-through;color:#999a8c;transform:rotate(-1deg)}
+[data-module="bucketlist"] .wish-someday{position:absolute;left:12%;bottom:9%;font:italic 11px/1.5 "Noteworthy","Bradley Hand",cursive;color:#999783}
+[data-module="bucketlist"] .wish-star{position:absolute;right:12%;bottom:17%;font-size:27px;color:#ae624c;transform:rotate(13deg)}
+[data-module="bucketlist"] .checklist-opening .wish-paper{transform:rotate(0) scale(1.06)}
+.module-thumbnail:has(.collectible--list){--hand:"Kaiti SC","STKaiti",serif;--pencil:#52594c;--sheet:#f6f2e7}
+/* Cover styles are scoped by module ID, including menu thumbnails. */
+.detail-view[data-module="bucketlist"]{padding:12px 6% 80px}
+[data-module="bucketlist"] .module-content{max-width:730px;margin:25px auto 0}
+[data-module="bucketlist"] .life-paper{position:relative;min-height:590px;padding:58px 64px 32px;background:repeating-linear-gradient(0deg,#9e886305 0 1px,transparent 1px 4px),linear-gradient(105deg,#fdfaf0,#f6f2e7);color:var(--pencil);box-shadow:0 1px 2px #6e614c0d,0 18px 50px #5f543909;animation:life-unfold .5s cubic-bezier(.2,.7,.2,1) both}
+[data-module="bucketlist"] .life-paper:before{content:'';position:absolute;left:36px;top:0;bottom:0;width:1px;background:#ac69551a}
+[data-module="bucketlist"] .life-heading{position:relative;margin-bottom:35px}
+[data-module="bucketlist"] .life-owner{font:9px/1.4 monospace;letter-spacing:.15em;color:#959380}
+[data-module="bucketlist"] .life-heading h1{font:38px/1.6 var(--hand);font-weight:400;letter-spacing:.08em;margin:12px 0 0}
+[data-module="bucketlist"] .life-heading h1:after{content:'';display:block;width:170px;height:2px;border-radius:50%;transform:rotate(-1deg);background:#a65e4877}
+[data-module="bucketlist"] .life-heading h1>span{color:#ad6047}
+[data-module="bucketlist"] .life-doodle{position:absolute;right:5px;top:32px;font:43px var(--hand);color:#ad6047;transform:rotate(12deg)}
+[data-module="bucketlist"] .life-list{list-style:none;margin:0;padding:0}
+[data-module="bucketlist"] .life-row{display:flex;align-items:center;gap:12px;border-bottom:1px solid #b6b09b38;min-height:64px;position:relative}
+[data-module="bucketlist"] .life-row label{display:flex;align-items:baseline;gap:18px;cursor:pointer;flex:1;min-width:0;padding:18px 0;position:relative}
+[data-module="bucketlist"] .life-row input{position:absolute;width:1px;height:1px;opacity:0}
+[data-module="bucketlist"] .life-checkbox{border:1px solid #8d927e;border-radius:3px 5px 2px 4px;width:18px;height:18px;flex:none;align-self:flex-start;margin-top:5px;color:transparent;font:25px/10px var(--hand);transform:rotate(-4deg);transition:color .18s}
+[data-module="bucketlist"] .life-row input:checked+.life-checkbox{color:#7f8d6b}
+[data-module="bucketlist"] .life-row input:focus-visible+.life-checkbox{outline:2px solid #a86d51;outline-offset:5px}
+[data-module="bucketlist"] .life-text{font:22px/1.5 var(--hand);overflow-wrap:anywhere;transition:color .3s;text-decoration-line:line-through;text-decoration-color:transparent;text-decoration-thickness:1px;text-decoration-skip-ink:none}
+[data-module="bucketlist"] .life-row input:checked~.life-text{color:#9b9c8d;text-decoration-color:#747c67}
+[data-module="bucketlist"] .life-remove{font:20px/1 serif;color:#8b8d7b;opacity:0;padding:12px;transition:opacity .2s}
+[data-module="bucketlist"] .life-row:hover .life-remove,[data-module="bucketlist"] .life-row:focus-within .life-remove{opacity:1}
+[data-module="bucketlist"] .life-empty{font:20px/1.8 var(--hand);color:#a1a18e;padding:30px 0 35px}
+[data-module="bucketlist"] .life-form{display:flex;align-items:center;gap:16px;border-bottom:1px dashed #b3ad9866;min-height:65px;margin-top:8px}
+[data-module="bucketlist"] .life-form>span{font:24px var(--hand);color:#949982}
+[data-module="bucketlist"] .life-form input{flex:1;min-width:0;border:0;background:none;font:20px/1.5 var(--hand);color:var(--pencil);padding:16px 0;border-radius:0}
+[data-module="bucketlist"] .life-form input::placeholder{color:#a8a592}
+[data-module="bucketlist"] .life-form input:focus{outline:none}
+[data-module="bucketlist"] .life-form:focus-within{border-color:#a96b50}
+[data-module="bucketlist"] .life-form button{color:#a1684f;font:24px serif;padding:12px}
+[data-module="bucketlist"] .life-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:48px;color:#9b9c8b}
+[data-module="bucketlist"] .life-count{font:10px monospace;letter-spacing:.06em}
+[data-module="bucketlist"] .life-signature{font:italic 17px "Noteworthy","Bradley Hand",cursive}
+[data-module="bucketlist"] .life-notice{display:flex;gap:10px;align-items:baseline;color:#8a8b7a;font-size:11px;line-height:1.8;margin-top:16px}
+[data-module="bucketlist"] .life-notice p{margin:0;overflow-wrap:anywhere}
+[data-module="bucketlist"] .life-notice button{flex:none;text-decoration:underline}
+@keyframes life-unfold{from{opacity:0;transform:translateY(14px) rotate(-1deg)}to{opacity:1;transform:none}}
+@media(max-width:650px){[data-module="bucketlist"] .wish-paper strong{font-size:23px}[data-module="bucketlist"] .wish-preview{font-size:12px;gap:14px;margin-top:20px}[data-module="bucketlist"] .wish-someday{font-size:9px}.detail-view[data-module="bucketlist"]{padding:10px 18px 45px}[data-module="bucketlist"] .module-content{margin-top:20px}[data-module="bucketlist"] .life-paper{padding:40px 25px 24px;min-height:520px}[data-module="bucketlist"] .life-paper:before{left:13px}[data-module="bucketlist"] .life-heading h1{font-size:32px}[data-module="bucketlist"] .life-text{font-size:20px}[data-module="bucketlist"] .life-remove{opacity:.7}[data-module="bucketlist"] .life-form input{font-size:18px}[data-module="bucketlist"] .life-signature{font-size:13px}}
+@media(prefers-reduced-motion:reduce){[data-module="bucketlist"] .life-paper{animation:none}[data-module="bucketlist"] .wish-paper,[data-module="bucketlist"] .life-text,[data-module="bucketlist"] .life-checkbox{transition:none}}
+
+[data-module="bucketlist"].module-thumbnail-image .wish-paper{padding:12% 8% 7%}
+[data-module="bucketlist"].module-thumbnail-image .wish-paper small{font-size:4px}
+[data-module="bucketlist"].module-thumbnail-image .wish-paper strong{font-size:12px;margin-top:2px}
+[data-module="bucketlist"].module-thumbnail-image .wish-preview{font-size:5px;gap:5px;margin-top:8px}
+[data-module="bucketlist"].module-thumbnail-image .wish-preview>span{gap:4px}
+[data-module="bucketlist"].module-thumbnail-image .wish-preview i{width:5px;height:5px;font-size:7px;line-height:3px}
+[data-module="bucketlist"].module-thumbnail-image .wish-someday{font-size:4px}
+[data-module="bucketlist"].module-thumbnail-image .wish-star{font-size:12px}
+[data-module="bucketlist"].module-thumbnail-image .wish-clip{width:7px;height:20px;top:-5px;border-width:1px}
+.collection-stage [data-module="bucketlist"] .wish-paper{padding:9% 8% 6%}
+.collection-stage [data-module="bucketlist"] .wish-paper strong{font-size:calc(var(--object-size) * .07);line-height:1.5;margin-top:5px}
+.collection-stage [data-module="bucketlist"] .wish-preview{font-size:calc(var(--object-size) * .042);gap:calc(var(--object-size) * .038);margin-top:calc(var(--object-size) * .055)}
+.collection-stage [data-module="bucketlist"] .wish-someday{font-size:calc(var(--object-size) * .028);bottom:9%}
+.collection-stage [data-module="bucketlist"] .wish-star{font-size:calc(var(--object-size) * .065);bottom:21%;right:9%}
+/* Life List: quiet English handwriting, scoped to this collection only. */
+[data-module="bucketlist"]{--hand:"Bradley Hand","Noteworthy","Kaiti SC",cursive}
+[data-module="bucketlist"] .wish-paper strong,[data-module="bucketlist"] .life-heading h1{letter-spacing:.015em}
+[data-module="bucketlist"] .life-heading h1:after{width:145px}
+[data-module="bucketlist"] .life-paper{animation:none}
+.collection-stage [data-module="bucketlist"] .wish-preview{font-size:calc(var(--object-size) * .04)}
+[data-module="bucketlist"] .wish-preview>span{gap:8px}
+[data-module="bucketlist"] .life-text{transition:color .3s,text-decoration-color .3s}
+/* v17 — a quieter typeface and a compact, numbered lifetime list. */
+[data-module="bucketlist"]{--hand:Georgia,"Songti SC","STSong","Noto Serif CJK SC",serif}
+[data-module="bucketlist"] .wish-someday{font-family:Georgia,serif}
+[data-module="bucketlist"] .module-content{max-width:640px;margin-top:16px}
+[data-module="bucketlist"] .life-paper{padding:36px 42px 24px;min-height:400px}
+[data-module="bucketlist"] .life-paper:before{left:22px}
+[data-module="bucketlist"] .life-heading{margin-bottom:20px}
+[data-module="bucketlist"] .life-heading h1{font-size:28px;line-height:1.5;letter-spacing:.08em;margin-top:10px}
+[data-module="bucketlist"] .life-heading h1:after{width:120px}
+[data-module="bucketlist"] .life-owner{font:10px/1.6 "PingFang SC",sans-serif;letter-spacing:.1em}
+[data-module="bucketlist"] .life-doodle{font-size:30px;top:25px}
+[data-module="bucketlist"] .life-row{min-height:48px;gap:12px}
+[data-module="bucketlist"] .life-number{font:11px/1.5 Georgia,serif;color:#a2a18f;min-width:24px;align-self:flex-start;padding-top:16px;font-variant-numeric:tabular-nums}
+[data-module="bucketlist"] .life-row label{padding:12px 0;gap:12px}
+[data-module="bucketlist"] .life-text{font-size:17px;line-height:1.6}
+[data-module="bucketlist"] .life-checkbox{width:14px;height:14px;margin-top:6px;font-size:21px}
+[data-module="bucketlist"] .life-empty{font-size:16px;padding:20px 0}
+[data-module="bucketlist"] .life-form{min-height:48px;gap:12px}
+[data-module="bucketlist"] .life-form input{font-size:16px;padding:12px 0}
+[data-module="bucketlist"] .life-footer{margin-top:28px}
+[data-module="bucketlist"] .life-signature{font:12px/1.5 "Songti SC",serif}
+@media(max-width:650px){[data-module="bucketlist"] .life-paper{padding:28px 22px 20px;min-height:360px}[data-module="bucketlist"] .life-paper:before{left:10px}[data-module="bucketlist"] .life-heading h1{font-size:25px}[data-module="bucketlist"] .life-row{gap:8px}[data-module="bucketlist"] .life-number{min-width:20px}[data-module="bucketlist"] .life-row label{gap:10px}[data-module="bucketlist"] .life-text{font-size:16px}}

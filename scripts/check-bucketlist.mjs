@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {parseEntries,loadEntries,saveEntries} from '../dist/modules/bucketlist/storage.js';
+assert.deepEqual(parseEntries(null),[]);
+const entries=[{id:'a',text:'去看极光 <不是 HTML>',done:false},{id:'b',text:'一件已经完成的事',done:true}];
+let saved;
+const storage={getItem:()=>saved,setItem:(key,value)=>saved=value};
+saveEntries(storage,entries);assert.deepEqual(loadEntries(storage),entries);
+entries[0].done=true;saveEntries(storage,entries);assert.equal(loadEntries(storage)[0].done,true);
+entries[0].done=false;saveEntries(storage,entries);assert.equal(loadEntries(storage)[0].done,false);
+assert.throws(()=>parseEntries('{broken'));
+assert.throws(()=>parseEntries('[{"id":"a","text":"x","done":"yes"}]'));
+assert.throws(()=>parseEntries(JSON.stringify([entries[0],entries[0]])));
+console.log('PASS: empty list, roundtrip persistence, completion/undo state and invalid-data protection');

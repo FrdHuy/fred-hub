@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { ticketContact,discContact } from '../dist/contact.js';
+let state={};
+const sample=(x,gap)=>ticketContact(state,{x,gap,width:300});
+assert.equal(sample(-90,-90),'ready');
+assert.equal(sample(-90,-10),'reading');
+assert.equal(sample(-70,16),'reading');
+assert.equal(state.inserted,true,'partial scan remains seated');
+assert.equal(sample(-70,-80),'error','withdrawing from slot fails');
+assert.equal(state.inserted,false);
+assert.equal(sample(-90,0),'reading','reinsertion allows retry');
+assert.equal(sample(110,16),'success');
+state={};assert.equal(sample(0,12),'reading');assert.equal(sample(110,12),'reading','must cover left region first');
+assert.equal(sample(-80,12),'reading');assert.equal(sample(110,12),'success');
+assert.equal(discContact({x:0,gap:12,diameter:180,inserted:false}),true);
+assert.equal(discContact({x:0,gap:70,diameter:180,inserted:true}),false,'pull out disengages');
+assert.equal(discContact({x:80,gap:12,diameter:180,inserted:false}),false,'misalignment cannot load');
+console.log('PASS: seating, withdrawal error, retry, full scan, disc engagement and withdrawal');

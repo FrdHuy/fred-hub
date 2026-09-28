@@ -1,0 +1,13 @@
+Use case: product-mockup
+Asset type: ONE original square transparent PNG sprite atlas for a minimalist design collection website.
+Primary request: Generate exactly one image containing a rigorously aligned 2 by 2 arrangement of four separate complete objects. The four invisible cells must have exactly equal dimensions. Each object is centered within its own quadrant, with approximately 15% clear margin on every side of that cell. No object or shadow may cross the quadrant boundary. This single atlas will be displayed using CSS background-size: 200% 200%.
+Scene/backdrop: ACTUAL transparent background with an alpha channel. Transparent gaps between objects, no grid lines. No scene, no tabletop, no colored or white background, no checkerboard drawn into the image.
+Subjects:
+TOP LEFT quadrant: a white-bordered travel postcard with an original photographic image of coastal cliffs and a blue sea. No real place labels. Entire postcard visible, nearly front facing, tasteful slight rotation.
+TOP RIGHT quadrant: a refined clear transparent plastic CD jewel case with a silver optical disc, nearly front facing with a slight tilt. Entire case and disc fit inside the quadrant.
+BOTTOM LEFT quadrant: an elegant clean ivory notepad, not distressed or aged, with only a very small short black English heading exactly "SMALL WORLD". No other text. Entire notepad visible.
+BOTTOM RIGHT quadrant: a small light gray aluminum mechanical knob control panel, precise elegant metal material, no lettering or labels. Entire panel visible.
+Style/medium: refined photorealistic physical materials, pale minimalist design museum collection aesthetic, clean studio product cutouts.
+Lighting/mood: consistent very soft light from upper left on all four objects, exceptionally subtle contact shadows on transparent background.
+Composition/framing: square canvas, 2x2 equal cells, strict center alignment, generous transparent breathing room, full objects with no cropping.
+Constraints: This is an illustrative original asset collection, not documentation of anyone's life or travels. No extra objects, no decoration, no logos, no watermarks, no captions, no scene, no large typography. Preserve actual transparency. Output one image only, no variants.
