@@ -18,7 +18,7 @@
 | 公共首页、交互、菜单、模块注册 | Codex | v0.17 已交接，无运行中编辑 |
 | cinema 影院片单（dist/modules/cinema/**、scripts/add-movie.mjs、scripts/check-cinema.mjs；共享：index.html 样式链接、catalog theme、main.js 主题切换、hub.css 深色头部） | Claude Code | v0.18 已交接，无运行中编辑 |
 | stories 撕页日历（dist/modules/stories/**；共享：experience.js 中 stories 分支、catalog.js 中 stories 封面、对应样式） | Codex / GPT | 2026-09-28 分配，分支 codex/tear-calendar，先与用户讨论创意 |
-| bucketlist 求签筒（dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画） | Claude Code | 2026-09-28 设计讨论中，分支 claude/fortune-sticks |
+| bucketlist 百灯控制面板（原求签筒；dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画） | Claude Code | 2026-09-28 设计图待确认，分支 claude/fortune-sticks |
 | travel 内容 | 未分配 | 当前为空状态占位 |
 | wheel | 暂停 | 源码保留，不在注册表和菜单中 |
 
@@ -115,3 +115,7 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - v0.25：首页手势按方向判断（experience.js）：按在机票/光盘上先观望约 7px，横向交给轨道滑动，纵向才拿起物件，轻点光盘照旧读取。修复手机上从物件起手无法滑动。人生清单名称/封面/提示改为中文（catalog.js、experience.js）。本地手机尺寸验证：物件上横滑切换、纵推光盘进入片单、轻点光盘进入片单。资源 v25。
 
 - v0.26：人生清单改为只读数据文件 dist/modules/bucketlist/data.js（text、done），规则 items.js，check-bucketlist 校验真实数据；去掉添加/移除/撤销和对应样式；若浏览器 localStorage 仍有旧条目，页面提示并可一键复制为 data.js 行（storage.js 只用于读取旧数据）。data.js 目前为空，等 Fred 填写。资源 v26。
+
+## 设计语言统一（2026-09-28）
+- 新增 `docs/DESIGN.md`：Soft Retro Industrial（博朗 / 八十年代日本电子 / TE）。首页严格统一为一个产品家族，内页可为“同一栋楼的不同房间”。PROGRESS、MODULES、撕页日历提示词已引用。
+- 人生清单方向改为「百灯控制面板」（10×10 琥珀灯 = 100 件事，拨杆通电，液晶读数），竹签筒已放弃；开发前先出设计图给 Fred 确认。分支 claude/fortune-sticks 仍由 Claude 持有（将改名/重做）。

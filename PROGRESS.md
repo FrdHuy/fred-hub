@@ -1,6 +1,6 @@
 # PROGRESS — Fred’s Hub
 
-> Claude Code 与 Codex 共用的进度总览。**开始工作前先读本文件和 `AGENTS.md`**，再读 `docs/HANDOFF.md`（逐版本交接、所有权表）和 `docs/MODULES.md`（模块接口）。
+> Claude Code 与 Codex 共用的进度总览。**开始工作前先读本文件和 `AGENTS.md`**，再读 `docs/DESIGN.md`（统一设计语言，任何视觉/交互改动必读）、`docs/HANDOFF.md`（逐版本交接、所有权表）和 `docs/MODULES.md`（模块接口）。
 > 本文件管“全局现状 + 待办 + 约定”；每轮的详细改动与验证继续写在 `docs/HANDOFF.md` 和 `docs/开发进度-vX.md`。
 
 最近更新：2026-09-28 · Claude Code（v0.21 书架收拢与原版海报）
@@ -62,6 +62,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 - 每个版本用 git 提交保存，并新增 `docs/开发进度-v<新版本>.md`（v0.18 起不再复制 `checkpoints/`）。
 
 ### 视觉
+- **统一设计语言见 `docs/DESIGN.md`：Soft Retro Industrial（温和的复古工业设计，博朗 / 八十年代日本电子 / Teenage Engineering）。以下条目是它的具体落地，冲突时以 DESIGN.md 为准。**
 - **首页**保持下面的暖白基调；**模块进入后可有独立风格**（用户 v0.18 决定，新风格先征得用户同意）。深色模块在 catalog 设 `theme: 'dark'`。
 - cinema 风格：暖黑 `#0f0d0c`、胶片白 `#ece4d6`、暗灰 `#8a8276`、金 `#d2a052`；Didot/宋体细体标题 + Avenir Next/苹方 Light 小字（只用系统字体）；token 定义在 `.cinema` 上。用户偏好：界面文字越少越好，用简笔线稿图标代替文字标签。
 - 首页基调：暖白纸张 + 墨色，克制、留白多，“实物收藏”质感（纸张纹理、阴影、轻微旋转）。

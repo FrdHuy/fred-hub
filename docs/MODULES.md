@@ -37,6 +37,7 @@ Cleanup runs before leaving/replacing a module. Do not bind unmanaged global lis
 
 Add module-specific `style.css` inside its directory; ask the integrator to add its stylesheet to index.html. All selectors begin with `[data-module="travel"]` (replace ID). Store module assets in its own directory; reference them through `new URL('./assets/file', import.meta.url)` where needed. Avoid root-relative paths.
 The home page keeps warm off-white, restrained typography and generous spacing; do not restore decorative labels and verbose help text there.
+**Design language:** read `docs/DESIGN.md` (Soft Retro Industrial) before any visual or interaction work; the home page must read as one product family.
 **User decision (v0.18):** once opened, a module may have its own visual language (e.g. cinema is a dark screening room). Confirm a new module style with the user first. A dark module sets `theme: 'dark'` in catalog.js; main.js mirrors it to `html[data-theme]` so the shared header/back link turn light (rules at the end of hub.css).
 Motion: honor prefers-reduced-motion. Pointer actions need keyboard equivalents. Content pages remain ordinary pages, never nested dialogs for the main experience.
 
