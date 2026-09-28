@@ -1,6 +1,6 @@
-最新变更和验证见 [开发进度-v0.18.md](开发进度-v0.18.md)。全局进度见根目录 PROGRESS.md。
+最新变更和验证见 [开发进度-v0.19.md](开发进度-v0.19.md)。全局进度见根目录 PROGRESS.md。
 
-# 当前交接 · v0.18 · 2026-09-28
+# 当前交接 · v0.19 · 2026-09-28
 
 ## Canonical path
 /Users/fred/Desktop/Project/Fred-Personal-Site
@@ -78,3 +78,10 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - 限制：reduced-motion 仅代码与 CSS 覆盖，未在浏览器模拟；首页光盘拖入手势未手动重测（代码未改，check-contact 通过）；TMDB 在部分网络需代理。
 - 使用说明：docs/片单使用说明.md；设计：docs/superpowers/specs/2026-09-28-cinema-design.md。
 - 下一步：用户用真实片单替换 5 部示例；再按同样流程做 travel 或 stories。
+
+## v0.19 片单改版：3D CD 架（Claude Code）
+- 用户反馈 v0.18 文字多、银幕大、书脊粗糙。改为：左上角简笔 CD 图标 + 数量；返回仅简笔箭头（hub.css，文字留给读屏）；删除标题/银幕/放映光。
+- 主体为 CSS 3D 珠宝盒横排（front/spine/edge/back 四面），书脊印海报左缘；悬停转动抬起，点击转正展示封面，再点进入详情（封面 FLIP 飞出、光盘滑出旋转、信息逐字浮现），Esc/关闭按钮原路收回并归还焦点。进场后自动转出最新一部。
+- 横向滚轮/鼠标拖动/←→/Home/End/Enter；手机紧凑尺寸；reduced-motion 直接切换；-webkit-box-reflect 地面倒影（Firefox 无倒影）。
+- 资源 v19。check 全部通过；浏览器 1280×800 与 375 宽验证：选择居中、详情开合两次、Esc 不退回首页、键盘打开。
+- 进不去片单的问题：57123 上曾是无 no-store 的 `python -m http.server`，已换成 scripts/preview.py；用户需强制刷新一次。
