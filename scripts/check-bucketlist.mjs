@@ -23,3 +23,18 @@ assert.equal((await import(`data:text/javascript,${encodeURIComponent(`export de
 const real = parseItems((await import('../dist/modules/bucketlist/data.js')).default);
 if (real.errors.length) { console.error(`✗ 清单 data.js 有问题：\n  ${real.errors.join('\n  ')}`); process.exit(1); }
 console.log(`PASS: bucketlist data rules, legacy export lines, data.js — ${real.items.length} 条`);
+
+// Fortune tube: numerals, shake detection, draws that never repeat, unique SVG ids per cover.
+const { chineseNumber, shakeMeter, pickIndex } = await import('../dist/modules/bucketlist/fortune.js');
+const { fortuneCover } = await import('../dist/modules/bucketlist/cover.js');
+assert.deepEqual([1, 7, 10, 11, 20, 23, 99].map(chineseNumber), ['一', '七', '十', '十一', '二十', '二十三', '九十九']);
+const meter = shakeMeter(14);
+assert.deepEqual([0, -6, -12, -20, -8, 4, 10, 2, -10, -3].map(meter), [false, false, false, false, true, false, false, true, false, true]);
+const tiny = shakeMeter(14);
+assert.ok(![0, -4, -8, -4, 0, -5, 0].map(tiny).some(Boolean), 'small jiggles are not shakes');
+for (let last = 0; last < 5; last++) for (const r of [0, .3, .6, .99]) assert.notEqual(pickIndex(5, last, () => r), last);
+assert.equal(pickIndex(1, 0), 0);
+const [a, b] = [fortuneCover(), fortuneCover()], ids = html => [...html.matchAll(/id="([^"]+)"/g)].map(m => m[1]);
+assert.equal((a.match(/class="fortune-stick"/g) || []).length, 16);
+assert.ok(!ids(a).some(id => ids(b).includes(id)), 'each cover owns its gradients');
+console.log('PASS: fortune numerals, shake meter, non-repeating draw, cover ids');

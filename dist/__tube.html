@@ -1,0 +1,10 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="./styles.css?v=27"><link rel="stylesheet" href="./hub.css?v=27"><link rel="stylesheet" href="./modules/bucketlist/style.css?v=27">
+<body style="margin:0;background:#f8f5f2;display:flex;gap:30px;padding:30px">
+<div data-module="bucketlist" style="width:420px;height:420px;position:relative"><div class="collectible collectible--list" id="a"></div></div>
+<div data-module="bucketlist" style="width:420px;height:420px;position:relative"><div class="collectible collectible--list" id="b"></div></div>
+<script type="module">
+import { fortuneCover } from './modules/bucketlist/cover.js?v=27';
+import { createFortune } from './modules/bucketlist/fortune.js?v=27';
+a.innerHTML = fortuneCover(); b.innerHTML = fortuneCover();
+const f = createFortune(b, { reduced: () => true }); await f.loading; await f.auto();
+</script>

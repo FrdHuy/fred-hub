@@ -1,4 +1,5 @@
 import { ticketContact, discContact } from './contact.js';
+import { createFortune, allowMotion, watchMotion } from './modules/bucketlist/fortune.js?v=27';
 
 export function createInteraction(gallery, enter) {
   const shell=document.querySelector('.gallery-shell'), hint=shell.querySelector('.interaction-hint');
@@ -25,7 +26,9 @@ export function createInteraction(gallery, enter) {
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let item,source,drag,frame=0,last=0,x=0,y=0,tx=0,ty=0,vx=0,vy=0,busy=false,sequence=0;
   let idleTimer,errorTimer,returning=false,animations=[],ticket={},inserted=false,pending=null;
-  const prompts={travel:'将机票下缘插入槽口，再从左向右刷过。Enter 可完成刷卡。',cinema:'按住光盘可推进或抽回；插入后松手读取。',stories:'打开日记',bucketlist:'打开人生清单'};
+  // Life List fortune tube: controller for the current cover, and phone-shake listening.
+  let fortune=null,motionWatch=null,motionAllowed=typeof globalThis.DeviceMotionEvent?.requestPermission!=='function'&&'DeviceMotionEvent' in globalThis;
+  const prompts={travel:'将机票下缘插入槽口，再从左向右刷过。Enter 可完成刷卡。',cinema:'按住光盘可推进或抽回；插入后松手读取。',stories:'打开日记',bucketlist:'按住签筒上下摇出一支签，点签打开人生清单。回车可直接求签。'};
   function status(value) {
     receiver.dataset.state=value;
     if(item) hint.textContent = value==='reading'?'READING':value==='error'?'ERROR，重新插入可重试':value==='success'?'SUCCESS':prompts[item.id];
@@ -39,12 +42,25 @@ export function createInteraction(gallery, enter) {
     busy=false;returning=false;inserted=false;ticket={};x=y=tx=ty=vx=vy=0;
     if(source){source.style.transform='';source.style.opacity='';source.classList.remove('journal-unfolding','checklist-opening');source.style.removeProperty('--seated');}
     shell.classList.remove('is-handling');status('ready');if(item)hint.textContent=prompts[item.id];
+    fortune?.reset();
+  }
+  function listenMotion(){
+    motionWatch?.abort();motionWatch=new AbortController();
+    watchMotion(()=>{if(fortune&&!busy&&!document.getElementById('home-view').hidden)fortune.nudge();},motionWatch.signal);
+  }
+  // iOS only grants motion from a tap; elsewhere it is available straight away.
+  function askMotion(){
+    if(motionAllowed)return;
+    allowMotion().then(ok=>{if(ok){motionAllowed=true;if(fortune)listenMotion();}});
   }
   function setItem(next){
     if(item?.id===next.id&&source===gallery.currentElement?.firstElementChild)return;
     reset();item=next;source=gallery.currentElement.firstElementChild;shell.dataset.object=item.id;
     receiver=receivers.get(item.id)||document.createElement('div');status('ready');drawReceivers();
     hint.textContent=prompts[item.id];
+    motionWatch?.abort();motionWatch=null;
+    fortune=item.id==='bucketlist'&&source.querySelector('.fortune')?createFortune(source,{reduced:()=>reduced.matches}):null;
+    if(fortune&&motionAllowed)listenMotion();
   }
   function geometry(px=x,py=y){
     const base=gallery.currentElement.getBoundingClientRect(),slot=receiver.querySelector(item.id==='travel'?'.gate-slot':'.reader-slot').getBoundingClientRect();
@@ -86,8 +102,9 @@ export function createInteraction(gallery, enter) {
   async function activate(next=item){
     if(busy)return;setItem(next);
     if(item.id==='bucketlist'){
-      busy=true;const token=++sequence;source.classList.add('checklist-opening');
-      await tween(0,-10,reduced.matches?1:140);if(token===sequence)enter(item);return;
+      // First activation draws a stick; with a stick on the floor it opens the list.
+      if(!fortune||fortune.drawn){enter(item);return;}
+      busy=true;const token=++sequence;await fortune.auto();if(token===sequence)busy=false;return;
     }
     if(item.id==='stories'){
       busy=true;const token=++sequence;source.classList.add('journal-unfolding');await tween(gallery.size*.18,0,720);if(token===sequence){busy=false;complete();}return;
@@ -107,6 +124,7 @@ export function createInteraction(gallery, enter) {
   }
   function move(e){
     if(!drag||drag.id!==e.pointerId)return;e.stopImmediatePropagation();
+    if(drag.shake){if(!drag.done&&fortune?.hold(e.clientY-drag.py)){drag.done=true;fortune.letGo();}return;}
     let px=drag.ox+e.clientX-drag.px,py=drag.oy+e.clientY-drag.py;
     drag.moved ||= Math.hypot(e.clientX-drag.px,e.clientY-drag.py)>4;
     const g=geometry(px,py);
@@ -127,13 +145,13 @@ export function createInteraction(gallery, enter) {
   // mostly up/down (disc into the drive, ticket into the slot) → the object is picked up.
   gallery.stage.addEventListener('pointerdown',e=>{
     pending=null;
-    if(!e.target.closest('.ticket-paper,.silver-disc')||!gallery.settled||e.button!==0||!['travel','cinema'].includes(item?.id)||e.target.closest('.collection-slot')!==gallery.currentElement)return;
+    if(!e.target.closest('.ticket-paper,.silver-disc,.fortune-body,.fortune-drop')||!gallery.settled||e.button!==0||!['travel','cinema','bucketlist'].includes(item?.id)||e.target.closest('.collection-slot')!==gallery.currentElement)return;
     e.preventDefault();if(busy){e.stopImmediatePropagation();return;}
-    pending={id:e.pointerId,x:e.clientX,y:e.clientY};
+    pending={id:e.pointerId,x:e.clientX,y:e.clientY,onDrop:!!e.target.closest('.fortune-drop')};
   },true);
   function pickUp(e){
     gallery.freeze();clearTimeout(idleTimer);returning=false;
-    drag={id:e.pointerId,px:pending.x,py:pending.y,ox:x,oy:y,moved:true};pending=null;
+    drag={id:e.pointerId,px:pending.x,py:pending.y,ox:x,oy:y,moved:true,shake:item.id==='bucketlist'};pending=null;
     gallery.stage.setPointerCapture(e.pointerId);shell.classList.add('is-handling');
   }
   gallery.stage.addEventListener('pointermove',e=>{
@@ -148,9 +166,16 @@ export function createInteraction(gallery, enter) {
   function release(e,cancelled=false){
     // A tap without movement: the disc still opens on click, nothing else changes.
     if(pending?.id===e.pointerId){
-      pending=null;if(cancelled)return;
+      const onDrop=pending.onDrop;pending=null;if(cancelled)return;
       e.stopImmediatePropagation();gallery.freeze();gallery.suppressUntil=performance.now()+450;
       if(item.id==='cinema')activate();
+      if(item.id==='bucketlist'){if(onDrop)enter(item);else{askMotion();activate();}}
+      return;
+    }
+    if(drag?.shake&&drag.id===e.pointerId){
+      const done=drag.done;drag=null;e.stopImmediatePropagation();gallery.suppressUntil=performance.now()+450;
+      if(gallery.stage.hasPointerCapture(e.pointerId))gallery.stage.releasePointerCapture(e.pointerId);
+      shell.classList.remove('is-handling');if(!done)fortune?.letGo();
       return;
     }
     if(!drag||drag.id!==e.pointerId)return;
