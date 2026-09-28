@@ -64,3 +64,6 @@
 .drive-eject:after{content:'';position:absolute;left:6px;top:6px;width:6px;height:1px;background:#6f7a68}
 .drive-eject:active{transform:translateY(1px);box-shadow:inset 0 1px 0 #fff,0 0 0 #8c9886}
 .module-thumbnail-image .drive-display,.module-thumbnail-image .drive-eject{display:none}
+/* One brick-red touch per home object (docs/DESIGN.md): the plane on the boarding pass, the full stop on the disc label. */
+.ticket-route>span{color:var(--accent)}
+.silver-disc>span b{color:var(--accent);font-weight:inherit}

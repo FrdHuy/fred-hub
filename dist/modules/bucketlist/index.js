@@ -1,6 +1,6 @@
-import { parseItems, itemLines } from './items.js?v=29';
-import { loadEntries } from './storage.js?v=29';
-import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=29';
+import { parseItems, itemLines } from './items.js?v=30';
+import { loadEntries } from './storage.js?v=30';
+import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=30';
 
 const DETENT = 24;
 // Each odometer drum is a strip of 0–9 that rolls to the current digit.
@@ -19,7 +19,7 @@ export function mount({ container, item }) {
 <div class="deck-field" role="listbox" aria-label="人生清单：方向键逐件浏览"></div>
 <div class="deck-controls">
 <div class="deck-control"><div class="deck-odometer" role="spinbutton" tabindex="0" aria-label="回看年份，上下拨动">${`<span class="deck-drum">${digitsStrip}</span>`.repeat(4)}</div><span class="deck-label">YEAR</span></div>
-<div class="deck-control"><div class="deck-knob" role="slider" tabindex="0" aria-label="选择旋钮，左右转动逐件浏览"><span class="deck-knob-cap"></span></div><span class="deck-label">SELECT</span></div>
+<div class="deck-control"><div class="deck-knob" role="slider" tabindex="0" aria-label="选择旋钮，左右转动逐件浏览"><span class="deck-knob-skirt"></span><span class="deck-knob-cap"></span><span class="deck-knob-mark"></span></div><span class="deck-label">SELECT</span></div>
 <div class="deck-control"><button class="deck-print" type="button" aria-label="打印完整清单"><span>PRINT</span></button><span class="deck-label">&nbsp;</span></div>
 </div>
 <span class="deck-silk" aria-hidden="true">LIFE LIST · Nº 100 · FRED <b>●</b></span>`;

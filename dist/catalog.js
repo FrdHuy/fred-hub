@@ -1,4 +1,4 @@
-import { panelCover } from './modules/bucketlist/cover.js?v=29';
+import { panelCover } from './modules/bucketlist/cover.js?v=30';
 
 export const categories = ['全部', '记忆', '文化', '工具'];
 
@@ -19,7 +19,7 @@ export function createCover(item) {
   const cover = document.createElement('div');
   cover.className = `collectible collectible--${item.cover}`;
   if (item.id === 'travel') cover.innerHTML = `<div class="ticket-paper"><div class="ticket-airline">FRED AIR <span>BOARDING PASS</span></div><div class="ticket-route">HERE <span>✈</span> THERE</div><div class="ticket-fields"><span>PASSENGER<b>FRED</b></span><span>FLIGHT<b>FH 001</b></span><span>SEAT<b>01 A</b></span></div><div class="ticket-barcode"></div><small>A TICKET TO MY MEMORIES</small></div>`;
-  if (item.id === 'cinema') cover.innerHTML = '<div class="silver-disc"><span>FRED’S COLLECTION</span><small>PICTURES & STORIES · VOL. 01</small></div>';
+  if (item.id === 'cinema') cover.innerHTML = '<div class="silver-disc"><span>FRED’S COLLECTION<b>.</b></span><small>PICTURES & STORIES · VOL. 01</small></div>';
   if (item.id === 'stories') cover.innerHTML = '<div class="diary-leaves"><span>DEAR DIARY</span><p>把日子，<br>慢慢写下来。</p><small>FRED’S HUB / 01</small></div><div class="diary-front"></div>';
   if (item.id === 'bucketlist') cover.innerHTML = panelCover();
   cover.dataset.title = item.title;

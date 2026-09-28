@@ -1,5 +1,5 @@
 import { ticketContact, discContact } from './contact.js';
-import { createPanel } from './modules/bucketlist/panel-home.js?v=29';
+import { createPanel } from './modules/bucketlist/panel-home.js?v=30';
 
 export function createInteraction(gallery, enter) {
   const shell=document.querySelector('.gallery-shell'), hint=shell.querySelector('.interaction-hint');

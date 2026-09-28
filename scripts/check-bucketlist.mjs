@@ -57,7 +57,9 @@ const { parseChecklist, dataSource } = await import('./lib/lifelist-import.mjs')
 const md = `# 候选\n## 旅行\n- [ ] 去看极光\n- [x] 学会游泳 2012\n- [x] 写日记\n- [X] 去冰岛 2022\n## 人生大事件\n- 1998 出生\n- 2020 大学毕业\n`;
 const imported = parseChecklist(md);
 assert.deepEqual(imported.problems, []);
-assert.deepEqual(imported.entries.map(e => e.text), ['出生', '学会游泳', '大学毕业', '去冰岛', '写日记', '去看极光']);
+assert.deepEqual(imported.entries.map(e => e.text), ['出生', '大学毕业', '学会游泳', '去冰岛', '写日记', '去看极光'], 'events first, then each theme: dated done, undated done, wishes');
+const themes = parseChecklist('## 旅行\n- [ ] 极光\n- [x] 冰岛 2022\n## 运动\n- [x] 游泳 2012\n- [ ] 冲浪\n').entries.map(e => e.text);
+assert.deepEqual(themes, ['冰岛', '极光', '游泳', '冲浪'], 'themes stay together in document order');
 assert.deepEqual(parseItems((await import(`data:text/javascript,${encodeURIComponent(dataSource(imported.entries))}`)).default).errors, []);
 assert.match(parseChecklist('## a\n- [ ] 去看极光 2019').problems[0], /没打勾/);
 assert.match(parseChecklist('## 人生大事件\n- 出生').problems[0], /年份 事件/);

@@ -3,8 +3,8 @@
 > Claude Code 与 Codex 共用的进度总览。**开始工作前先读本文件和 `AGENTS.md`**，再读 `docs/DESIGN.md`（统一设计语言，任何视觉/交互改动必读）、`docs/HANDOFF.md`（逐版本交接、所有权表）和 `docs/MODULES.md`（模块接口）。
 > 本文件管“全局现状 + 待办 + 约定”；每轮的详细改动与验证继续写在 `docs/HANDOFF.md` 和 `docs/开发进度-vX.md`。
 
-最近更新：2026-09-28 · Claude Code（v0.29 人生时间线与光盘质感）
-上一次代码改动：v0.29 · 2026-09-28 · Claude Code
+最近更新：2026-09-28 · Claude Code（v0.30 真实清单与砖红）
+上一次代码改动：v0.30 · 2026-09-28 · Claude Code
 
 ---
 
@@ -41,7 +41,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 1. 片单：Fred 用真实片单替换 5 部示例（`docs/片单使用说明.md`）。
 2. 旅行 travel：独立风格 + 静态数据文件（同 cinema 模式），先和用户确认风格与字段。
 3. 故事与日记 stories：同上。
-4. 人生清单：Fred 在 docs/人生清单候选-200.md 勾选并写年份、补人生大事件，然后 `node scripts/import-lifelist.mjs`（v0.29）。
+4. 人生清单已导入 66 条（v0.30）。以后改 docs/人生清单候选-200.md 后运行 `node scripts/import-lifelist.mjs --force`，或直接改 data.js。
 
 **P2 — 打磨**
 5. 人生清单：条目原地编辑、导出/备份、100 条压力测试。
@@ -58,7 +58,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 - 原生 HTML/CSS/ES Modules；`dist/` 就是可编辑源码，不是构建产物。无 npm、无框架、无打包器。Node 只用于 `scripts/check*.mjs`，Python 只用于本地预览服务器。
 - `dist/index.html` 单页；`main.js`（外壳/菜单/路由挂载）、`gallery.js`（横向轨道）、`experience.js`（首页物理动作）、`catalog.js`（模块元数据+封面）、`router.js`、`hub.css` 为**共享文件，同一时间只能一个集成者修改**。
 - 模块放在 `dist/modules/<id>/{index.js, style.css, storage.js?, assets/}`；入口同步 `mount({container,item,navigate,createCover})`，返回 cleanup；事件用 `AbortController` 的 `signal` 统一注销。
-- 资源缓存版本号：`?v=29` 写在 index.html 与 import 路径中，发版时整体递增。
+- 资源缓存版本号：`?v=30` 写在 index.html 与 import 路径中，发版时整体递增。
 - 每个版本用 git 提交保存，并新增 `docs/开发进度-v<新版本>.md`（v0.18 起不再复制 `checkpoints/`）。
 
 ### 视觉
