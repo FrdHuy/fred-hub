@@ -54,3 +54,13 @@
 [data-theme=dark] a:focus-visible,[data-theme=dark] button:focus-visible{outline:1px solid #d2a05273;outline-offset:6px;border-radius:6px}
 /* Pointer and touch users never see focus rings; keyboard users still do (see main.js). */
 [data-input=pointer] :focus-visible{outline:none!important}
+/* Disc sheen: the diffraction colours turn and a soft glint sits toward the light (--sheen/--gx/--gy from sheen.js). */
+.silver-disc{background:radial-gradient(ellipse 34% 14% at var(--gx,33%) var(--gy,28%),#ffffffa6,#fff0 72%),repeating-radial-gradient(circle,transparent 0 2px,#ffffff19 2px 3px),conic-gradient(from calc(35deg + var(--sheen,0deg)),#c4c9c5,#f1eff0,#b9c8d0,#d0c7db,#edf0d9,#b7bebc,#e2e5e0,#c4c9c5)}
+/* Optical drive readout and EJECT key, same family as the ticket reader's display. */
+.drive-display{position:absolute;left:14px;bottom:9px;min-width:74px;padding:0 7px;height:15px;box-sizing:border-box;border-radius:3px;background:linear-gradient(#2c302b,#363b34);box-shadow:inset 0 1px 2px #000a,0 1px 0 #ffffff80;font:500 8px/15px ui-monospace,Menlo,monospace;letter-spacing:.16em;color:#9aa58b;text-align:center;white-space:nowrap}
+.stage-receiver[data-state=reading] .drive-display,.stage-receiver[data-state=success] .drive-display{color:#c5d1b0;text-shadow:0 0 4px #c5d1b066}
+.drive-eject{position:absolute;right:34px;bottom:8px;width:18px;height:9px;border-radius:3px;pointer-events:auto;cursor:pointer;background:linear-gradient(#f3f4ef,#d3d7cd);box-shadow:inset 0 1px 0 #fff,0 1px 0 #8c9886,0 2px 2px #3b483426}
+.drive-eject:before{content:'';position:absolute;left:6px;top:2px;border:3px solid transparent;border-top:0;border-bottom:3px solid #6f7a68}
+.drive-eject:after{content:'';position:absolute;left:6px;top:6px;width:6px;height:1px;background:#6f7a68}
+.drive-eject:active{transform:translateY(1px);box-shadow:inset 0 1px 0 #fff,0 0 0 #8c9886}
+.module-thumbnail-image .drive-display,.module-thumbnail-image .drive-eject{display:none}

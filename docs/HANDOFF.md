@@ -1,6 +1,6 @@
-最新变更和验证见 [开发进度-v0.28.md](开发进度-v0.28.md)。全局进度见根目录 PROGRESS.md。
+最新变更和验证见 [开发进度-v0.29.md](开发进度-v0.29.md)。全局进度见根目录 PROGRESS.md。
 
-# 当前交接 · v0.28 · 2026-09-28
+# 当前交接 · v0.29 · 2026-09-28
 
 ## Canonical path
 /Users/fred/Desktop/Project/Fred-Personal-Site
@@ -127,3 +127,10 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - 验证：全部 check 通过（新增 lampStates/回看/年份范围/旋钮/拨杆测试）；CDP 真实鼠标键盘测试：短拖回弹不开机、长拖开机并进入、旋钮转 3 档 001→004、里程表回拨到 2018 只亮 7 盏、PRINT 输出 38 行；1440 与 390 宽截图无溢出。
 - 限制：无声音；灯在手机上约 17px，建议主要用旋钮/方向键浏览；Firefox 未测。
 - 旧的竹签筒 / 陶瓷签筒方案保留在分支 claude/fortune-sticks，未合入。
+
+## v0.29 人生时间线 + 光盘质感（Claude Code）
+- 年份拨轮修复：原范围从清单最早年份到今年，空清单时只有 2025–2026，看起来“滚不动”。现在至少回看十年（或到最早年份），到头时滚筒轻弹提示。
+- 人生大事件：data.js `{ text, milestone: true, year }`，冷白色灯（愿望完成仍为琥珀）；回看早于其年份时不亮；读数 `◎ MILESTONE · 年份`，计数附 `◎ nn`，打印纸标 ◎。
+- 200 条候选：docs/人生清单候选-200.md（10 类 × 20，勾选 [x] + 年份，删不要的，末节写大事件）→ `node scripts/import-lifelist.mjs`（>100 条会拦下；已有数据需 --force）。导入顺序：带年份的大事件与完成事项按年份在前，拨年份时灯从左到右依次亮。逻辑在 scripts/lib/lifelist-import.mjs，已测。
+- 光盘：dist/sheen.js（main.js 挂载）让虹彩角度与高光随鼠标 / 手机倾斜缓动（iOS 未请求权限，保持默认）；hub.css `.silver-disc` 背景加 --sheen/--gx/--gy。光驱：液晶 NO DISC → READING → `nn TITLES`（读取 cinema data.js 数量），EJECT 键（插入中按下退盘，空闲时指示灯闪）。
+- 验证：全部 check 通过；CDP 真实输入：光源三方向 sheen 变化、推入光盘 READING → 05 TITLES → 进入片单、空清单年份可回拨到 2016。推得过深会脱离插槽（原有设计）。

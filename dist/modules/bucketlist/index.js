@@ -1,6 +1,6 @@
-import { parseItems, itemLines } from './items.js?v=28';
-import { loadEntries } from './storage.js?v=28';
-import { lampStates, litCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=28';
+import { parseItems, itemLines } from './items.js?v=29';
+import { loadEntries } from './storage.js?v=29';
+import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=29';
 
 const DETENT = 24;
 // Each odometer drum is a strip of 0–9 that rolls to the current digit.
@@ -38,6 +38,7 @@ export function mount({ container, item }) {
   function stateOf(i) {
     const entry = items[i];
     if (!entry) return '';
+    if (entry.milestone) return entry.year <= year ? `◎ MILESTONE · ${entry.year}` : `○ LATER · ${entry.year}`;
     if (!entry.done) return '○ SOMEDAY';
     if ((entry.year ?? now) > year) return `○ NOT YET · ${entry.year ?? now}`;
     return `● DONE${entry.year ? ` · ${entry.year}` : ''}`;
@@ -49,11 +50,13 @@ export function mount({ container, item }) {
     const state = stateOf(index), mark = document.createElement('b'); mark.textContent = state.slice(0, 1);
     readout.state.replaceChildren(mark, state.slice(1));
     readout.state.classList.toggle('is-lit', state.startsWith('●'));
+    readout.state.classList.toggle('is-mark', state.startsWith('◎'));
   }
   function render() {
     const states = lampStates(items, year, now);
-    [...field.children].forEach((lamp, i) => { lamp.classList.toggle('is-done', states[i] === 'done'); lamp.classList.toggle('is-todo', states[i] === 'todo'); });
-    readout.count.textContent = `${year} · ${pad(litCount(states))}/${SLOTS}`;
+    [...field.children].forEach((lamp, i) => { lamp.classList.toggle('is-done', states[i] === 'done'); lamp.classList.toggle('is-todo', states[i] === 'todo'); lamp.classList.toggle('is-mark', states[i] === 'mark'); });
+    const marks = markCount(states);
+    readout.count.textContent = `${year} · ${pad(litCount(states))}/${SLOTS}${marks ? ` · ◎ ${pad(marks, 2)}` : ''}`;
     [...odometer.children].forEach((drum, i) => drum.style.setProperty('--d', String(year)[i]));
     odometer.setAttribute('aria-valuenow', year); odometer.setAttribute('aria-valuetext', `${year} 年，已完成 ${litCount(states)} 件`);
     show();
@@ -70,9 +73,13 @@ export function mount({ container, item }) {
     knob.setAttribute('aria-valuenow', i + 1); knob.setAttribute('aria-valuetext', `第 ${i + 1} 件：${items[i].text}`);
     show();
   }
+  // At either end the drums nudge and settle back, so a stop feels like a stop.
   function setYear(next) {
     const clamped = Math.max(span[0], Math.min(span[1], next));
-    if (clamped === year) return false;
+    if (clamped === year) {
+      if (next !== year && !motion.matches) odometer.animate([{ translate: '0 0' }, { translate: `0 ${next > year ? -3 : 3}px` }, { translate: '0 0' }], { duration: 180, easing: 'ease-out' });
+      return false;
+    }
     year = clamped; render(); return true;
   }
 
@@ -86,12 +93,12 @@ export function mount({ container, item }) {
       if (!entry) { const empty = document.createElement('span'); empty.className = 'deck-lamp is-empty'; empty.style.setProperty('--n', i); return empty; }
       const lamp = document.createElement('button'); lamp.type = 'button'; lamp.className = 'deck-lamp'; lamp.tabIndex = -1;
       lamp.setAttribute('role', 'option'); lamp.setAttribute('aria-selected', 'false'); lamp.style.setProperty('--n', i);
-      lamp.setAttribute('aria-label', `${pad(i + 1)} ${entry.text}${entry.done ? `，已完成${entry.year ? ` ${entry.year}` : ''}` : ''}`);
+      lamp.setAttribute('aria-label', `${pad(i + 1)} ${entry.text}${entry.milestone ? `，人生大事件 ${entry.year}` : entry.done ? `，已完成${entry.year ? ` ${entry.year}` : ''}` : ''}`);
       lamp.addEventListener('click', () => select(i), { signal });
       lamp.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') select(i); }, { signal });
       return lamp;
     }));
-    full.replaceChildren(...items.map(entry => { const li = document.createElement('li'); li.textContent = `${entry.text}${entry.done ? `（已完成${entry.year ? ` ${entry.year}` : ''}）` : ''}`; return li; }));
+    full.replaceChildren(...items.map(entry => { const li = document.createElement('li'); li.textContent = `${entry.text}${entry.milestone ? `（人生大事件 ${entry.year}）` : entry.done ? `（已完成${entry.year ? ` ${entry.year}` : ''}）` : ''}`; return li; }));
     render(); if (items.length) select(0); else show();
     if (parsed.errors.length) say(`有 ${parsed.errors.length} 条没显示：${parsed.errors.join('；')}。运行 node scripts/check-bucketlist.mjs 查看详情。`);
     if (!motion.matches) deck.classList.add('is-booting');
@@ -158,8 +165,9 @@ export function mount({ container, item }) {
     const line = (className, cells) => { const row = document.createElement('div'); row.className = className; cells.forEach(text => { const cell = document.createElement('span'); cell.textContent = text; row.append(cell); }); paper.append(row); };
     line('deck-head', ['LIFE LIST · PRINTOUT', String(year)]);
     if (!items.length) line('deck-row', ['---', '尚未落笔', '○', '']);
-    items.forEach((entry, i) => line(`deck-row${states[i] === 'done' ? ' is-done' : ''}`, [pad(i + 1), entry.text, states[i] === 'done' ? '●' : '○', states[i] === 'done' ? String(entry.year ?? '') : '']));
-    line('deck-foot', [`${pad(litCount(states))}/${SLOTS} COMPLETE`, 'FRED']);
+    const mark = { done: '●', mark: '◎' };
+    items.forEach((entry, i) => line(`deck-row${states[i] === 'done' ? ' is-done' : ''}${states[i] === 'mark' ? ' is-mark' : ''}`, [pad(i + 1), entry.text, mark[states[i]] ?? '○', mark[states[i]] ? String(entry.year ?? '') : '']));
+    line('deck-foot', [`${pad(litCount(states))}/${SLOTS} COMPLETE${markCount(states) ? ` · ◎ ${pad(markCount(states), 2)}` : ''}`, 'FRED']);
     receipt.replaceChildren(paper); receipt.hidden = false;
     printing?.cancel();
     if (motion.matches) return;

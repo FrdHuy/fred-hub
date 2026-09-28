@@ -1,8 +1,9 @@
-import { createInteraction } from './experience.js?v=28';
-import { mountModule } from './modules/index.js?v=28';
-import { modules, getModule, createCover } from './catalog.js?v=28';
-import { CollectionGallery } from './gallery.js?v=28';
+import { createInteraction } from './experience.js?v=29';
+import { mountModule } from './modules/index.js?v=29';
+import { modules, getModule, createCover } from './catalog.js?v=29';
+import { CollectionGallery } from './gallery.js?v=29';
 import { readRoute, navigate } from './router.js';
+import { attachSheen } from './sheen.js?v=29';
 
 const $ = selector => document.querySelector(selector);
 // Focus rings are for keyboard users. Script-moved focus after a click or tap stays invisible.
@@ -29,6 +30,7 @@ const gallery = new CollectionGallery({
   onOpen(item) { interaction.activate(item); },
 });
 interaction = createInteraction(gallery, item => navigate(item.id));
+attachSheen(gallery.stage, motion);
 interaction.setItem(gallery.current);
 gallery.setLayout('rail');
 

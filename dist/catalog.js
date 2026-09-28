@@ -1,4 +1,4 @@
-import { panelCover } from './modules/bucketlist/cover.js?v=28';
+import { panelCover } from './modules/bucketlist/cover.js?v=29';
 
 export const categories = ['全部', '记忆', '文化', '工具'];
 

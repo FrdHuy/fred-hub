@@ -1,5 +1,5 @@
 import { ticketContact, discContact } from './contact.js';
-import { createPanel } from './modules/bucketlist/panel-home.js?v=28';
+import { createPanel } from './modules/bucketlist/panel-home.js?v=29';
 
 export function createInteraction(gallery, enter) {
   const shell=document.querySelector('.gallery-shell'), hint=shell.querySelector('.interaction-hint');
@@ -7,7 +7,7 @@ export function createInteraction(gallery, enter) {
   shell.querySelector('.stage-receiver').remove();
   for(const id of ['travel','cinema']){
     const node=document.createElement('div');node.className='stage-receiver';node.dataset.module=id;node.dataset.state='ready';node.setAttribute('aria-hidden','true');
-    node.innerHTML=id==='travel'?'<div class="gate-reader"><div class="gate-back"></div><div class="gate-slot"></div><div class="gate-front"><div class="gate-vents"></div><span class="gate-display">READY</span><i class="gate-light"></i></div></div>':'<div class="optical-drive"><div class="drive-casing"><i class="drive-light"></i></div><div class="reader-slot"></div></div>';
+    node.innerHTML=id==='travel'?'<div class="gate-reader"><div class="gate-back"></div><div class="gate-slot"></div><div class="gate-front"><div class="gate-vents"></div><span class="gate-display">READY</span><i class="gate-light"></i></div></div>':'<div class="optical-drive"><div class="drive-casing"><span class="drive-display">NO DISC</span><span class="drive-eject" title="EJECT"></span><i class="drive-light"></i></div><div class="reader-slot"></div></div>';
     receivers.set(id,node);shell.append(node);
   }
   let receiver=document.createElement('div');
@@ -28,11 +28,22 @@ export function createInteraction(gallery, enter) {
   let idleTimer,errorTimer,returning=false,animations=[],ticket={},inserted=false,pending=null;
   // Life List control panel on the current cover (lever, self-test, lamps).
   let panel=null;
+  // Number of films in the cinema list, shown by the drive after reading.
+  let titles=0;
+  import('./modules/cinema/data.js?t='+Date.now()).then(module=>{titles=Array.isArray(module.default)?module.default.filter(entry=>entry&&entry.title).length:0;},()=>{});
+  // EJECT: with a disc in the slot it pushes it back out; otherwise the light just blinks.
+  receivers.get('cinema').querySelector('.drive-eject').addEventListener('click',e=>{
+    e.stopPropagation();const drive=receivers.get('cinema');
+    if(item?.id==='cinema'&&(inserted||busy||drive.dataset.state!=='ready')){reset();const display=drive.querySelector('.drive-display');display.textContent='EJECT';setTimeout(()=>{if(drive.dataset.state==='ready')display.textContent='NO DISC';},700);}
+    if(!reduced.matches)drive.querySelector('.drive-light').animate([{opacity:1},{opacity:.2},{opacity:1},{opacity:.2},{opacity:1}],{duration:500});
+  });
   const prompts={travel:'将机票下缘插入槽口，再从左向右刷过。Enter 可完成刷卡。',cinema:'按住光盘可推进或抽回；插入后松手读取。',stories:'打开日记',bucketlist:'把人生清单面板的拨杆往上拨到 ON，面板通电后进入。回车可直接开机。'};
   function status(value) {
     receiver.dataset.state=value;
     if(item) hint.textContent = value==='reading'?'READING':value==='error'?'ERROR，重新插入可重试':value==='success'?'SUCCESS':prompts[item.id];
     const display=receiver.querySelector('.gate-display');if(display)display.textContent={ready:'READY',reading:'READING',error:'ERROR',success:'SUCCESS'}[value]||'READY';
+    // The optical drive has its own little readout: it knows how many titles are on the disc.
+    const drive=receiver.querySelector('.drive-display');if(drive)drive.textContent={ready:'NO DISC',reading:'READING',success:`${String(titles).padStart(2,'0')} TITLES`}[value]||'NO DISC';
     shell.dataset.contact=value;
   }
   function stop(){cancelAnimationFrame(frame);frame=0;last=0;}

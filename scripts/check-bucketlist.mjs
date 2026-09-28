@@ -37,7 +37,29 @@ assert.equal(litCount(nowStates), 3);
 assert.deepEqual(lampStates(life, 2018, 2026).slice(0, 4), ['done', 'todo', 'todo', 'todo'], 'looking back hides later and undated achievements');
 assert.equal(litCount(lampStates(life, 2014, 2026)), 0);
 assert.deepEqual(yearSpan(life, 2026), [2015, 2026]);
-assert.deepEqual(yearSpan([], 2026), [2025, 2026]);
+assert.deepEqual(yearSpan([], 2026), [2016, 2026], 'an empty list can still look back ten years');
+assert.deepEqual(yearSpan([{ text: '出生', milestone: true, year: 1998 }], 2026), [1998, 2026]);
 assert.deepEqual([0, 23, 24, 50, -25].map(d => knobSteps(d)), [0, 0, 1, 2, -1]);
 assert.deepEqual([0, -35, -70, -140, 20].map(dy => leverPosition(dy)), [0, .5, 1, 1, 0]);
-console.log('PASS: optional year, lamp states, look-back years, knob detents, lever travel');
+// Life events (milestones): cool-white lamps that light from their year on.
+assert.deepEqual(parseItems([{ text: '大学毕业', milestone: true, year: 2020 }]).items, [{ text: '大学毕业', milestone: true, year: 2020 }]);
+assert.match(parseItems([{ text: 'x', milestone: true }]).errors[0], /必须写 year/);
+assert.match(parseItems([{ text: 'x', milestone: true, year: 2020, done: true }]).errors[0], /不用写 done/);
+const { markCount } = await import('../dist/modules/bucketlist/panel.js');
+const timeline = [{ text: '出生', milestone: true, year: 1998 }, { text: 'a', done: true, year: 2019 }, { text: '毕业', milestone: true, year: 2020 }];
+assert.deepEqual(lampStates(timeline, 2019, 2026).slice(0, 3), ['mark', 'done', 'later']);
+assert.equal(markCount(lampStates(timeline, 2026, 2026)), 2);
+assert.equal(litCount(lampStates(timeline, 2026, 2026)), 1, 'milestones do not count as fulfilled wishes');
+console.log('PASS: optional year, lamp states, look-back years, knob detents, lever travel, milestones');
+
+// Checklist importer (Markdown → data.js), ordered as a timeline.
+const { parseChecklist, dataSource } = await import('./lib/lifelist-import.mjs');
+const md = `# 候选\n## 旅行\n- [ ] 去看极光\n- [x] 学会游泳 2012\n- [x] 写日记\n- [X] 去冰岛 2022\n## 人生大事件\n- 1998 出生\n- 2020 大学毕业\n`;
+const imported = parseChecklist(md);
+assert.deepEqual(imported.problems, []);
+assert.deepEqual(imported.entries.map(e => e.text), ['出生', '学会游泳', '大学毕业', '去冰岛', '写日记', '去看极光']);
+assert.deepEqual(parseItems((await import(`data:text/javascript,${encodeURIComponent(dataSource(imported.entries))}`)).default).errors, []);
+assert.match(parseChecklist('## a\n- [ ] 去看极光 2019').problems[0], /没打勾/);
+assert.match(parseChecklist('## 人生大事件\n- 出生').problems[0], /年份 事件/);
+assert.deepEqual(parseChecklist('# t\n- 说明文字\n## 人生大事件\n<!-- 例：\n- 1998 出生\n-->\n').entries, [], 'intro and commented examples are ignored');
+console.log('PASS: checklist import order, milestones, round trip into data.js');

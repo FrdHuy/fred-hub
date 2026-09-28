@@ -1,5 +1,5 @@
-import { parseItems } from './items.js?v=28';
-import { lampStates, litCount, leverPosition, LEVER_THRESHOLD, pad, SLOTS } from './panel.js?v=28';
+import { parseItems } from './items.js?v=29';
+import { lampStates, litCount, leverPosition, LEVER_THRESHOLD, pad, SLOTS } from './panel.js?v=29';
 
 // Home controller: drag the lever up past its threshold (or tap) → self-test → lamps settle on real progress.
 export function createPanel(cover, { reduced }) {
@@ -58,7 +58,7 @@ export function createPanel(cover, { reduced }) {
     // Self-test: every written lamp flashes in reading order, then settles on its real state.
     await wait(560 + Math.min(states.filter(state => state !== 'empty').length, 60) * 7); if (run !== epoch) return false;
     root.classList.remove('is-testing');
-    lamps.forEach((lamp, i) => { lamp.classList.toggle('is-done', states[i] === 'done'); lamp.classList.toggle('is-todo', states[i] === 'todo'); });
+    lamps.forEach((lamp, i) => { lamp.classList.toggle('is-done', states[i] === 'done'); lamp.classList.toggle('is-todo', states[i] === 'todo'); lamp.classList.toggle('is-mark', states[i] === 'mark'); });
     await count(litCount(states), 650); if (run !== epoch) return false;
     await wait(260);
     return run === epoch;
@@ -68,7 +68,7 @@ export function createPanel(cover, { reduced }) {
     epoch++; on = false;
     timers.forEach(clearTimeout); timers.clear(); frames.forEach(cancelAnimationFrame); frames.clear();
     root.dataset.power = 'off'; root.classList.remove('is-testing');
-    lamps.forEach(lamp => lamp.classList.remove('is-done', 'is-todo'));
+    lamps.forEach(lamp => lamp.classList.remove('is-done', 'is-todo', 'is-mark'));
     digits.textContent = ''; setLever(0);
   }
   return { hold, release, auto, reset, get on() { return on; } };

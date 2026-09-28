@@ -2,22 +2,25 @@
 export const SLOTS = 100;
 export const pad = (n, size = 3) => String(n).padStart(size, '0');
 
-// Each slot is 'done' (lit), 'todo' (written, not yet) or 'empty' (no wish written yet).
-// Looking back to `year`: a dated item is lit from its year on; an undated one only in the present.
+// Each slot is 'done' (amber: a wish fulfilled), 'mark' (cool white: a life event), 'todo' (a wish not yet),
+// 'later' (a life event after the year being looked at) or 'empty' (nothing written).
+// Looking back to `year`: a dated item lights from its year on; an undated fulfilled wish only in the present.
 export function lampStates(items, year = Infinity, now = Infinity) {
   return Array.from({ length: SLOTS }, (_, i) => {
     const item = items[i];
     if (!item) return 'empty';
+    if (item.milestone) return item.year <= year ? 'mark' : 'later';
     if (!item.done) return 'todo';
     return (item.year ?? now) <= year ? 'done' : 'todo';
   });
 }
 export const litCount = states => states.filter(state => state === 'done').length;
+export const markCount = states => states.filter(state => state === 'mark').length;
 
-// The year dial runs from the earliest dated achievement (or ten years back) to this year.
+// The year dial runs from the earliest dated item (at least ten years back) to this year.
 export function yearSpan(items, now) {
   const years = items.map(item => item.year).filter(Boolean);
-  return [Math.min(now - 1, ...years), now];
+  return [Math.min(now - 10, ...years), now];
 }
 
 // Rotary selector: every `detent` degrees of turn moves one step.
