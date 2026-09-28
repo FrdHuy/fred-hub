@@ -6,7 +6,7 @@
 
 - `dist/catalog.js`: display metadata / IDs / homepage covers. Thumbnail menu uses this registry automatically.
 - `dist/modules/index.js`: maps IDs to renderers; shared integrator edits it.
-- `dist/modules/travel/index.js`: 旅行页面。
+- `dist/modules/travel/`: 旅行翻牌屏。`data.js` 静态数据（home/arrivals/departures），`trips.js` 校验与排序规则，`flap.js` 翻牌引擎，`fonts/` 自托管字牌字体，`photos/` 照片；检查 `scripts/check-travel.mjs`；设计 `docs/design/travel.md`。
 - `dist/modules/cinema/`: 影院片单。`data.js` 静态数据（只有作者编辑），`films.js` 校验规则，`posters/` 海报；添加脚本 `scripts/add-movie.mjs`，检查 `scripts/check-cinema.mjs`。
 - `dist/modules/stories/index.js`: 日记与故事页面。
 - `dist/modules/bucketlist/`: 人生清单，含手稿样式、条目 UI 和 localStorage 数据边界。

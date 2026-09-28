@@ -1,6 +1,6 @@
-import { parseItems, itemLines } from './items.js?v=30';
-import { loadEntries } from './storage.js?v=30';
-import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=30';
+import { parseItems, itemLines } from './items.js?v=31';
+import { loadEntries } from './storage.js?v=31';
+import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=31';
 
 const DETENT = 24;
 // Each odometer drum is a strip of 0–9 that rolls to the current digit.

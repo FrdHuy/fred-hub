@@ -19,7 +19,7 @@
 | cinema 影院片单（dist/modules/cinema/**、scripts/add-movie.mjs、scripts/check-cinema.mjs；共享：index.html 样式链接、catalog theme、main.js 主题切换、hub.css 深色头部） | Claude Code | v0.18 已交接，无运行中编辑 |
 | stories 撕页日历（dist/modules/stories/**；共享：experience.js 中 stories 分支、catalog.js 中 stories 封面、对应样式） | Codex / GPT | 2026-09-28 分配，分支 codex/tear-calendar，先与用户讨论创意 |
 | bucketlist 百灯控制面板（dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画、hub.css 清单返回箭头） | Claude Code | v0.28 已合入 main，无运行中编辑 |
-| travel 翻牌屏（dist/modules/travel/**；设计见 docs/design/travel.md） | Claude Code | 2026-09-29 设计已确认，等 Fred 填 docs/旅行行程-填写.md 后开发 |
+| travel 翻牌屏（dist/modules/travel/**；设计见 docs/design/travel.md） | Claude Code | v0.31 已完成（占位数据），无运行中编辑 |
 | wheel | 暂停 | 源码保留，不在注册表和菜单中 |
 
 开始任务前填写自己的范围；结束更新状态。表格不是程序锁，也不会自动通知另一个 agent。
@@ -143,3 +143,12 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - 资源 v30。全部 check 通过；截图核对首页三物件、内页真实数据、旋钮特写。
 
 - v0.30.1：人生清单导入顺序改为按文字哈希打散（scripts/lib/lifelist-import.mjs 的 scatter）：看起来随机、刷新不变、新增条目不挪动其他条目；已重新导入 66 条。
+
+## v0.31 旅行 · Solari 翻牌屏（Claude Code）
+- 设计：docs/design/travel.md（v7 设计图经 Fred 确认）。首页登机牌 + 闸机不变；内页深色候机大厅：平面哑光翻牌（标题 ARRIVALS/DEPARTURES、目的地 12 格、时钟），其余等宽小字；点一行，出纸口吐出暖白登机牌（全页唯一砖红 ✈）。
+- 文件：dist/modules/travel/{index.js 页面, flap.js 翻牌引擎, trips.js 纯数据规则, data.js, style.css, fonts/（Barlow Semi Condensed 500 自托管子集 5.8KB + OFL）, photos/}；scripts/check-travel.mjs。
+- 数据：data.js `{ home, arrivals, departures }`，目前是**占位示例**（台词带“（占位）”），Fred 按 docs/旅行行程-填写.md 填好后替换。航班号按时间编号；DEPARTURES 状态：最近一个未过期日期 BOARDING、其余 SCHEDULED、已过期 DELAYED、无日期 SOMEDAY。没照片时显示按三字码生成的天空色块。
+- 共享改动：catalog travel `theme:'dark'`；index.html 加 travel/style.css；modules/index.js 带版本号；hub.css 返回简笔箭头加 travel；资源 v31。
+- 交互：ARR/DEP 拨档或点标题整屏翻牌；Esc 先收登机牌（document 捕获阶段拦截，菜单打开时不拦），再按一次回首页；↑↓ 在行间移动；reduced-motion 直接显示终态。
+- 验证：全部 check 通过；CDP 真实点击：展开/换行/Esc 收起不离开页面/切到 DEP（BOARDING,SCHEDULED,SOMEDAY,SOMEDAY）/回首页主题复位；1440 与 390 宽截图无横向溢出；reduced-motion 下 0 个动画。
+- 未做：翻牌声音（等全站声音开关）；首页登机牌仍是 HERE → THERE / FH 001，可以以后联动最新航班。

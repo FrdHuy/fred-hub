@@ -1,11 +1,11 @@
-import { panelCover } from './modules/bucketlist/cover.js?v=30';
+import { panelCover } from './modules/bucketlist/cover.js?v=31';
 
 export const categories = ['全部', '记忆', '文化', '工具'];
 
 // A new module belongs here; the home page has no fixed number of slots.
 export const modules = [
   { id: 'cinema', title: '电影与剧集', category: '文化', label: 'CINEMA', cover: 'disc', description: '看过的世界，留下的余韵。', emptyTitle: '片单还是空白的', emptyText: '以后看完一部电影或剧集，就在这里留下一点感受。', section: '观影记录', theme: 'dark' },
-  { id: 'travel', title: '旅行足迹', category: '记忆', label: 'MEMORY', cover: 'ticket', description: '去过的地方，遇见的风景。', emptyTitle: '下一段旅程，从这里开始', emptyText: '这里会慢慢收下旅途中的照片、地点和故事。', section: '旅行收藏' },
+  { id: 'travel', title: '旅行足迹', category: '记忆', label: 'MEMORY', cover: 'ticket', description: '去过的地方，遇见的风景。', emptyTitle: '下一段旅程，从这里开始', emptyText: '这里会慢慢收下旅途中的照片、地点和故事。', section: '旅行收藏', theme: 'dark' },
   { id: 'stories', title: '故事与日记', category: '记忆', label: 'STORIES', cover: 'notebook', description: '一些片段，值得慢慢记住。', emptyTitle: '留一页，给想记下的事', emptyText: '日常的心情、很久以前的故事，都可以在这里安放。', section: '故事收藏' },
   { id: 'bucketlist', title: '人生清单', category: '记忆', label: 'SOMEDAY', cover: 'list', description: '想做的事，一件一件来。', emptyTitle: '这辈子想做什么？', emptyText: '不赶时间，一件一件来。', section: '人生清单' },
 ];
