@@ -1,0 +1,65 @@
+<!doctype html><meta charset="utf-8"><title>board comp v7</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500&display=block" rel="stylesheet">
+<style>
+body{margin:0;background:#0e0f0e}
+:root{--flap:'Barlow Semi Condensed',sans-serif;--mono:ui-monospace,'SF Mono',Menlo,monospace;--paper:#f2efe6;--dim:#7d8078;--line:#ffffff14;--yellow:#f2c318}
+.page{position:relative;width:1600px;height:1180px;overflow:hidden;background:#0e0f0e}
+.tag{position:absolute;left:14px;top:10px;font:11px var(--mono);letter-spacing:.14em;color:#4c4f49}
+.brand{position:absolute;top:44px;left:0;right:0;text-align:center;font:600 34px/1 'Helvetica Neue',sans-serif;letter-spacing:-.06em;color:var(--paper)}
+.brand i{color:#b34934;font-style:normal}
+.burger{position:absolute;top:58px;right:64px;width:22px;height:8px;border-top:1.5px solid var(--paper);border-bottom:1.5px solid var(--paper)}
+.back{position:absolute;left:64px;top:128px;width:26px;height:16px}
+.board{position:absolute;left:96px;right:96px;top:176px}
+.w{display:inline-flex;gap:2px}
+.f{position:relative;display:inline-block;width:var(--cw);height:var(--ch);background:#1c1d1b;color:var(--paper);font:500 var(--fs)/var(--ch) var(--flap);text-align:center}
+.f:after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:#0e0f0e}
+.f.o{background:#141514}
+.xl{--cw:50px;--ch:84px;--fs:70px}.l{--cw:40px;--ch:66px;--fs:54px}.m{--cw:28px;--ch:46px;--fs:38px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:26px;border-bottom:1px solid var(--line)}
+.title{display:flex;align-items:center;gap:34px}
+.switch{display:grid;gap:12px;font:500 11px var(--mono);letter-spacing:.24em;color:var(--dim)}
+.switch span{display:flex;align-items:center;gap:10px}
+.switch i{width:7px;height:7px;border-radius:50%;background:#34372f}
+.switch .on{color:var(--paper)}.switch .on i{background:var(--paper);box-shadow:0 0 8px #f2efe655}
+.meta{font:500 12px var(--mono);letter-spacing:.28em;color:var(--dim);margin-top:16px}.meta b{color:var(--paper);font-weight:500}
+.clock{font:500 12px var(--mono);letter-spacing:.28em;color:var(--dim);text-align:right}.clock .w{margin-bottom:16px}
+.head{display:grid;grid-template-columns:190px 1fr 120px 200px;gap:32px;padding:18px 0 4px;font:500 10px var(--mono);letter-spacing:.3em;color:#50534c}
+.head span:nth-child(3),.head span:nth-child(4){text-align:right}
+.row{display:grid;grid-template-columns:190px 1fr 120px 200px;align-items:center;gap:32px;padding:16px 0;border-bottom:1px solid var(--line)}
+.row .info{font:500 12px/1.9 var(--mono);letter-spacing:.2em;color:var(--dim)}.row .info b{display:block;color:var(--paper);font-weight:500}
+.days{text-align:right;font:500 13px var(--mono);letter-spacing:.2em;color:var(--dim)}.days b{color:var(--paper);font-weight:500;font-size:15px}
+.status{display:flex;align-items:center;justify-content:flex-end;gap:12px;font:500 12px var(--mono);letter-spacing:.3em;color:var(--dim)}
+.status i{width:7px;height:7px;border-radius:50%;background:#4a4d47}
+.row.now .status{color:var(--yellow)}.row.now .status i{background:var(--yellow);box-shadow:0 0 10px #f2c31866}
+.board.open .row:not(.sel){opacity:.28}
+/* The pass slides out from a slot under the chosen row. */
+.slot{height:3px;margin:0 0 0 222px;background:#050505;border-radius:2px;box-shadow:0 1px #ffffff10}
+.pass{position:relative;display:grid;grid-template-columns:230px 1fr 170px;margin:0 20px 22px 238px;height:230px;background:linear-gradient(170deg,#f6f2e8,#ebe7da);color:#3f463e;box-shadow:0 18px 30px #0008,0 2px 3px #0006}
+.photo{background:linear-gradient(180deg,#2c3a44 0%,#4b6a6c 38%,#9fb2a4 52%,#1f2522 53%,#2c312d 100%);position:relative}
+.photo:after{content:'';position:absolute;left:22%;right:30%;top:14%;height:30%;border-radius:50%;background:radial-gradient(#a5e3b955,transparent 70%);filter:blur(6px)}
+.main{padding:24px 30px;display:flex;flex-direction:column;gap:14px}
+.air{font:500 10px var(--mono);letter-spacing:.3em;color:#8e978c;display:flex;justify-content:space-between}
+.route{font:500 34px/1 var(--flap);letter-spacing:.06em;color:#2e342d}.route span{color:#b34934;font-size:24px;margin:0 16px;vertical-align:4px}
+.fields{display:flex;gap:34px;font:500 9px var(--mono);letter-spacing:.24em;color:#8e978c}.fields b{display:block;margin-top:5px;font-size:13px;letter-spacing:.12em;color:#3f463e}
+.line{margin-top:auto;font:300 16px/1.5 'Songti SC','STSong',serif;color:#4b5549}
+.stub{border-left:1.5px dashed #c9c6b8;padding:24px 22px;display:flex;flex-direction:column;gap:10px;font:500 9px var(--mono);letter-spacing:.24em;color:#8e978c}
+.stub b{font:500 26px/1 var(--flap);letter-spacing:.06em;color:#2e342d}
+.bars{margin-top:auto;height:44px;background:repeating-linear-gradient(90deg,#3f463e 0 2px,transparent 2px 4px,#3f463e 4px 5px,transparent 5px 9px,#3f463e 9px 12px,transparent 12px 14px)}
+.foot{position:absolute;left:96px;bottom:36px;font:500 11px var(--mono);letter-spacing:.32em;color:#4c4f49}
+</style>
+<body><div class="page">
+<span class="tag">旅行足迹 · 设计图 v7（Barlow 字牌 · 左右切换 · 展开登机牌）</span>
+<span class="brand">Fred<i>.</i></span><span class="burger"></span>
+<svg class="back" viewBox="0 0 26 16" fill="none" stroke="#f2efe6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24.2 8.4c-6.6-.5-13.4-.3-20.4.1"/><path d="M9.4 2.6C7.3 4.5 5.4 6.3 3.4 8.6c2 1.8 4 3.5 6.2 5.2"/></svg>
+<section class="board open" id="board"></section>
+<span class="foot">FRED AIR · MSN</span>
+</div>
+<script>
+const FIELD = 12;
+const w = (text, size, pad = 0) => `<span class="w">${[...text.padEnd(pad)].map((c, i) => `<span class="f ${size}${i >= text.length ? ' o' : ''}">${c === ' ' ? '&nbsp;' : c}</span>`).join('')}</span>`;
+const rows = [['APR 2025', 'FH 012', 'KYOTO', 'KIX', '06', 'ARRIVED'], ['OCT 2024', 'FH 010', 'REYKJAVIK', 'KEF', '07', 'ARRIVED'], ['JUL 2024', 'FH 009', 'NEW YORK', 'JFK', '04', 'ARRIVED'], ['DEC 2023', 'FH 008', 'TOKYO', 'HND', '09', 'ARRIVED'], ['AUG 2023', 'FH 007', 'BANFF', 'YYC', '05', 'ARRIVED']];
+const pass = `<div class="slot"></div><div class="pass"><div class="photo"></div><div class="main"><div class="air"><span>FRED AIR · BOARDING PASS</span><span>Nº 010</span></div><div class="route">MSN<span>✈</span>KEF</div><div class="fields"><span>DATE<b>12 OCT 2024</b></span><span>DAYS<b>07</b></span><span>WITH<b>小林 · 阿杰</b></span><span>SEAT<b>01 A</b></span></div><p class="line">在黑沙滩上等了一整晚，极光最后还是来了。</p></div><div class="stub"><span>FLIGHT</span><b>FH 010</b><span>TO</span><b>KEF</b><div class="bars"></div></div></div>`;
+board.innerHTML = `<div class="top"><div><div class="title">${w('ARRIVALS', 'xl')}<div class="switch"><span class="on"><i></i>ARR</span><span><i></i>DEP</span></div></div><div class="meta"><b>12</b> FLIGHTS · <b>9</b> COUNTRIES · SINCE 2019</div></div><div class="clock">${w('14:32', 'l')}<div>MADISON · LOCAL TIME</div></div></div>
+<div class="head"><span>DATE / FLIGHT</span><span>DESTINATION</span><span>DAYS</span><span>REMARKS</span></div>
+${rows.map((r, i) => `<div class="row ${i === 0 ? 'now' : ''} ${i === 1 ? 'sel' : ''}"><div class="info"><b>${r[0]}</b>${r[1]} · ${r[3]}</div><div>${w(r[2], 'm', FIELD)}</div><div class="days"><b>${r[4]}</b> D</div><div class="status"><i></i>${r[5]}</div></div>${i === 1 ? pass : ''}`).join('')}`;
+</script>

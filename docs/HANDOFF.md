@@ -19,7 +19,7 @@
 | cinema 影院片单（dist/modules/cinema/**、scripts/add-movie.mjs、scripts/check-cinema.mjs；共享：index.html 样式链接、catalog theme、main.js 主题切换、hub.css 深色头部） | Claude Code | v0.18 已交接，无运行中编辑 |
 | stories 撕页日历（dist/modules/stories/**；共享：experience.js 中 stories 分支、catalog.js 中 stories 封面、对应样式） | Codex / GPT | 2026-09-28 分配，分支 codex/tear-calendar，先与用户讨论创意 |
 | bucketlist 百灯控制面板（dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画、hub.css 清单返回箭头） | Claude Code | v0.28 已合入 main，无运行中编辑 |
-| travel 内容 | 未分配 | 当前为空状态占位 |
+| travel 翻牌屏（dist/modules/travel/**；设计见 docs/design/travel.md） | Claude Code | 2026-09-29 设计已确认，等 Fred 填 docs/旅行行程-填写.md 后开发 |
 | wheel | 暂停 | 源码保留，不在注册表和菜单中 |
 
 开始任务前填写自己的范围；结束更新状态。表格不是程序锁，也不会自动通知另一个 agent。

@@ -3,7 +3,7 @@
 > Claude Code 与 Codex 共用的进度总览。**开始工作前先读本文件和 `AGENTS.md`**，再读 `docs/DESIGN.md`（统一设计语言，任何视觉/交互改动必读）、`docs/HANDOFF.md`（逐版本交接、所有权表）和 `docs/MODULES.md`（模块接口）。
 > 本文件管“全局现状 + 待办 + 约定”；每轮的详细改动与验证继续写在 `docs/HANDOFF.md` 和 `docs/开发进度-vX.md`。
 
-最近更新：2026-09-28 · Claude Code（v0.30 真实清单与砖红）
+最近更新：2026-09-29 · Claude Code（旅行翻牌屏设计确认）
 上一次代码改动：v0.30 · 2026-09-28 · Claude Code
 
 ---
@@ -33,13 +33,14 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 
 ## 3. 进行中
 
-无。所有权表（`docs/HANDOFF.md`）中没有正在编辑的 agent。
+- travel 翻牌屏：设计已确认，等 Fred 的行程数据（Claude Code）。
+- stories 撕页日历：Codex/GPT，分支 codex/tear-calendar。
 
 ## 4. 待办清单（按优先级）
 
 **P1 — 模块内容**
 1. 片单：Fred 用真实片单替换 5 部示例（`docs/片单使用说明.md`）。
-2. 旅行 travel：独立风格 + 静态数据文件（同 cinema 模式），先和用户确认风格与字段。
+2. 旅行 travel：Solari 翻牌屏设计已确认（`docs/design/travel.md`，Claude Code 负责）；等 Fred 填 `docs/旅行行程-填写.md`，再做 data.js + 页面。
 3. 故事与日记 stories：同上。
 4. 人生清单已导入 66 条（v0.30）。以后改 docs/人生清单候选-200.md 后运行 `node scripts/import-lifelist.mjs --force`，或直接改 data.js。
 
