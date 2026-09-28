@@ -24,8 +24,8 @@ export function createInteraction(gallery, enter) {
   gallery.onMotionStart=reset;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let item,source,drag,frame=0,last=0,x=0,y=0,tx=0,ty=0,vx=0,vy=0,busy=false,sequence=0;
-  let idleTimer,errorTimer,returning=false,animations=[],ticket={},inserted=false;
-  const prompts={travel:'将机票下缘插入槽口，再从左向右刷过。Enter 可完成刷卡。',cinema:'按住光盘可推进或抽回；插入后松手读取。',stories:'打开日记',bucketlist:'Open Life List'};
+  let idleTimer,errorTimer,returning=false,animations=[],ticket={},inserted=false,pending=null;
+  const prompts={travel:'将机票下缘插入槽口，再从左向右刷过。Enter 可完成刷卡。',cinema:'按住光盘可推进或抽回；插入后松手读取。',stories:'打开日记',bucketlist:'打开人生清单'};
   function status(value) {
     receiver.dataset.state=value;
     if(item) hint.textContent = value==='reading'?'READING':value==='error'?'ERROR，重新插入可重试':value==='success'?'SUCCESS':prompts[item.id];
@@ -123,15 +123,36 @@ export function createInteraction(gallery, enter) {
     }
     tx=px;ty=py;follow();
   }
+  // A press on the object is ambiguous: the first ~7px decide. Mostly sideways → the rail swipes;
+  // mostly up/down (disc into the drive, ticket into the slot) → the object is picked up.
   gallery.stage.addEventListener('pointerdown',e=>{
+    pending=null;
     if(!e.target.closest('.ticket-paper,.silver-disc')||!gallery.settled||e.button!==0||!['travel','cinema'].includes(item?.id)||e.target.closest('.collection-slot')!==gallery.currentElement)return;
-    e.stopImmediatePropagation();e.preventDefault();if(busy)return;
-    gallery.freeze();clearTimeout(idleTimer);returning=false;
-    drag={id:e.pointerId,px:e.clientX,py:e.clientY,ox:x,oy:y,moved:false};
-    gallery.stage.setPointerCapture(e.pointerId);shell.classList.add('is-handling');
+    e.preventDefault();if(busy){e.stopImmediatePropagation();return;}
+    pending={id:e.pointerId,x:e.clientX,y:e.clientY};
   },true);
-  gallery.stage.addEventListener('pointermove',move,true);
+  function pickUp(e){
+    gallery.freeze();clearTimeout(idleTimer);returning=false;
+    drag={id:e.pointerId,px:pending.x,py:pending.y,ox:x,oy:y,moved:true};pending=null;
+    gallery.stage.setPointerCapture(e.pointerId);shell.classList.add('is-handling');
+  }
+  gallery.stage.addEventListener('pointermove',e=>{
+    if(pending?.id===e.pointerId){
+      const dx=e.clientX-pending.x,dy=e.clientY-pending.y;
+      if(Math.hypot(dx,dy)<7){e.stopImmediatePropagation();return;}
+      if(Math.abs(dx)>Math.abs(dy)){pending=null;return;}
+      e.stopImmediatePropagation();pickUp(e);
+    }
+    move(e);
+  },true);
   function release(e,cancelled=false){
+    // A tap without movement: the disc still opens on click, nothing else changes.
+    if(pending?.id===e.pointerId){
+      pending=null;if(cancelled)return;
+      e.stopImmediatePropagation();gallery.freeze();gallery.suppressUntil=performance.now()+450;
+      if(item.id==='cinema')activate();
+      return;
+    }
     if(!drag||drag.id!==e.pointerId)return;
     if(!cancelled)move(e);e.stopImmediatePropagation();const moved=drag.moved;drag=null;gallery.suppressUntil=performance.now()+450;
     if(gallery.stage.hasPointerCapture(e.pointerId))gallery.stage.releasePointerCapture(e.pointerId);
