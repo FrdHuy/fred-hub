@@ -108,3 +108,5 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - GitHub 私有仓库 https://github.com/FrdHuy/fred-hub （origin，main）。本机 git 需经代理 127.0.0.1:7890 访问 GitHub；凭据在钥匙串。
 - Vercel 项目 fred-hub，Root Directory = dist，无构建；push main 即自动部署。线上：https://fred-hub.vercel.app 已验证（首页、片单、海报、私有文件 404、cache revalidate）。
 - 下一步：Vercel 添加 fredhu.top / www，阿里云云解析按 Vercel 给出的记录配置。步骤见 docs/部署.md。
+
+- v0.24：焦点框只给键盘用户。main.js 记录输入方式（html[data-input=pointer|keyboard]），hub.css 在 pointer 模式隐藏所有 :focus-visible 描边；片单/清单模块的后代焦点样式同步处理。原因：路由切换后脚本 focus() 在鼠标/触屏下也会显示红/金框。资源 v24。

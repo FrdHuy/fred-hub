@@ -1,10 +1,14 @@
-import { createInteraction } from './experience.js?v=23';
-import { mountModule } from './modules/index.js?v=23';
-import { modules, getModule, createCover } from './catalog.js?v=23';
-import { CollectionGallery } from './gallery.js?v=23';
+import { createInteraction } from './experience.js?v=24';
+import { mountModule } from './modules/index.js?v=24';
+import { modules, getModule, createCover } from './catalog.js?v=24';
+import { CollectionGallery } from './gallery.js?v=24';
 import { readRoute, navigate } from './router.js';
 
 const $ = selector => document.querySelector(selector);
+// Focus rings are for keyboard users. Script-moved focus after a click or tap stays invisible.
+document.documentElement.dataset.input = 'pointer';
+addEventListener('pointerdown', () => { document.documentElement.dataset.input = 'pointer'; }, true);
+addEventListener('keydown', e => { if (!e.metaKey && !e.ctrlKey) document.documentElement.dataset.input = 'keyboard'; }, true);
 const home = $('#home-view'), detail = $('#detail-view');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 let disposeModule = () => {};

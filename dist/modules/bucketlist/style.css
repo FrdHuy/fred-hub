@@ -34,6 +34,7 @@
 [data-module="bucketlist"] .life-checkbox{border:1px solid #8d927e;border-radius:3px 5px 2px 4px;width:18px;height:18px;flex:none;align-self:flex-start;margin-top:5px;color:transparent;font:25px/10px var(--hand);transform:rotate(-4deg);transition:color .18s}
 [data-module="bucketlist"] .life-row input:checked+.life-checkbox{color:#7f8d6b}
 [data-module="bucketlist"] .life-row input:focus-visible+.life-checkbox{outline:2px solid #a86d51;outline-offset:5px}
+[data-input=pointer] [data-module="bucketlist"] .life-row input:focus-visible+.life-checkbox{outline:none}
 [data-module="bucketlist"] .life-text{font:22px/1.5 var(--hand);overflow-wrap:anywhere;transition:color .3s;text-decoration-line:line-through;text-decoration-color:transparent;text-decoration-thickness:1px;text-decoration-skip-ink:none}
 [data-module="bucketlist"] .life-row input:checked~.life-text{color:#9b9c8d;text-decoration-color:#747c67}
 [data-module="bucketlist"] .life-remove{font:20px/1 serif;color:#8b8d7b;opacity:0;padding:12px;transition:opacity .2s}
