@@ -1,5 +1,4 @@
 import { parseItems } from './items.js?v=27';
-import { sealSvg } from './cover.js?v=27';
 
 const DIGITS = '零一二三四五六七八九';
 export function chineseNumber(n) {
@@ -110,9 +109,9 @@ export function createFortune(cover, { reduced }) {
     const list = items || [];
     if (chosen >= list.length && list.length) chosen = pickIndex(list.length, last);
     const entry = list[chosen];
-    drop.querySelector('b').textContent = entry ? `第${chineseNumber(chosen + 1)}签` : '空签';
+    drop.querySelector('b').textContent = entry ? `Nº ${String(chosen + 1).padStart(2, '0')}` : 'Nº 00';
     drop.querySelector('span').textContent = entry ? entry.text : '尚未落笔';
-    drop.querySelector('em').innerHTML = entry?.done ? sealSvg('已成') : '';
+    drop.querySelector('em').textContent = entry?.done ? '已成' : '';
     drop.classList.toggle('is-done', !!entry?.done);
     const source = stick(); source?.classList.add('is-out');
     drop.hidden = false; drawn = true; last = chosen;
