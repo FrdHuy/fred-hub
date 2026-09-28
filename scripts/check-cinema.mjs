@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { parseFilms, filmMeta, starCells, viewFilms } from '../dist/modules/cinema/films.js';
-import { searchChoices, entryFromTmdb, insertEntry, parseRating, creator } from './lib/cinema-add.mjs';
+import { pose } from '../dist/modules/cinema/flow.js';
+import { searchChoices, entryFromTmdb, insertEntry, parseRating, creator, pickPoster, posterLanguage, originCountries } from './lib/cinema-add.mjs';
 
 // Data rules.
 assert.deepEqual(parseFilms([{ title: ' 花样年华 ' }]).films, [{ title: '花样年华' }]);
@@ -39,6 +40,28 @@ assert.equal(parseRating(''), undefined);
 assert.equal(parseRating('4.5'), 4.5);
 assert.throws(() => parseRating('4.2'));
 assert.throws(() => parseRating('9'));
+// Shelf geometry: front in the middle, mirrored sides, folding and tightening toward the edges.
+assert.deepEqual(pose(0, 300, 14), { x: 0, z: -0, turn: -0 });
+const poses = [0, .5, 1, 2, 3, 6, 10].map(o => pose(o, 300, 14));
+for (let i = 1; i < poses.length; i++) { assert.ok(poses[i].x > poses[i - 1].x); assert.ok(poses[i].turn < poses[i - 1].turn); }
+assert.ok(poses.at(-1).turn < -87.5 && poses[2].turn > -70);
+assert.ok(poses[6].x - poses[5].x < 25 * 4 && poses[2].x > 150);
+assert.equal(pose(-2, 300, 14).x, -pose(2, 300, 14).x);
+assert.equal(pose(-2, 300, 14).turn, -pose(2, 300, 14).turn);
+// Original-language poster choice.
+const posters = [
+  { file_path: '/zhcn.jpg', iso_639_1: 'zh', iso_3166_1: 'CN', vote_count: 9 },
+  { file_path: '/zhhk.jpg', iso_639_1: 'zh', iso_3166_1: 'HK', vote_count: 2 },
+  { file_path: '/en.jpg', iso_639_1: 'en', vote_count: 50 },
+  { file_path: '/plain.jpg', iso_639_1: null, vote_count: 80 },
+];
+assert.equal(pickPoster(posters, { language: 'zh', countries: ['HK'] }), '/zhhk.jpg');
+assert.equal(pickPoster(posters, { language: 'zh', countries: ['CN'] }), '/zhcn.jpg');
+assert.equal(pickPoster(posters, { language: 'zh' }), '/zhcn.jpg');
+assert.equal(pickPoster(posters, { language: 'en', countries: ['US'] }), '/en.jpg');
+assert.equal(pickPoster(posters, { language: 'fr', countries: ['FR'] }), undefined);
+assert.equal(posterLanguage({ original_language: 'cn' }), 'zh');
+assert.deepEqual(originCountries({ origin_country: ['HK'], production_countries: [{ iso_3166_1: 'HK' }, { iso_3166_1: 'FR' }] }), ['HK', 'FR']);
 console.log('PASS: cinema data rules, stars, TMDB mapping and data.js insertion');
 
 // The real data file.

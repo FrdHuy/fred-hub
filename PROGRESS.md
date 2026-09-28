@@ -3,8 +3,8 @@
 > Claude Code 与 Codex 共用的进度总览。**开始工作前先读本文件和 `AGENTS.md`**，再读 `docs/HANDOFF.md`（逐版本交接、所有权表）和 `docs/MODULES.md`（模块接口）。
 > 本文件管“全局现状 + 待办 + 约定”；每轮的详细改动与验证继续写在 `docs/HANDOFF.md` 和 `docs/开发进度-vX.md`。
 
-最近更新：2026-09-28 · Claude Code（v0.20 片单 cover-flow 与筛选）
-上一次代码改动：v0.20 · 2026-09-28 · Claude Code
+最近更新：2026-09-28 · Claude Code（v0.21 书架收拢与原版海报）
+上一次代码改动：v0.21 · 2026-09-28 · Claude Code
 
 ---
 
@@ -27,7 +27,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 | 旅行（travel）：机票吸附入槽 READING → 左→右刷卡 SUCCESS，拔出 ERROR 可重试 | ✅ 交互获用户认可 |
 | 日记（stories）：日记本翻开展开 | ✅ 交互获用户认可 |
 | 人生清单（bucketlist）：添加、勾选划线、移除 + 单步撤销、自动序号、localStorage 保存；封面英文 Life List，内页中文 | ✅ v0.15–v0.17 |
-| 影院片单（cinema）：深色 3D CD 盒 cover-flow（中间正对、两侧倾斜随滑动变化），详情飞出，精简筛选/排序（v0.20）；静态 `data.js`；`scripts/add-movie.mjs` 从 TMDB 自动补全与下载海报 | ✅ v0.18 |
+| 影院片单（cinema）：深色 3D CD 盒 cover-flow（中间正面、两侧渐收为书脊），原版语言海报，详情飞出，精简筛选/排序（v0.21）；静态 `data.js`；`scripts/add-movie.mjs` 从 TMDB 自动补全与下载海报 | ✅ v0.18 |
 | 模块化接口 `mount(context) → cleanup()`、模块注册表、路由 `#/collection/<id>` | ✅ |
 | 检查脚本：`check` / `check-cinema` / `check-bucketlist` / `check-contact` / `check-gallery` / `check-swipe` | ✅ 2026-09-28 全部通过 |
 
@@ -58,7 +58,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 - 原生 HTML/CSS/ES Modules；`dist/` 就是可编辑源码，不是构建产物。无 npm、无框架、无打包器。Node 只用于 `scripts/check*.mjs`，Python 只用于本地预览服务器。
 - `dist/index.html` 单页；`main.js`（外壳/菜单/路由挂载）、`gallery.js`（横向轨道）、`experience.js`（首页物理动作）、`catalog.js`（模块元数据+封面）、`router.js`、`hub.css` 为**共享文件，同一时间只能一个集成者修改**。
 - 模块放在 `dist/modules/<id>/{index.js, style.css, storage.js?, assets/}`；入口同步 `mount({container,item,navigate,createCover})`，返回 cleanup；事件用 `AbortController` 的 `signal` 统一注销。
-- 资源缓存版本号：`?v=20` 写在 index.html 与 import 路径中，发版时整体递增。
+- 资源缓存版本号：`?v=21` 写在 index.html 与 import 路径中，发版时整体递增。
 - 每个版本用 git 提交保存，并新增 `docs/开发进度-v<新版本>.md`（v0.18 起不再复制 `checkpoints/`）。
 
 ### 视觉

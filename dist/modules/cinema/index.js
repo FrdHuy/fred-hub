@@ -1,4 +1,5 @@
-import { parseFilms, filmMeta, starCells, viewFilms, TYPES, ORDERS } from './films.js?v=20';
+import { parseFilms, filmMeta, starCells, viewFilms, TYPES, ORDERS } from './films.js?v=21';
+import { pose } from './flow.js?v=21';
 
 const poster = name => new URL(`./posters/${name}`, import.meta.url).href;
 const pad = number => String(number).padStart(2, '0');
@@ -25,7 +26,7 @@ export function mount({ container, item }) {
 <div class="cinema-rack" role="listbox" aria-orientation="horizontal" aria-label="片单：左右方向键挑选，回车打开"></div>
 <div class="cinema-detail" role="region" aria-label="影片详情" hidden><button class="cinema-close" type="button" aria-label="收起详情">${CLOSE_ICON}</button>
 <div class="cinema-art"><div class="cinema-flight"><span class="cinema-detail-disc"><i></i></span><span class="cinema-detail-cover"></span></div></div><div class="cinema-info"></div></div>
-<p class="cinema-notice" role="status"></p><i class="cinema-probe" style="width:var(--w)"></i><i class="cinema-probe" style="width:var(--slot)"></i>
+<p class="cinema-notice" role="status"></p><i class="cinema-probe" style="width:var(--w)"></i><i class="cinema-probe" style="width:var(--slot)"></i><i class="cinema-probe" style="width:var(--d)"></i>
 <p class="cinema-credit">Data &amp; posters · <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>`;
   container.append(hall);
   const $ = selector => hall.querySelector(selector);
@@ -59,12 +60,14 @@ export function mount({ container, item }) {
     const box = document.createElement('span'); box.className = 'cinema-box';
     const front = document.createElement('span'); front.className = 'cinema-face cinema-front'; front.append(cover(film));
     const back = document.createElement('span'); back.className = 'cinema-face cinema-back';
-    box.append(back, spine(film, index, 'left'), spine(film, index, 'right'), front); lift.append(box); button.append(lift);
+    const mirror = document.createElement('span'); mirror.className = 'cinema-face cinema-mirror';
+    if (film.poster) mirror.style.setProperty('--poster', `url("${poster(film.poster)}")`);
+    box.append(back, spine(film, index, 'left'), spine(film, index, 'right'), front, mirror); lift.append(box); button.append(lift);
     button.addEventListener('click', () => { if (dragged) return; position === current ? openDetail(position) : centre(position); }, { signal });
     return button;
   }
 
-  const size = () => { const [w, slot] = [...hall.querySelectorAll('.cinema-probe')].map(probe => probe.offsetWidth); return { w, slot, pitch: slot + (parseFloat(getComputedStyle(rack).columnGap) || 0) }; };
+  const size = () => { const [w, slot, d] = [...hall.querySelectorAll('.cinema-probe')].map(probe => probe.offsetWidth); return { w, d, pitch: slot + (parseFloat(getComputedStyle(rack).columnGap) || 0) }; };
   function centre(position, behavior = motion.matches ? 'auto' : 'smooth') {
     aim = position;
     rack.scrollTo({ left: position * size().pitch, behavior });
@@ -73,14 +76,15 @@ export function mount({ container, item }) {
   // Cover-flow: each case turns by its distance from the middle, recomputed as the rack scrolls.
   function layout() {
     frame = 0;
-    const { w, slot, pitch } = size(), middle = rack.scrollLeft;
+    const { w, d, pitch } = size(), middle = rack.scrollLeft;
     let nearest = -1, best = Infinity;
     [...rack.children].forEach((element, position) => {
-      const offset = (position * pitch - middle) / pitch, t = Math.max(-1, Math.min(1, offset)), distance = Math.abs(offset);
+      const offset = (position * pitch - middle) / pitch, distance = Math.abs(offset), { x, z, turn } = pose(offset, w, d);
       if (distance < best) { best = distance; nearest = position; }
-      element.style.setProperty('--x', `${t * ((w - slot) / 2 + 10)}px`);
-      element.style.setProperty('--z', `${-Math.min(distance, 3) * 34}px`);
-      element.style.setProperty('--turn', `${-t * 66}deg`);
+      // The case element stays in its scroll slot; only the box moves to its shelf position.
+      element.style.setProperty('--x', `${x - offset * pitch}px`);
+      element.style.setProperty('--z', `${z}px`);
+      element.style.setProperty('--turn', `${turn}deg`);
       element.style.perspectiveOrigin = `calc(50% - ${offset * pitch}px) 50%`;
       element.style.zIndex = String(100 - Math.round(distance * 4));
     });

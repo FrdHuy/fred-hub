@@ -28,12 +28,14 @@
 [data-module="cinema"] .cinema-rack{position:relative;z-index:1;display:flex;align-items:center;gap:var(--gap);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-snap-type:x mandatory;padding:calc(var(--w) * .3) calc(50% - var(--slot) / 2) calc(var(--w) * .5);cursor:grab;-webkit-user-select:none;user-select:none}
 [data-module="cinema"] .cinema-rack::-webkit-scrollbar{display:none}
 [data-module="cinema"] .cinema-rack.is-dragging{cursor:grabbing;scroll-snap-type:none}
-[data-module="cinema"] .cinema-case{--x:0px;--z:0px;--turn:0deg;flex:none;position:relative;width:var(--slot);height:var(--w);padding:0;border:0;background:none;color:inherit;cursor:pointer;scroll-snap-align:center;perspective:1400px;animation:cinema-arrive 1s var(--ease) calc(var(--i) * 60ms + 80ms) both;-webkit-box-reflect:below 12px linear-gradient(transparent 74%,#ffffff17)}
+[data-module="cinema"] .cinema-case{--x:0px;--z:0px;--turn:0deg;flex:none;position:relative;width:var(--slot);height:var(--w);padding:0;border:0;background:none;color:inherit;cursor:pointer;scroll-snap-align:center;perspective:1400px;pointer-events:none;animation:cinema-arrive 1s var(--ease) calc(var(--i) * 60ms + 80ms) both}
 [data-module="cinema"] .cinema-case:focus-visible{outline:none}
 [data-module="cinema"] .cinema-lift{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .45s var(--ease)}
 [data-module="cinema"] .cinema-case:hover .cinema-lift{transform:translateY(-8px)}
 [data-module="cinema"] .cinema-box{position:absolute;left:50%;top:0;width:var(--w);height:var(--w);margin-left:calc(var(--w) / -2);transform-style:preserve-3d;transform:translateX(var(--x)) translateZ(var(--z)) rotateY(var(--turn))}
-[data-module="cinema"] .cinema-face{position:absolute;top:0;height:100%;backface-visibility:hidden;overflow:hidden}
+[data-module="cinema"] .cinema-face{position:absolute;top:0;height:100%;backface-visibility:hidden;overflow:hidden;pointer-events:auto}
+/* Reflection: the lower part of the cover, flipped onto the floor; it turns with the case. */
+[data-module="cinema"] .cinema-mirror{left:0;top:calc(100% + 10px);width:100%;height:30%;pointer-events:none;backface-visibility:visible;transform:translateZ(calc(var(--d) / 2)) scaleY(-1);background:var(--poster,linear-gradient(#bdb9b1,#8d8a83)) 50% calc(var(--w) * -.95)/100% auto no-repeat;opacity:.1;-webkit-mask-image:linear-gradient(transparent 20%,#000);mask-image:linear-gradient(transparent 20%,#000)}
 [data-module="cinema"] .cinema-front{left:0;width:100%;transform:translateZ(calc(var(--d) / 2));background:#15130f}
 [data-module="cinema"] .cinema-front img,[data-module="cinema"] .cinema-detail-cover img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
 /* Jewel-case lid: a fine hinge on the left, a cold sheen across the plastic. */

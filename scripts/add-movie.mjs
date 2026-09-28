@@ -1,11 +1,12 @@
 // Usage: node scripts/add-movie.mjs 花样年华 [4.5]
+//        node scripts/add-movie.mjs --posters   (re-fetch original-language posters for the whole list)
 // Looks the title up on TMDB (local machine only), saves the poster and prepends an entry to data.js.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { parseFilms } from '../dist/modules/cinema/films.js';
-import { searchChoices, entryFromTmdb, insertEntry, parseRating, posterName } from './lib/cinema-add.mjs';
+import { searchChoices, entryFromTmdb, insertEntry, parseRating, posterName, pickPoster, posterLanguage, originCountries } from './lib/cinema-add.mjs';
 
 const root = new URL('../', import.meta.url), cinema = new URL('dist/modules/cinema/', root);
 const dataFile = new URL('data.js', cinema);
@@ -29,7 +30,7 @@ try { rating = parseRating(ratingArg); } catch (error) { fail(error.message); }
 const v3 = /^[a-f0-9]{32}$/i.test(token);
 async function tmdb(path, params = {}) {
   const url = new URL(`https://api.themoviedb.org/3/${path}`);
-  for (const [key, value] of Object.entries({ language: 'zh-CN', ...params })) url.searchParams.set(key, value);
+  for (const [key, value] of Object.entries({ language: 'zh-CN', ...params })) if (value !== null) url.searchParams.set(key, value);
   if (v3) url.searchParams.set('api_key', token);
   let response;
   try { response = await fetch(url, { headers: v3 ? {} : { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(15000) }); }
@@ -37,6 +38,33 @@ async function tmdb(path, params = {}) {
   if (response.status === 401) fail('TMDB 拒绝了这个 Token，请检查 .env 里的 TMDB_TOKEN 是否完整。');
   if (!response.ok) fail(`TMDB 返回错误 ${response.status}`);
   return response.json();
+}
+
+// The original release poster (e.g. French for a French film); falls back to TMDB's Chinese-market poster.
+async function originalPoster(kind, id, details) {
+  const language = posterLanguage(details);
+  const images = await tmdb(`${kind}/${id}/images`, { language: null, include_image_language: `${language},null` });
+  return pickPoster(images.posters, { language, countries: originCountries(details) }) || details.poster_path;
+}
+async function download(path, name) {
+  try {
+    const image = await fetch(`https://image.tmdb.org/t/p/w780${path}`, { signal: AbortSignal.timeout(20000) });
+    if (!image.ok) throw new Error(String(image.status));
+    writeFileSync(new URL(`posters/${name}`, cinema), Buffer.from(await image.arrayBuffer()));
+    return true;
+  } catch { return false; }
+}
+
+if (query === '--posters') {
+  const films = parseFilms((await import(`${dataFile.href}?t=${Date.now()}`)).default).films.filter(film => film.tmdb && film.poster);
+  console.log(`\n更新 ${films.length} 张海报为原版：`);
+  for (const film of films) {
+    const [kind, id] = film.tmdb.split('/'), details = await tmdb(`${kind}/${id}`, { language: null });
+    const path = await originalPoster(kind, id, details);
+    const ok = path && await download(path, film.poster);
+    console.log(`  ${ok ? '✓' : '!'} ${film.title}（${posterLanguage(details)}）${ok ? '' : ' 下载失败，保留原图'}`);
+  }
+  console.log('\n刷新预览页面即可看到。\n'); process.exit(0);
 }
 
 const choices = searchChoices((await tmdb('search/multi', { query, include_adult: 'false' })).results);
@@ -58,15 +86,11 @@ if (existing.some(film => film.tmdb === `${picked.kind}/${picked.id}`)) fail(`�
 
 const details = await tmdb(`${picked.kind}/${picked.id}`, picked.kind === 'movie' ? { append_to_response: 'credits' } : {});
 let poster;
-if (details.poster_path) {
+const path = await originalPoster(picked.kind, picked.id, details);
+if (path) {
   poster = posterName(picked.kind, picked.id);
-  const file = new URL(`posters/${poster}`, cinema);
-  if (!existsSync(file)) {
-    try {
-      const image = await fetch(`https://image.tmdb.org/t/p/w500${details.poster_path}`, { signal: AbortSignal.timeout(20000) });
-      if (!image.ok) throw new Error(String(image.status));
-      writeFileSync(file, Buffer.from(await image.arrayBuffer()));
-    } catch { console.warn('  ! 海报下载失败，这一条先不带海报，之后可以手动放进 posters/。'); poster = undefined; }
+  if (!existsSync(new URL(`posters/${poster}`, cinema)) && !await download(path, poster)) {
+    console.warn('  ! 海报下载失败，这一条先不带海报，之后可以手动放进 posters/。'); poster = undefined;
   }
 }
 const entry = entryFromTmdb(picked.kind, details, { rating, poster });

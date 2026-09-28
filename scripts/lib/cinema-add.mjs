@@ -51,3 +51,26 @@ export function parseRating(text) {
   if (!(value >= 0 && value <= 5 && Number.isInteger(value * 2))) throw new Error('评分应在 0–5 之间，以 0.5 为一档，如 4 或 4.5');
   return value;
 }
+
+// The poster language that counts as "original". TMDB tags Cantonese films 'cn' but their posters 'zh'.
+export function posterLanguage(details) {
+  const language = details.original_language;
+  return language === 'cn' ? 'zh' : language;
+}
+
+// Prefer a poster in the original language, released in a country of origin, then the most voted.
+export function pickPoster(posters = [], { language, countries = [] } = {}) {
+  const score = poster => [
+    poster.iso_639_1 === language ? 0 : poster.iso_639_1 ? 2 : 1,
+    countries.includes(poster.iso_3166_1) ? 0 : 1,
+    -(poster.vote_count || 0), -(poster.vote_average || 0),
+  ];
+  const ranked = posters.filter(poster => poster.file_path).map(poster => ({ poster, key: score(poster) }))
+    .sort((a, b) => { for (let i = 0; i < a.key.length; i++) if (a.key[i] !== b.key[i]) return a.key[i] - b.key[i]; return 0; });
+  const best = ranked[0];
+  return best && best.key[0] === 0 ? best.poster.file_path : undefined;
+}
+
+export function originCountries(details) {
+  return [...new Set([...(details.origin_country || []), ...(details.production_countries || []).map(country => country.iso_3166_1)])];
+}
