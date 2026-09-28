@@ -17,8 +17,9 @@
 | --- | --- | --- |
 | 公共首页、交互、菜单、模块注册 | Codex | v0.17 已交接，无运行中编辑 |
 | cinema 影院片单（dist/modules/cinema/**、scripts/add-movie.mjs、scripts/check-cinema.mjs；共享：index.html 样式链接、catalog theme、main.js 主题切换、hub.css 深色头部） | Claude Code | v0.18 已交接，无运行中编辑 |
-| travel / stories 内容 | 未分配 | 当前为空状态占位 |
-| bucketlist | 未分配 | 手稿人生清单：添加、勾选、移除/撤销、本地保存 |
+| stories 撕页日历（dist/modules/stories/**；共享：experience.js 中 stories 分支、catalog.js 中 stories 封面、对应样式） | Codex / GPT | 2026-09-28 分配，分支 codex/tear-calendar，先与用户讨论创意 |
+| bucketlist 求签筒（dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画） | Claude Code | 2026-09-28 设计讨论中，分支 claude/fortune-sticks |
+| travel 内容 | 未分配 | 当前为空状态占位 |
 | wheel | 暂停 | 源码保留，不在注册表和菜单中 |
 
 开始任务前填写自己的范围；结束更新状态。表格不是程序锁，也不会自动通知另一个 agent。
