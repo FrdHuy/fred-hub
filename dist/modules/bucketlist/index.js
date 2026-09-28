@@ -1,51 +1,192 @@
-import { parseItems, itemLines } from './items.js?v=26';
-import { loadEntries } from './storage.js?v=26';
+import { parseItems, itemLines } from './items.js?v=28';
+import { loadEntries } from './storage.js?v=28';
+import { lampStates, litCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=28';
 
-// Read-only list from data.js: everyone sees the same page; only the author edits the file.
+const DETENT = 24;
+// Each odometer drum is a strip of 0–9 that rolls to the current digit.
+const digitsStrip = `<span class="deck-strip">${[...'0123456789'].map(d => `<span>${d}</span>`).join('')}</span>`;
+
+// Inside the Life List: the full deck. Readout + 100 lamps + year odometer, selector knob and a PRINT key.
 export function mount({ container, item }) {
   const events = new AbortController(), { signal } = events;
-  const paper = document.createElement('section'); paper.className = 'life-paper'; paper.lang = 'zh-CN';
-  paper.innerHTML = `<header class="life-heading"><span class="life-owner">想做的事 · 慢慢完成</span><h1>人生清单<span aria-hidden="true">.</span></h1><span class="life-doodle" aria-hidden="true">✳</span></header><ol class="life-list" aria-label="人生清单"></ol><p class="life-empty" hidden></p><footer class="life-footer"><span class="life-count"></span><span class="life-signature" aria-hidden="true">不赶时间，一件一件来。</span></footer><div class="life-notice" hidden><p role="status"></p><button type="button" hidden>复制旧条目</button></div>`;
-  container.append(paper);
-  const list = paper.querySelector('ol'), empty = paper.querySelector('.life-empty'), count = paper.querySelector('.life-count');
-  const notice = paper.querySelector('.life-notice'), message = notice.querySelector('p'), copy = notice.querySelector('button');
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  const now = new Date().getFullYear();
+  let items = [], year = now, span = [now - 1, now], index = 0;
+
+  const deck = document.createElement('section'); deck.className = 'deck'; deck.lang = 'zh-CN';
+  deck.innerHTML = `<h1 class="deck-sr">人生清单</h1><span class="screw"></span><span class="screw"></span><span class="screw"></span><span class="screw"></span>
+<div class="deck-readout" aria-live="polite"><p class="deck-no"></p><p class="deck-text"></p><p class="deck-state"></p><p class="deck-count"></p></div>
+<div class="deck-field" role="listbox" aria-label="人生清单：方向键逐件浏览"></div>
+<div class="deck-controls">
+<div class="deck-control"><div class="deck-odometer" role="spinbutton" tabindex="0" aria-label="回看年份，上下拨动">${`<span class="deck-drum">${digitsStrip}</span>`.repeat(4)}</div><span class="deck-label">YEAR</span></div>
+<div class="deck-control"><div class="deck-knob" role="slider" tabindex="0" aria-label="选择旋钮，左右转动逐件浏览"><span class="deck-knob-cap"></span></div><span class="deck-label">SELECT</span></div>
+<div class="deck-control"><button class="deck-print" type="button" aria-label="打印完整清单"><span>PRINT</span></button><span class="deck-label">&nbsp;</span></div>
+</div>
+<span class="deck-silk" aria-hidden="true">LIFE LIST · Nº 100 · FRED <b>●</b></span>`;
+  const slot = document.createElement('div'); slot.className = 'deck-slot'; slot.setAttribute('aria-hidden', 'true');
+  const receipt = document.createElement('div'); receipt.className = 'deck-receipt'; receipt.hidden = true; receipt.setAttribute('aria-hidden', 'true');
+  const full = document.createElement('ol'); full.className = 'deck-sr';
+  const notice = document.createElement('div'); notice.className = 'deck-notice'; notice.hidden = true;
+  notice.innerHTML = '<p role="status"></p><button type="button" hidden>复制旧条目</button>';
+  container.append(deck, slot, receipt, full, notice);
+  const $ = selector => deck.querySelector(selector);
+  const field = $('.deck-field'), odometer = $('.deck-odometer'), knob = $('.deck-knob'), printKey = $('.deck-print');
+  const readout = { no: $('.deck-no'), text: $('.deck-text'), state: $('.deck-state'), count: $('.deck-count') };
+  const message = notice.querySelector('p'), copy = notice.querySelector('button');
   const say = text => { message.textContent = text; notice.hidden = !text; };
 
-  function row({ text, done }, index) {
-    const li = document.createElement('li'); li.className = `life-row${done ? ' is-done' : ''}`;
-    const number = document.createElement('span'); number.className = 'life-number'; number.setAttribute('aria-hidden', 'true'); number.textContent = String(index + 1).padStart(2, '0');
-    const body = document.createElement('span'); body.className = 'life-item';
-    const box = document.createElement('span'); box.className = 'life-checkbox'; box.setAttribute('aria-hidden', 'true'); box.textContent = '✓';
-    const label = document.createElement('span'); label.className = 'life-text'; label.textContent = text;
-    const state = document.createElement('span'); state.className = 'life-sr'; state.textContent = done ? '（已完成）' : '';
-    body.append(box, label, state); li.append(number, body); return li;
+  function stateOf(i) {
+    const entry = items[i];
+    if (!entry) return '';
+    if (!entry.done) return '○ SOMEDAY';
+    if ((entry.year ?? now) > year) return `○ NOT YET · ${entry.year ?? now}`;
+    return `● DONE${entry.year ? ` · ${entry.year}` : ''}`;
+  }
+  function show() {
+    const entry = items[index];
+    readout.no.textContent = entry ? `Nº ${pad(index + 1)}` : 'Nº ---';
+    readout.text.textContent = entry ? entry.text : '尚未写下第一件事';
+    const state = stateOf(index), mark = document.createElement('b'); mark.textContent = state.slice(0, 1);
+    readout.state.replaceChildren(mark, state.slice(1));
+    readout.state.classList.toggle('is-lit', state.startsWith('●'));
+  }
+  function render() {
+    const states = lampStates(items, year, now);
+    [...field.children].forEach((lamp, i) => { lamp.classList.toggle('is-done', states[i] === 'done'); lamp.classList.toggle('is-todo', states[i] === 'todo'); });
+    readout.count.textContent = `${year} · ${pad(litCount(states))}/${SLOTS}`;
+    [...odometer.children].forEach((drum, i) => drum.style.setProperty('--d', String(year)[i]));
+    odometer.setAttribute('aria-valuenow', year); odometer.setAttribute('aria-valuetext', `${year} 年，已完成 ${litCount(states)} 件`);
+    show();
+  }
+  function select(i, { focus = false } = {}) {
+    if (!items.length) return;
+    i = Math.max(0, Math.min(items.length - 1, i));
+    const lamps = [...field.children];
+    lamps[index]?.classList.remove('is-sel'); lamps[index]?.setAttribute('aria-selected', 'false'); if (lamps[index]) lamps[index].tabIndex = -1;
+    index = i;
+    lamps[i].classList.add('is-sel'); lamps[i].setAttribute('aria-selected', 'true'); lamps[i].tabIndex = 0;
+    if (focus) lamps[i].focus({ preventScroll: true });
+    knob.style.setProperty('--angle', `${i * DETENT}deg`);
+    knob.setAttribute('aria-valuenow', i + 1); knob.setAttribute('aria-valuetext', `第 ${i + 1} 件：${items[i].text}`);
+    show();
+  }
+  function setYear(next) {
+    const clamped = Math.max(span[0], Math.min(span[1], next));
+    if (clamped === year) return false;
+    year = clamped; render(); return true;
   }
 
-  function render(data) {
-    const { items, errors } = parseItems(data);
-    list.replaceChildren(...items.map(row));
-    empty.hidden = items.length > 0; empty.textContent = item.emptyTitle;
-    count.textContent = items.length ? `${items.filter(entry => entry.done).length} / ${items.length} 已完成` : '';
-    if (errors.length) say(`有 ${errors.length} 条没显示：${errors.join('；')}。运行 node scripts/check-bucketlist.mjs 查看详情。`);
+  function build(data) {
+    const parsed = parseItems(data); items = parsed.items.slice(0, SLOTS);
+    span = yearSpan(items, now); year = now;
+    odometer.setAttribute('aria-valuemin', span[0]); odometer.setAttribute('aria-valuemax', span[1]);
+    knob.setAttribute('aria-valuemin', 1); knob.setAttribute('aria-valuemax', Math.max(1, items.length));
+    field.replaceChildren(...Array.from({ length: SLOTS }, (_, i) => {
+      const entry = items[i];
+      if (!entry) { const empty = document.createElement('span'); empty.className = 'deck-lamp is-empty'; empty.style.setProperty('--n', i); return empty; }
+      const lamp = document.createElement('button'); lamp.type = 'button'; lamp.className = 'deck-lamp'; lamp.tabIndex = -1;
+      lamp.setAttribute('role', 'option'); lamp.setAttribute('aria-selected', 'false'); lamp.style.setProperty('--n', i);
+      lamp.setAttribute('aria-label', `${pad(i + 1)} ${entry.text}${entry.done ? `，已完成${entry.year ? ` ${entry.year}` : ''}` : ''}`);
+      lamp.addEventListener('click', () => select(i), { signal });
+      lamp.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') select(i); }, { signal });
+      return lamp;
+    }));
+    full.replaceChildren(...items.map(entry => { const li = document.createElement('li'); li.textContent = `${entry.text}${entry.done ? `（已完成${entry.year ? ` ${entry.year}` : ''}）` : ''}`; return li; }));
+    render(); if (items.length) select(0); else show();
+    if (parsed.errors.length) say(`有 ${parsed.errors.length} 条没显示：${parsed.errors.join('；')}。运行 node scripts/check-bucketlist.mjs 查看详情。`);
+    if (!motion.matches) deck.classList.add('is-booting');
   }
+
+  // Lamp grid keys: ←/→ one, ↑/↓ a row, Home/End.
+  field.addEventListener('keydown', e => {
+    const move = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -10, ArrowDown: 10 }[e.key];
+    if (move !== undefined) { e.preventDefault(); select(index + move, { focus: true }); }
+    else if (e.key === 'Home') { e.preventDefault(); select(0, { focus: true }); }
+    else if (e.key === 'End') { e.preventDefault(); select(items.length - 1, { focus: true }); }
+  }, { signal });
+
+  // Selector knob: turn it; every detent clicks to the next wish.
+  let grab = null;
+  const tick = () => { if (!motion.matches) knob.animate([{ scale: '1' }, { scale: '.96' }, { scale: '1' }], { duration: 110 }); };
+  knob.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return; e.preventDefault(); knob.setPointerCapture(e.pointerId);
+    const box = knob.getBoundingClientRect(), cx = box.left + box.width / 2, cy = box.top + box.height / 2;
+    grab = { cx, cy, last: Math.atan2(e.clientY - cy, e.clientX - cx), turned: 0, applied: 0 };
+    knob.classList.add('is-held');
+  }, { signal });
+  knob.addEventListener('pointermove', e => {
+    if (!grab) return;
+    const angle = Math.atan2(e.clientY - grab.cy, e.clientX - grab.cx);
+    let delta = angle - grab.last; if (delta > Math.PI) delta -= 2 * Math.PI; if (delta < -Math.PI) delta += 2 * Math.PI;
+    grab.last = angle; grab.turned += delta * 180 / Math.PI;
+    const steps = knobSteps(grab.turned, DETENT);
+    if (steps !== grab.applied) { const before = index; select(index + steps - grab.applied); grab.applied = steps; if (index !== before) tick(); }
+    // Between detents the cap follows the hand a little, then springs into the notch on release.
+    knob.style.setProperty('--drag', `${Math.max(-DETENT * .45, Math.min(DETENT * .45, grab.turned - grab.applied * DETENT))}deg`);
+  }, { signal });
+  const letGo = () => { if (!grab) return; grab = null; knob.classList.remove('is-held'); knob.style.setProperty('--drag', '0deg'); };
+  knob.addEventListener('pointerup', letGo, { signal }); knob.addEventListener('pointercancel', letGo, { signal });
+  knob.addEventListener('keydown', e => {
+    const move = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[e.key];
+    if (move !== undefined) { e.preventDefault(); select(index + move); tick(); }
+  }, { signal });
+  knob.addEventListener('wheel', e => { e.preventDefault(); select(index + Math.sign(e.deltaY || e.deltaX)); tick(); }, { passive: false, signal });
+
+  // Year odometer: drag the drums up/down (one year per notch), wheel or ↑/↓.
+  let roll = null;
+  odometer.addEventListener('pointerdown', e => { if (e.button !== 0) return; e.preventDefault(); odometer.setPointerCapture(e.pointerId); roll = { y: e.clientY, applied: 0 }; odometer.classList.add('is-held'); }, { signal });
+  odometer.addEventListener('pointermove', e => {
+    if (!roll) return;
+    const steps = Math.trunc((roll.y - e.clientY) / 16);
+    if (steps !== roll.applied) { setYear(year + steps - roll.applied); roll.applied = steps; }
+  }, { signal });
+  const stopRoll = () => { roll = null; odometer.classList.remove('is-held'); };
+  odometer.addEventListener('pointerup', stopRoll, { signal }); odometer.addEventListener('pointercancel', stopRoll, { signal });
+  odometer.addEventListener('wheel', e => { e.preventDefault(); setYear(year - Math.sign(e.deltaY)); }, { passive: false, signal });
+  odometer.addEventListener('keydown', e => {
+    const move = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[e.key];
+    if (move !== undefined) { e.preventDefault(); setYear(year + move); }
+    else if (e.key === 'Home') { e.preventDefault(); setYear(span[0]); }
+    else if (e.key === 'End') { e.preventDefault(); setYear(span[1]); }
+  }, { signal });
+
+  // PRINT: the key goes down and a thermal receipt feeds out of the slot, line by line.
+  let printing = null;
+  printKey.addEventListener('click', () => {
+    const states = lampStates(items, year, now);
+    const paper = document.createElement('div'); paper.className = 'deck-paper';
+    const line = (className, cells) => { const row = document.createElement('div'); row.className = className; cells.forEach(text => { const cell = document.createElement('span'); cell.textContent = text; row.append(cell); }); paper.append(row); };
+    line('deck-head', ['LIFE LIST · PRINTOUT', String(year)]);
+    if (!items.length) line('deck-row', ['---', '尚未落笔', '○', '']);
+    items.forEach((entry, i) => line(`deck-row${states[i] === 'done' ? ' is-done' : ''}`, [pad(i + 1), entry.text, states[i] === 'done' ? '●' : '○', states[i] === 'done' ? String(entry.year ?? '') : '']));
+    line('deck-foot', [`${pad(litCount(states))}/${SLOTS} COMPLETE`, 'FRED']);
+    receipt.replaceChildren(paper); receipt.hidden = false;
+    printing?.cancel();
+    if (motion.matches) return;
+    const lines = Math.max(4, items.length + 3);
+    slot.classList.add('is-feeding');
+    printing = receipt.animate([{ clipPath: 'inset(0 0 100% 0)', translate: '0 -10px' }, { clipPath: 'inset(0 0 0 0)', translate: '0 0' }], { duration: Math.min(2600, 280 + lines * 90), easing: `steps(${lines}, end)` });
+    printing.finished.then(() => slot.classList.remove('is-feeding'), () => slot.classList.remove('is-feeding'));
+  }, { signal });
 
   // Entries typed into earlier versions live only in this browser; offer them for data.js.
   let legacy = [];
   try { legacy = loadEntries(localStorage); } catch {}
-  function offerLegacy() {
-    if (!legacy.length || !notice.hidden) return;
-    say(`这台浏览器里还存着 ${legacy.length} 条以前在网页上写的清单，其他人看不到。复制后粘贴进 data.js 即可公开。`);
-    copy.hidden = false;
-  }
   copy.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(itemLines(legacy)); say('已复制。粘贴到 dist/modules/bucketlist/data.js 的方括号里。'); copy.hidden = true; }
-    catch { say(itemLines(legacy)); copy.hidden = true; }
+    try { await navigator.clipboard.writeText(itemLines(legacy)); say('已复制。粘贴到 dist/modules/bucketlist/data.js 的方括号里。'); }
+    catch { say(itemLines(legacy)); }
+    copy.hidden = true;
   }, { signal });
 
   // A fresh URL each visit so edits to data.js show after a normal refresh.
-  import(`./data.js?t=${Date.now()}`).then(module => { if (!signal.aborted) { render(module.default); offerLegacy(); } }, error => {
+  import(`./data.js?t=${Date.now()}`).then(module => {
     if (signal.aborted) return;
-    render([]); say(`data.js 读取失败（多半是少了逗号、引号或括号）。运行 node scripts/check-bucketlist.mjs 查看出错位置。${error.message ? ` ${error.message}` : ''}`);
+    build(module.default);
+    if (legacy.length && notice.hidden) { say(`这台浏览器里还存着 ${legacy.length} 条以前在网页上写的清单，其他人看不到。复制后粘贴进 data.js 即可公开。`); copy.hidden = false; }
+  }, error => {
+    if (signal.aborted) return;
+    build([]); say(`data.js 读取失败（多半是少了逗号、引号或括号）。运行 node scripts/check-bucketlist.mjs 查看出错位置。${error.message ? ` ${error.message}` : ''}`);
   });
-  return () => events.abort();
+
+  return () => { events.abort(); printing?.cancel(); };
 }

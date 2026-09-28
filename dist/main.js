@@ -1,7 +1,7 @@
-import { createInteraction } from './experience.js?v=26';
-import { mountModule } from './modules/index.js?v=26';
-import { modules, getModule, createCover } from './catalog.js?v=26';
-import { CollectionGallery } from './gallery.js?v=26';
+import { createInteraction } from './experience.js?v=28';
+import { mountModule } from './modules/index.js?v=28';
+import { modules, getModule, createCover } from './catalog.js?v=28';
+import { CollectionGallery } from './gallery.js?v=28';
 import { readRoute, navigate } from './router.js';
 
 const $ = selector => document.querySelector(selector);
@@ -60,7 +60,8 @@ async function showRoute(initial = false) {
   const sequence = ++routeSequence, nextRoute = readRoute(), item = nextRoute.type === 'collection' ? getModule(nextRoute.id) : null;
   const previousRoute = activeRoute; let origin = null, transitionItem = null;
   const openingList = !initial && previousRoute.type==='home' && item?.id==='bucketlist';
-  const listOrigin = openingList ? gallery.currentElement?.querySelector('.wish-paper')?.getBoundingClientRect() : null;
+  // The Life List opens out of the powered-up panel on the home page.
+  const listOrigin = openingList ? gallery.currentElement?.querySelector('.panel')?.getBoundingClientRect() : null;
   interaction.reset(); cancelRouteAnimation();
   if (!initial && nextRoute.type === 'home' && previousRoute.type === 'collection') {
     origin = $('.detail-cover')?.getBoundingClientRect(); transitionItem = getModule(previousRoute.id);
@@ -79,14 +80,13 @@ async function showRoute(initial = false) {
   }
   window.scrollTo({ top: 0, behavior: 'instant' });
   if(openingList && listOrigin && !motion.matches){
-    const paper=detail.querySelector('.life-paper'), end=paper.getBoundingClientRect();
-    // The actual destination sheet grows out of the cover; no intermediate overlay.
+    const paper=detail.querySelector('.deck'), end=paper.getBoundingClientRect();
+    // The small panel grows into the full deck; the module lights its own lamps.
     paper.getAnimations().forEach(animation=>animation.cancel());
     paper.style.transformOrigin='0 0';
-    const from=`translate(${listOrigin.left-end.left}px,${listOrigin.top-end.top}px) scale(${listOrigin.width/end.width},${listOrigin.height/end.height}) rotate(-4deg)`;
+    const from=`translate(${listOrigin.left-end.left}px,${listOrigin.top-end.top}px) scale(${listOrigin.width/end.width},${listOrigin.height/end.height})`;
     await Promise.all([
       animate(paper,[{transform:from},{transform:'none'}],{duration:520,easing:'cubic-bezier(.22,.75,.2,1)'}),
-      ...[...paper.children].map((child,i)=>animate(child,[{opacity:0,transform:'translateY(7px)'},{opacity:1,transform:'none'}],{delay:180+Math.min(i,3)*35,duration:220,fill:'backwards',easing:'ease-out'}))
     ]);
     paper.style.removeProperty('transform-origin');
   }else if(!initial&&!motion.matches){

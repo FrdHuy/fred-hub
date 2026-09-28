@@ -1,90 +1,137 @@
-/* An unbound manuscript sheet, with the same warm material palette as the collection. */
-[data-module="bucketlist"]{--hand:"Kaiti SC","STKaiti","KaiTi","Songti SC",serif;--pencil:#52594c;--sheet:#f6f2e7}
-[data-module="bucketlist"] .collectible--list{background:none;display:grid;place-items:center;filter:drop-shadow(0 16px 15px #51493616)}
-[data-module="bucketlist"] .wish-paper{width:68%;height:84%;position:relative;box-sizing:border-box;padding:12% 8% 7%;color:var(--pencil);text-align:left;transform:rotate(-5deg);transform-origin:50% 80%;border-radius:2px 5px 3px 1px;background:repeating-linear-gradient(0deg,#96866804 0 1px,transparent 1px 3px),linear-gradient(115deg,#fffcf2,var(--sheet));box-shadow:inset 0 1px #fff,1px 2px 1px #cdc7b0,3px 5px 0 -2px #f4efdf,5px 7px 0 -3px #d6d0bc;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
-[data-module="bucketlist"] .wish-paper:after{content:'';position:absolute;right:0;bottom:0;width:30px;height:30px;background:linear-gradient(135deg,transparent 49%,#e4decc 50%,#fefcf5 80%);clip-path:polygon(100% 0,100% 100%,0 100%)}
-[data-module="bucketlist"] .wish-clip{position:absolute;width:16px;height:45px;left:65%;top:-12px;border:2px solid #969b8d;border-radius:10px;transform:rotate(12deg);box-shadow:1px 1px 1px #fff9,2px 2px 2px #54554120}
-[data-module="bucketlist"] .wish-clip:after{content:'';position:absolute;inset:3px 3px 8px;border:1px solid #969b8d;border-bottom:0;border-radius:7px}
-[data-module="bucketlist"] .wish-paper small{font:8px/1.2 monospace;letter-spacing:.2em;color:#91937e}
-[data-module="bucketlist"] .wish-paper strong{display:block;font:28px/1.7 var(--hand);letter-spacing:.08em;margin-top:8px}
-[data-module="bucketlist"] .wish-underline{display:block;width:72%;height:2px;background:#ac5c47;transform:rotate(-2deg);border-radius:50%;opacity:.7}
-[data-module="bucketlist"] .wish-preview{display:grid;gap:18px;margin-top:27px;font:15px/1.4 var(--hand)}
-[data-module="bucketlist"] .wish-preview>span{display:flex;align-items:center;gap:10px;white-space:nowrap}
-[data-module="bucketlist"] .wish-preview i{width:13px;height:13px;flex:none;border:1px solid #858978;border-radius:2px 4px 1px 3px;font:15px/9px var(--hand);font-style:normal}
-[data-module="bucketlist"] .wish-preview .crossed{text-decoration:line-through;color:#999a8c;transform:rotate(-1deg)}
-[data-module="bucketlist"] .wish-someday{position:absolute;left:12%;bottom:9%;font:italic 11px/1.5 "Noteworthy","Bradley Hand",cursive;color:#999783}
-[data-module="bucketlist"] .wish-star{position:absolute;right:12%;bottom:17%;font-size:27px;color:#ae624c;transform:rotate(13deg)}
-[data-module="bucketlist"] .checklist-opening .wish-paper{transform:rotate(0) scale(1.06)}
-.module-thumbnail:has(.collectible--list){--hand:"Kaiti SC","STKaiti",serif;--pencil:#52594c;--sheet:#f6f2e7}
-/* Cover styles are scoped by module ID, including menu thumbnails. */
-.detail-view[data-module="bucketlist"]{padding:12px 6% 80px}
-[data-module="bucketlist"] .module-content{max-width:730px;margin:25px auto 0}
-[data-module="bucketlist"] .life-paper{position:relative;min-height:590px;padding:58px 64px 32px;background:repeating-linear-gradient(0deg,#9e886305 0 1px,transparent 1px 4px),linear-gradient(105deg,#fdfaf0,#f6f2e7);color:var(--pencil);box-shadow:0 1px 2px #6e614c0d,0 18px 50px #5f543909;animation:life-unfold .5s cubic-bezier(.2,.7,.2,1) both}
-[data-module="bucketlist"] .life-paper:before{content:'';position:absolute;left:36px;top:0;bottom:0;width:1px;background:#ac69551a}
-[data-module="bucketlist"] .life-heading{position:relative;margin-bottom:35px}
-[data-module="bucketlist"] .life-owner{font:9px/1.4 monospace;letter-spacing:.15em;color:#959380}
-[data-module="bucketlist"] .life-heading h1{font:38px/1.6 var(--hand);font-weight:400;letter-spacing:.08em;margin:12px 0 0}
-[data-module="bucketlist"] .life-heading h1:after{content:'';display:block;width:170px;height:2px;border-radius:50%;transform:rotate(-1deg);background:#a65e4877}
-[data-module="bucketlist"] .life-heading h1>span{color:#ad6047}
-[data-module="bucketlist"] .life-doodle{position:absolute;right:5px;top:32px;font:43px var(--hand);color:#ad6047;transform:rotate(12deg)}
-[data-module="bucketlist"] .life-list{list-style:none;margin:0;padding:0}
-[data-module="bucketlist"] .life-row{display:flex;align-items:center;gap:12px;border-bottom:1px solid #b6b09b38;min-height:64px;position:relative}
-[data-module="bucketlist"] .life-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-[data-module="bucketlist"] .life-row .life-item{display:flex;align-items:baseline;gap:18px;flex:1;min-width:0;padding:18px 0;position:relative}
-[data-module="bucketlist"] .life-checkbox{border:1px solid #8d927e;border-radius:3px 5px 2px 4px;width:18px;height:18px;flex:none;align-self:flex-start;margin-top:5px;color:transparent;font:25px/10px var(--hand);transform:rotate(-4deg);transition:color .18s}
-[data-module="bucketlist"] .life-row.is-done .life-checkbox{color:#7f8d6b}
-[data-module="bucketlist"] .life-text{font:22px/1.5 var(--hand);overflow-wrap:anywhere;transition:color .3s;text-decoration-line:line-through;text-decoration-color:transparent;text-decoration-thickness:1px;text-decoration-skip-ink:none}
-[data-module="bucketlist"] .life-row.is-done .life-text{color:#9b9c8d;text-decoration-color:#747c67}
-[data-module="bucketlist"] .life-empty{font:20px/1.8 var(--hand);color:#a1a18e;padding:30px 0 35px}
-[data-module="bucketlist"] .life-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:48px;color:#9b9c8b}
-[data-module="bucketlist"] .life-count{font:10px monospace;letter-spacing:.06em}
-[data-module="bucketlist"] .life-signature{font:italic 17px "Noteworthy","Bradley Hand",cursive}
-[data-module="bucketlist"] .life-notice{display:flex;gap:10px;align-items:baseline;color:#8a8b7a;font-size:11px;line-height:1.8;margin-top:16px}
-[data-module="bucketlist"] .life-notice p{margin:0;overflow-wrap:anywhere}
-[data-module="bucketlist"] .life-notice button{flex:none;text-decoration:underline}
-@keyframes life-unfold{from{opacity:0;transform:translateY(14px) rotate(-1deg)}to{opacity:1;transform:none}}
-@media(max-width:650px){[data-module="bucketlist"] .wish-paper strong{font-size:23px}[data-module="bucketlist"] .wish-preview{font-size:12px;gap:14px;margin-top:20px}[data-module="bucketlist"] .wish-someday{font-size:9px}.detail-view[data-module="bucketlist"]{padding:10px 18px 45px}[data-module="bucketlist"] .module-content{margin-top:20px}[data-module="bucketlist"] .life-paper{padding:40px 25px 24px;min-height:520px}[data-module="bucketlist"] .life-paper:before{left:13px}[data-module="bucketlist"] .life-heading h1{font-size:32px}[data-module="bucketlist"] .life-text{font-size:20px}[data-module="bucketlist"] .life-signature{font-size:13px}}
-@media(prefers-reduced-motion:reduce){[data-module="bucketlist"] .life-paper{animation:none}[data-module="bucketlist"] .wish-paper,[data-module="bucketlist"] .life-text,[data-module="bucketlist"] .life-checkbox{transition:none}}
+/* Life List: a hundred-lamp control panel (docs/DESIGN.md · Soft Retro Industrial). Light from the upper left. */
+[data-module="bucketlist"]{--casing-hi:#f8f5ec;--casing:#efebdf;--casing-lo:#e3dfd1;--sage-hi:#c8cec0;--sage:#b6bdae;--sage-lo:#aeb5a5;--ink:#4b5549;--muted:#8d9186;--lcd:#c5d1b0;--brick:#b34934;--mono:ui-monospace,"SF Mono",Menlo,monospace}
 
-[data-module="bucketlist"].module-thumbnail-image .wish-paper{padding:12% 8% 7%}
-[data-module="bucketlist"].module-thumbnail-image .wish-paper small{font-size:4px}
-[data-module="bucketlist"].module-thumbnail-image .wish-paper strong{font-size:12px;margin-top:2px}
-[data-module="bucketlist"].module-thumbnail-image .wish-preview{font-size:5px;gap:5px;margin-top:8px}
-[data-module="bucketlist"].module-thumbnail-image .wish-preview>span{gap:4px}
-[data-module="bucketlist"].module-thumbnail-image .wish-preview i{width:5px;height:5px;font-size:7px;line-height:3px}
-[data-module="bucketlist"].module-thumbnail-image .wish-someday{font-size:4px}
-[data-module="bucketlist"].module-thumbnail-image .wish-star{font-size:12px}
-[data-module="bucketlist"].module-thumbnail-image .wish-clip{width:7px;height:20px;top:-5px;border-width:1px}
-.collection-stage [data-module="bucketlist"] .wish-paper{padding:9% 8% 6%}
-.collection-stage [data-module="bucketlist"] .wish-paper strong{font-size:calc(var(--object-size) * .07);line-height:1.5;margin-top:5px}
-.collection-stage [data-module="bucketlist"] .wish-preview{font-size:calc(var(--object-size) * .042);gap:calc(var(--object-size) * .038);margin-top:calc(var(--object-size) * .055)}
-.collection-stage [data-module="bucketlist"] .wish-someday{font-size:calc(var(--object-size) * .028);bottom:9%}
-.collection-stage [data-module="bucketlist"] .wish-star{font-size:calc(var(--object-size) * .065);bottom:21%;right:9%}
-/* Life List: quiet English handwriting, scoped to this collection only. */
-[data-module="bucketlist"]{--hand:"Bradley Hand","Noteworthy","Kaiti SC",cursive}
-[data-module="bucketlist"] .wish-paper strong,[data-module="bucketlist"] .life-heading h1{letter-spacing:.015em}
-[data-module="bucketlist"] .life-heading h1:after{width:145px}
-[data-module="bucketlist"] .life-paper{animation:none}
-.collection-stage [data-module="bucketlist"] .wish-preview{font-size:calc(var(--object-size) * .04)}
-[data-module="bucketlist"] .wish-preview>span{gap:8px}
-[data-module="bucketlist"] .life-text{transition:color .3s,text-decoration-color .3s}
-/* v17 — a quieter typeface and a compact, numbered lifetime list. */
-[data-module="bucketlist"]{--hand:Georgia,"Songti SC","STSong","Noto Serif CJK SC",serif}
-[data-module="bucketlist"] .wish-someday{font-family:Georgia,serif}
-[data-module="bucketlist"] .module-content{max-width:640px;margin-top:16px}
-[data-module="bucketlist"] .life-paper{padding:36px 42px 24px;min-height:400px}
-[data-module="bucketlist"] .life-paper:before{left:22px}
-[data-module="bucketlist"] .life-heading{margin-bottom:20px}
-[data-module="bucketlist"] .life-heading h1{font-size:28px;line-height:1.5;letter-spacing:.08em;margin-top:10px}
-[data-module="bucketlist"] .life-heading h1:after{width:120px}
-[data-module="bucketlist"] .life-owner{font:10px/1.6 "PingFang SC",sans-serif;letter-spacing:.1em}
-[data-module="bucketlist"] .life-doodle{font-size:30px;top:25px}
-[data-module="bucketlist"] .life-row{min-height:48px;gap:12px}
-[data-module="bucketlist"] .life-number{font:11px/1.5 Georgia,serif;color:#a2a18f;min-width:24px;align-self:flex-start;padding-top:16px;font-variant-numeric:tabular-nums}
-[data-module="bucketlist"] .life-row .life-item{padding:12px 0;gap:12px}
-[data-module="bucketlist"] .life-text{font-size:17px;line-height:1.6}
-[data-module="bucketlist"] .life-checkbox{width:14px;height:14px;margin-top:6px;font-size:21px}
-[data-module="bucketlist"] .life-empty{font-size:16px;padding:20px 0}
-[data-module="bucketlist"] .life-footer{margin-top:28px}
-[data-module="bucketlist"] .life-signature{font:12px/1.5 "Songti SC",serif}
-@media(max-width:650px){[data-module="bucketlist"] .life-paper{padding:28px 22px 20px;min-height:360px}[data-module="bucketlist"] .life-paper:before{left:10px}[data-module="bucketlist"] .life-heading h1{font-size:25px}[data-module="bucketlist"] .life-row{gap:8px}[data-module="bucketlist"] .life-number{min-width:20px}[data-module="bucketlist"] .life-row .life-item{gap:10px}[data-module="bucketlist"] .life-text{font-size:16px}}
+/* ——— Lamps (shared by the home panel and the deck): a metal bezel, a glass lens, a warm filament behind it ——— */
+[data-module="bucketlist"] :is(.lamp,.deck-lamp){position:relative;aspect-ratio:1;border-radius:50%;padding:0;border:0;--spec:radial-gradient(ellipse 42% 26% at 36% 27%,#ffffff8c,#fff0 72%);background:var(--spec),radial-gradient(circle,#858e7e 0 52%,#6e7768 86%,#5f6858);box-shadow:0 0 0 1.4px #e2e5da,0 0 0 2.3px #99a08f,0 1.5px 1px 1.5px #6f7a664d}
+[data-module="bucketlist"] :is(.lamp,.deck-lamp):before,[data-module="bucketlist"] :is(.lamp,.deck-lamp):after{content:'';position:absolute;inset:0;border-radius:50%;opacity:0;transition:opacity .35s ease-out}
+/* Written but not done yet: a dim, warm glow. */
+[data-module="bucketlist"] :is(.lamp,.deck-lamp):before{background:var(--spec),radial-gradient(circle,#b19772 0 26%,#8f7f63 58%,#737060 90%)}
+/* Done: lit amber, with a halo. */
+[data-module="bucketlist"] :is(.lamp,.deck-lamp):after{background:var(--spec),radial-gradient(circle,#fff6d8 0 16%,#ffd88e 34%,#f5a843 66%,#d9862a 92%);box-shadow:0 0 0 1.4px #f1ead6,0 0 0 2.3px #b3a07c,0 0 6px 2px #ffb54a8c,0 0 16px #ffa33a4d}
+[data-module="bucketlist"] :is(.lamp,.deck-lamp).is-todo:before,[data-module="bucketlist"] :is(.lamp,.deck-lamp).is-done:after{opacity:1}
+/* An unused socket: no lens yet. */
+[data-module="bucketlist"] :is(.lamp,.deck-lamp).is-empty{background:radial-gradient(circle,#a3ab9a 0 22%,#b8bfaf 26%);box-shadow:inset 0 1px 2px #6f7a6673,0 0 0 1.4px #c7ccbe,0 0 0 2.3px #a9b09f}
+[data-module="bucketlist"] :is(.lamp,.deck-lamp).is-empty:before,[data-module="bucketlist"] :is(.lamp,.deck-lamp).is-empty:after{display:none}
+
+/* Casing and screws. */
+[data-module="bucketlist"] :is(.panel,.deck){position:relative;box-sizing:border-box;background:linear-gradient(162deg,var(--casing-hi),var(--casing) 45%,var(--casing-lo))}
+[data-module="bucketlist"] .screw{position:absolute;width:var(--screw,7px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fbfaf6,#c9c5b6 70%,#a8a393);box-shadow:inset 0 0 0 .5px #8f8a7a88}
+[data-module="bucketlist"] .screw:after{content:'';position:absolute;left:18%;right:18%;top:46%;height:1px;background:#8f8a7aaa;transform:rotate(35deg)}
+[data-module="bucketlist"] .screw:nth-of-type(1){left:2.2%;top:3.4%}
+[data-module="bucketlist"] .screw:nth-of-type(2){right:2.2%;top:3.4%}
+[data-module="bucketlist"] .screw:nth-of-type(3){left:2.2%;bottom:3.4%}
+[data-module="bucketlist"] .screw:nth-of-type(4){right:2.2%;bottom:3.4%}
+
+/* ——— Home object: the small panel ——— */
+[data-module="bucketlist"] .collectible--list{background:none;display:grid;place-items:center;container-type:size;overflow:visible;filter:none}
+[data-module="bucketlist"] .panel{--w:84cqw;--screw:calc(var(--w) * .022);width:var(--w);aspect-ratio:1.52;padding:calc(var(--w) * .045);display:grid;grid-template-columns:62% 1fr;gap:calc(var(--w) * .045);border-radius:calc(var(--w) * .05);cursor:grab;
+  box-shadow:inset 0 1.5px 1px #fff,inset 1px 0 1px #fffa,inset 0 -3px 5px #aca78f40,0 calc(var(--w) * .016) 0 #d2cdbc,0 calc(var(--w) * .02) 1px #b9b4a2,0 calc(var(--w) * .07) calc(var(--w) * .09) #3d3f2a1f,0 calc(var(--w) * .02) calc(var(--w) * .03) #3d3f2a14}
+.collection-stage [data-module="bucketlist"] .panel,.collection-stage .panel{pointer-events:auto}
+[data-module="bucketlist"] .panel-field{display:grid;grid-template-columns:repeat(10,1fr);gap:calc(var(--w) * .0115);padding:calc(var(--w) * .03);border-radius:calc(var(--w) * .028);background:linear-gradient(150deg,var(--sage-hi),var(--sage) 60%,var(--sage-lo));box-shadow:inset 0 2px 3px #6f7a6680,inset 0 -1px 0 #ffffff80,0 1px 0 #fff}
+[data-module="bucketlist"] .panel .lamp{box-shadow:0 0 0 calc(var(--w) * .004) #e2e5da,0 0 0 calc(var(--w) * .007) #99a08f,0 1px 1px calc(var(--w) * .004) #6f7a664d}
+[data-module="bucketlist"] .panel .lamp:after{box-shadow:0 0 calc(var(--w) * .018) 1px #ffb54aa6,0 0 calc(var(--w) * .05) #ffa33a55}
+/* Self-test: every written lamp flashes once in reading order. */
+[data-module="bucketlist"] .panel.is-testing .lamp:not(.is-empty):after{animation:lamp-test .5s ease-out calc(var(--n) * 7ms) both}
+@keyframes lamp-test{0%{opacity:0}30%{opacity:1;filter:brightness(1.25)}100%{opacity:0}}
+[data-module="bucketlist"] .panel-side{display:flex;flex-direction:column;gap:calc(var(--w) * .03);min-width:0}
+[data-module="bucketlist"] .panel-plate{font:500 calc(var(--w) * .03)/1.15 var(--mono);letter-spacing:.2em;color:var(--ink)}
+[data-module="bucketlist"] .panel-plate small{display:block;font-size:.72em;letter-spacing:.24em;color:var(--muted);margin-top:.35em}
+[data-module="bucketlist"] :is(.panel-lcd,.deck-readout,.deck-odometer){position:relative;overflow:hidden;background:linear-gradient(180deg,#2c302b,#363b34);box-shadow:inset 0 2px 3px #0009,inset 0 -1px 0 #ffffff14,0 1px 0 #fff}
+[data-module="bucketlist"] :is(.panel-lcd,.deck-readout):after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,#ffffff12 0 30%,transparent 42%),repeating-linear-gradient(0deg,#0000 0 2px,#00000018 2px 3px)}
+[data-module="bucketlist"] .panel-lcd{height:calc(var(--w) * .13);border-radius:calc(var(--w) * .014);display:grid;place-items:center}
+[data-module="bucketlist"] .panel-lcd span{grid-area:1/1;font:500 calc(var(--w) * .058)/1 var(--mono);letter-spacing:.06em}
+[data-module="bucketlist"] .panel-lcd .ghost{color:#3f463d}
+[data-module="bucketlist"] .panel-lcd .digits{color:var(--lcd);text-shadow:0 0 6px #c5d1b055}
+/* The toggle: a chrome lever in a round bezel, the only brick-red on the home page is its tip. */
+[data-module="bucketlist"] .panel-switch{position:relative;flex:1;display:grid;place-items:center}
+[data-module="bucketlist"] .panel-bezel{position:relative;width:calc(var(--w) * .13);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fbfbf7,#d8d5c8 45%,#aaa697 80%,#8f8b7c);box-shadow:0 2px 3px #3d3f2a33,inset 0 0 0 1px #ffffff90}
+[data-module="bucketlist"] .panel-bezel:before{content:'';position:absolute;inset:26%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#5c6158,#2a2e28);box-shadow:inset 0 1px 2px #000a}
+[data-module="bucketlist"] .panel-lever{position:absolute;left:50%;top:50%;width:calc(var(--w) * .026);height:calc(var(--w) * .1);margin-left:calc(var(--w) * -.013);border-radius:calc(var(--w) * .013);transform-origin:50% 0;transform:rotate(calc(var(--lever,0) * 180deg));transition:transform var(--lever-t,0s) cubic-bezier(.3,1.45,.5,1);background:linear-gradient(90deg,#8f8d86,#f4f3ee 40%,#c9c7bf 62%,#86847c);box-shadow:1px 2px 2px #0004}
+[data-module="bucketlist"] .panel-lever:after{content:'';position:absolute;left:-18%;right:-18%;bottom:-6%;height:34%;border-radius:40%;background:linear-gradient(90deg,#8f3526,#d0634a 42%,#a13f2c)}
+[data-module="bucketlist"] :is(.panel-on,.panel-off){position:absolute;left:0;right:0;text-align:center;font:500 calc(var(--w) * .022)/1 var(--mono);letter-spacing:.2em;color:var(--muted)}
+[data-module="bucketlist"] .panel-on{top:0}
+[data-module="bucketlist"] .panel-off{bottom:0}
+[data-module="bucketlist"] .panel[data-power=on] .panel-on{color:var(--ink)}
+.module-thumbnail-image [data-module="bucketlist"] .panel,.module-thumbnail-image .panel{cursor:default}
+
+/* ——— Inside: the full deck ——— */
+[data-module="bucketlist"] .module-content{max-width:1080px;margin:18px auto 0}
+[data-module="bucketlist"] .deck{--screw:11px;display:grid;grid-template-columns:320px auto 118px;gap:34px;align-items:stretch;padding:38px 44px 56px;border-radius:40px;
+  box-shadow:inset 0 2px 1px #fff,inset 1px 0 1px #fffa,inset 0 -4px 7px #aca78f40,0 14px 0 #d2cdbc,0 16px 1px #b9b4a2,0 60px 80px #3d3f2a1f,0 18px 26px #3d3f2a14}
+[data-module="bucketlist"] .deck-readout{box-sizing:border-box;min-height:380px;padding:26px 28px;border-radius:12px;color:var(--lcd);display:flex;flex-direction:column}
+[data-module="bucketlist"] .deck-readout p{margin:0;position:relative;z-index:1}
+[data-module="bucketlist"] .deck-no{font:500 14px/1 var(--mono);letter-spacing:.3em;color:#8f9a80}
+[data-module="bucketlist"] .deck-text{margin-top:22px!important;font:300 28px/1.45 "PingFang SC","Helvetica Neue",sans-serif;letter-spacing:.08em;text-shadow:0 0 8px #c5d1b044;overflow-wrap:anywhere}
+[data-module="bucketlist"] .deck-state{margin-top:auto!important;font:500 14px/1 var(--mono);letter-spacing:.24em;color:#9aa58b}
+[data-module="bucketlist"] .deck-state b{font-weight:500;margin-right:.4em}
+[data-module="bucketlist"] .deck-state.is-lit{color:var(--lcd)}
+[data-module="bucketlist"] .deck-state.is-lit b{color:#f7ae47;text-shadow:0 0 6px #ffb54a88}
+[data-module="bucketlist"] .deck-count{margin-top:14px!important;padding-top:14px;border-top:1px solid #c5d1b026;font:500 12px/1 var(--mono);letter-spacing:.28em;color:#8f9a80}
+[data-module="bucketlist"] .deck-field{--lamp:26px;display:grid;grid-template-columns:repeat(10,var(--lamp));gap:12px;padding:22px;align-content:center;justify-content:center;border-radius:14px;background:linear-gradient(150deg,var(--sage-hi),var(--sage) 60%,var(--sage-lo));box-shadow:inset 0 2px 4px #6f7a6680,inset 0 -1px 0 #ffffff80,0 1px 0 #fff}
+[data-module="bucketlist"] .deck-lamp{width:var(--lamp);height:var(--lamp);min-height:0;cursor:pointer}
+[data-module="bucketlist"] .deck-lamp.is-sel{outline:1.5px solid #fbfaf3;outline-offset:5px}
+[data-module="bucketlist"] .deck-lamp:focus-visible{outline:1.5px solid #fbfaf3;outline-offset:5px}
+[data-module="bucketlist"] .is-booting .deck-lamp.is-done:after{animation:lamp-on .6s ease-out calc(180ms + var(--n) * 9ms) both}
+[data-module="bucketlist"] .is-booting .deck-lamp.is-todo:before{animation:lamp-dim .5s ease-out calc(180ms + var(--n) * 9ms) both}
+@keyframes lamp-on{0%{opacity:0}40%{opacity:1;filter:brightness(1.3)}100%{opacity:1;filter:none}}
+@keyframes lamp-dim{from{opacity:0}to{opacity:1}}
+
+/* Controls column: odometer, knob, key — each with a silk-screened label. */
+[data-module="bucketlist"] .deck-controls{display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:4px 0}
+[data-module="bucketlist"] .deck-control{display:flex;flex-direction:column;align-items:center;gap:10px}
+[data-module="bucketlist"] .deck-label{font:500 10px/1 var(--mono);letter-spacing:.3em;color:var(--muted)}
+[data-module="bucketlist"] .deck-odometer{--h:34px;display:flex;gap:3px;padding:6px 8px;border-radius:8px;cursor:ns-resize;touch-action:none}
+[data-module="bucketlist"] .deck-drum{position:relative;width:19px;height:var(--h);overflow:hidden;border-radius:2px;background:linear-gradient(#e9e4d4,#fbf8ef 45%,#fbf8ef 55%,#d9d3c2)}
+[data-module="bucketlist"] .deck-drum:after{content:'';position:absolute;inset:0;background:linear-gradient(#0000004d,transparent 30%,transparent 70%,#0000004d)}
+[data-module="bucketlist"] .deck-strip{display:flex;flex-direction:column;transform:translateY(calc(var(--d,0) * var(--h) * -1));transition:transform .45s cubic-bezier(.3,1.35,.5,1)}
+[data-module="bucketlist"] .deck-strip span{height:var(--h);line-height:var(--h);text-align:center;font:600 20px var(--mono);color:#2c302b}
+[data-module="bucketlist"] .deck-odometer.is-held,[data-module="bucketlist"] .deck-odometer:focus-visible{box-shadow:inset 0 2px 3px #0009,0 0 0 1.5px #fbfaf3,0 1px 0 #fff}
+/* Knob: knurled aluminium with a pointer line; it turns in detents. */
+[data-module="bucketlist"] .deck-knob{--size:78px;position:relative;width:var(--size);height:var(--size);border-radius:50%;cursor:grab;touch-action:none;transform:rotate(calc(var(--angle,0deg) + var(--drag,0deg)));transition:transform .28s cubic-bezier(.3,1.4,.5,1);
+  background:repeating-conic-gradient(#b8b5ab 0 3deg,#eeece5 3deg 6deg);box-shadow:0 3px 4px #3d3f2a40,0 10px 14px #3d3f2a1f,inset 0 0 0 1px #ffffff80}
+[data-module="bucketlist"] .deck-knob.is-held{cursor:grabbing;transition:none}
+[data-module="bucketlist"] .deck-knob-cap{position:absolute;inset:11%;border-radius:50%;background:radial-gradient(circle at 34% 28%,#ffffffcc,#fff0 38%),repeating-conic-gradient(from 7deg,#d8d6ce 0 2deg,#e7e5de 2deg 5deg,#cfcdc4 5deg 7deg),#dedcd4;box-shadow:inset 0 -2px 3px #8f8b7c66,inset 0 1px 1px #fff,0 1px 2px #3d3f2a33}
+[data-module="bucketlist"] .deck-knob-cap:after{content:'';position:absolute;left:50%;top:9%;width:3px;height:26%;margin-left:-1.5px;border-radius:2px;background:#4b5549;box-shadow:0 1px 0 #fff8}
+[data-module="bucketlist"] .deck-control:has(.deck-knob){position:relative}
+[data-module="bucketlist"] .deck-control:has(.deck-knob):before{content:'';position:absolute;top:-9px;left:50%;width:96px;height:96px;margin-left:-48px;border-radius:50%;background:repeating-conic-gradient(from -1deg,#8d9186 0 2deg,transparent 2deg 24deg);-webkit-mask:radial-gradient(circle,transparent 44px,#000 44.5px 47px,transparent 47.5px);mask:radial-gradient(circle,transparent 44px,#000 44.5px 47px,transparent 47.5px);opacity:.6}
+[data-module="bucketlist"] .deck-knob:focus-visible{outline:1.5px solid var(--ink);outline-offset:6px}
+/* PRINT: a cream key with real travel. */
+[data-module="bucketlist"] .deck-print{width:78px;height:44px;border:0;border-radius:9px;cursor:pointer;background:linear-gradient(180deg,#fbf9f2,#ebe7da);box-shadow:inset 0 1px 0 #fff,inset 0 -2px 2px #b9b4a266,0 4px 0 #cfcab9,0 5px 1px #aea995,0 8px 10px #3d3f2a26;transition:transform .08s,box-shadow .08s}
+[data-module="bucketlist"] .deck-print span{font:600 11px/1 var(--mono);letter-spacing:.28em;color:var(--ink)}
+[data-module="bucketlist"] .deck-print:active{transform:translateY(3px);box-shadow:inset 0 1px 0 #fff,inset 0 -1px 1px #b9b4a266,0 1px 0 #cfcab9,0 2px 1px #aea995,0 3px 5px #3d3f2a26}
+[data-module="bucketlist"] .deck-silk{position:absolute;left:74px;top:13px;font:500 11px var(--mono);letter-spacing:.3em;color:var(--muted)}
+[data-module="bucketlist"] .deck-silk b{color:var(--brick);font-weight:500}
+
+/* Printer slot on the deck's lower edge, and the receipt that feeds out of it. */
+[data-module="bucketlist"] .deck-slot{position:relative;z-index:2;width:460px;max-width:80%;height:8px;margin:-34px auto 0;border-radius:4px;background:linear-gradient(#1f221e,#3a3f37);box-shadow:inset 0 2px 2px #000,0 1px 0 #fff}
+[data-module="bucketlist"] .deck-receipt{position:relative;z-index:1;width:430px;max-width:74%;margin:-3px auto 40px}
+[data-module="bucketlist"] .deck-receipt[hidden]{display:none}
+[data-module="bucketlist"] .deck-paper{padding:26px 28px 36px;background:linear-gradient(#e9e6db,#fbfaf5 22px);box-shadow:0 12px 24px #3d3f2a1c;font:400 13px/2.1 var(--mono);color:var(--ink);-webkit-mask:linear-gradient(#000,#000) top/100% calc(100% - 8px) no-repeat,conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/12px 8px repeat-x;mask:linear-gradient(#000,#000) top/100% calc(100% - 8px) no-repeat,conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/12px 8px repeat-x}
+[data-module="bucketlist"] :is(.deck-head,.deck-foot){display:flex;justify-content:space-between;font-size:11px;letter-spacing:.2em;color:var(--muted)}
+[data-module="bucketlist"] .deck-head{border-bottom:1px dashed #cfcbbd;margin-bottom:6px}
+[data-module="bucketlist"] .deck-foot{border-top:1px dashed #cfcbbd;margin-top:6px}
+[data-module="bucketlist"] .deck-row{display:grid;grid-template-columns:40px 1fr 16px 42px;gap:8px}
+[data-module="bucketlist"] .deck-row span:nth-child(2){font-family:"PingFang SC",sans-serif;font-weight:300;letter-spacing:.06em;color:#343832;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+[data-module="bucketlist"] .deck-row.is-done span:nth-child(2){color:var(--muted)}
+
+[data-module="bucketlist"] .deck-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0;padding:0}
+[data-module="bucketlist"] .deck-notice{display:flex;gap:10px;align-items:baseline;margin:22px 4px 0;font:12px/1.8 "PingFang SC",sans-serif;color:var(--muted)}
+[data-module="bucketlist"] .deck-notice[hidden]{display:none}
+[data-module="bucketlist"] .deck-notice p{margin:0;overflow-wrap:anywhere}
+[data-module="bucketlist"] .deck-notice button{flex:none;text-decoration:underline;color:var(--ink)}
+
+@media(max-width:980px){
+  [data-module="bucketlist"] .deck{grid-template-columns:1fr;gap:22px;padding:30px 22px 48px;border-radius:28px}
+  [data-module="bucketlist"] .deck-readout{min-height:0;padding:20px 22px}
+  [data-module="bucketlist"] .deck-text{font-size:22px;margin-top:14px!important;margin-bottom:18px!important}
+  [data-module="bucketlist"] .deck-field{--lamp:min(26px,calc((100vw - 150px) / 14.2));gap:calc(var(--lamp) * .42);padding:16px}
+  [data-module="bucketlist"] .deck-controls{flex-direction:row;justify-content:space-around;align-items:flex-end}
+  [data-module="bucketlist"] .deck-knob{--size:64px}
+  [data-module="bucketlist"] .deck-control:has(.deck-knob):before{display:none}
+  [data-module="bucketlist"] .deck-silk{left:28px;top:10px;font-size:9px}
+  [data-module="bucketlist"] .deck-receipt{max-width:88%}
+}
+@media(prefers-reduced-motion:reduce){
+  [data-module="bucketlist"] :is(.lamp,.deck-lamp):before,[data-module="bucketlist"] :is(.lamp,.deck-lamp):after{transition:none;animation:none!important}
+  [data-module="bucketlist"] :is(.panel-lever,.deck-knob,.deck-strip){transition:none}
+}

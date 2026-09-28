@@ -1,4 +1,5 @@
 import { ticketContact, discContact } from './contact.js';
+import { createPanel } from './modules/bucketlist/panel-home.js?v=28';
 
 export function createInteraction(gallery, enter) {
   const shell=document.querySelector('.gallery-shell'), hint=shell.querySelector('.interaction-hint');
@@ -25,7 +26,9 @@ export function createInteraction(gallery, enter) {
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let item,source,drag,frame=0,last=0,x=0,y=0,tx=0,ty=0,vx=0,vy=0,busy=false,sequence=0;
   let idleTimer,errorTimer,returning=false,animations=[],ticket={},inserted=false,pending=null;
-  const prompts={travel:'将机票下缘插入槽口，再从左向右刷过。Enter 可完成刷卡。',cinema:'按住光盘可推进或抽回；插入后松手读取。',stories:'打开日记',bucketlist:'打开人生清单'};
+  // Life List control panel on the current cover (lever, self-test, lamps).
+  let panel=null;
+  const prompts={travel:'将机票下缘插入槽口，再从左向右刷过。Enter 可完成刷卡。',cinema:'按住光盘可推进或抽回；插入后松手读取。',stories:'打开日记',bucketlist:'把人生清单面板的拨杆往上拨到 ON，面板通电后进入。回车可直接开机。'};
   function status(value) {
     receiver.dataset.state=value;
     if(item) hint.textContent = value==='reading'?'READING':value==='error'?'ERROR，重新插入可重试':value==='success'?'SUCCESS':prompts[item.id];
@@ -39,12 +42,14 @@ export function createInteraction(gallery, enter) {
     busy=false;returning=false;inserted=false;ticket={};x=y=tx=ty=vx=vy=0;
     if(source){source.style.transform='';source.style.opacity='';source.classList.remove('journal-unfolding','checklist-opening');source.style.removeProperty('--seated');}
     shell.classList.remove('is-handling');status('ready');if(item)hint.textContent=prompts[item.id];
+    panel?.reset();
   }
   function setItem(next){
     if(item?.id===next.id&&source===gallery.currentElement?.firstElementChild)return;
     reset();item=next;source=gallery.currentElement.firstElementChild;shell.dataset.object=item.id;
     receiver=receivers.get(item.id)||document.createElement('div');status('ready');drawReceivers();
     hint.textContent=prompts[item.id];
+    panel=item.id==='bucketlist'&&source.querySelector('.panel')?createPanel(source,{reduced:()=>reduced.matches}):null;
   }
   function geometry(px=x,py=y){
     const base=gallery.currentElement.getBoundingClientRect(),slot=receiver.querySelector(item.id==='travel'?'.gate-slot':'.reader-slot').getBoundingClientRect();
@@ -86,8 +91,9 @@ export function createInteraction(gallery, enter) {
   async function activate(next=item){
     if(busy)return;setItem(next);
     if(item.id==='bucketlist'){
-      busy=true;const token=++sequence;source.classList.add('checklist-opening');
-      await tween(0,-10,reduced.matches?1:140);if(token===sequence)enter(item);return;
+      // The panel powers up (lever thrown for you), then the list opens.
+      if(!panel||panel.on){enter(item);return;}
+      busy=true;const token=++sequence;const ok=await panel.auto();if(token!==sequence)return;busy=false;if(ok)enter(item);return;
     }
     if(item.id==='stories'){
       busy=true;const token=++sequence;source.classList.add('journal-unfolding');await tween(gallery.size*.18,0,720);if(token===sequence){busy=false;complete();}return;
@@ -107,6 +113,7 @@ export function createInteraction(gallery, enter) {
   }
   function move(e){
     if(!drag||drag.id!==e.pointerId)return;e.stopImmediatePropagation();
+    if(drag.lever){panel?.hold(e.clientY-drag.py);return;}
     let px=drag.ox+e.clientX-drag.px,py=drag.oy+e.clientY-drag.py;
     drag.moved ||= Math.hypot(e.clientX-drag.px,e.clientY-drag.py)>4;
     const g=geometry(px,py);
@@ -127,13 +134,13 @@ export function createInteraction(gallery, enter) {
   // mostly up/down (disc into the drive, ticket into the slot) → the object is picked up.
   gallery.stage.addEventListener('pointerdown',e=>{
     pending=null;
-    if(!e.target.closest('.ticket-paper,.silver-disc')||!gallery.settled||e.button!==0||!['travel','cinema'].includes(item?.id)||e.target.closest('.collection-slot')!==gallery.currentElement)return;
+    if(!e.target.closest('.ticket-paper,.silver-disc,.panel')||!gallery.settled||e.button!==0||!['travel','cinema','bucketlist'].includes(item?.id)||e.target.closest('.collection-slot')!==gallery.currentElement)return;
     e.preventDefault();if(busy){e.stopImmediatePropagation();return;}
     pending={id:e.pointerId,x:e.clientX,y:e.clientY};
   },true);
   function pickUp(e){
     gallery.freeze();clearTimeout(idleTimer);returning=false;
-    drag={id:e.pointerId,px:pending.x,py:pending.y,ox:x,oy:y,moved:true};pending=null;
+    drag={id:e.pointerId,px:pending.x,py:pending.y,ox:x,oy:y,moved:true,lever:item.id==='bucketlist'};pending=null;
     gallery.stage.setPointerCapture(e.pointerId);shell.classList.add('is-handling');
   }
   gallery.stage.addEventListener('pointermove',e=>{
@@ -150,7 +157,16 @@ export function createInteraction(gallery, enter) {
     if(pending?.id===e.pointerId){
       pending=null;if(cancelled)return;
       e.stopImmediatePropagation();gallery.freeze();gallery.suppressUntil=performance.now()+450;
-      if(item.id==='cinema')activate();
+      if(item.id==='cinema'||item.id==='bucketlist')activate();
+      return;
+    }
+    if(drag?.lever&&drag.id===e.pointerId){
+      drag=null;e.stopImmediatePropagation();gallery.suppressUntil=performance.now()+450;
+      if(gallery.stage.hasPointerCapture(e.pointerId))gallery.stage.releasePointerCapture(e.pointerId);
+      shell.classList.remove('is-handling');
+      if(cancelled){panel?.reset();return;}
+      busy=true;const token=++sequence;
+      panel?.release().then(ok=>{if(token!==sequence)return;busy=false;if(ok)enter(item);});
       return;
     }
     if(!drag||drag.id!==e.pointerId)return;

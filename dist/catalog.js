@@ -1,3 +1,5 @@
+import { panelCover } from './modules/bucketlist/cover.js?v=28';
+
 export const categories = ['全部', '记忆', '文化', '工具'];
 
 // A new module belongs here; the home page has no fixed number of slots.
@@ -19,7 +21,7 @@ export function createCover(item) {
   if (item.id === 'travel') cover.innerHTML = `<div class="ticket-paper"><div class="ticket-airline">FRED AIR <span>BOARDING PASS</span></div><div class="ticket-route">HERE <span>✈</span> THERE</div><div class="ticket-fields"><span>PASSENGER<b>FRED</b></span><span>FLIGHT<b>FH 001</b></span><span>SEAT<b>01 A</b></span></div><div class="ticket-barcode"></div><small>A TICKET TO MY MEMORIES</small></div>`;
   if (item.id === 'cinema') cover.innerHTML = '<div class="silver-disc"><span>FRED’S COLLECTION</span><small>PICTURES & STORIES · VOL. 01</small></div>';
   if (item.id === 'stories') cover.innerHTML = '<div class="diary-leaves"><span>DEAR DIARY</span><p>把日子，<br>慢慢写下来。</p><small>FRED’S HUB / 01</small></div><div class="diary-front"></div>';
-  if (item.id === 'bucketlist') cover.innerHTML = `<div class="wish-paper"><span class="wish-clip" aria-hidden="true"></span><small>想做的事</small><strong>人生清单</strong><span class="wish-underline"></span><div class="wish-preview"><span><i></i>去看看世界</span><span class="crossed"><i>✓</i>坚持写日记</span><span><i></i>做一件勇敢的事</span></div><span class="wish-someday">总有一天，也在每一天。</span><span class="wish-star">✳</span></div>`;
+  if (item.id === 'bucketlist') cover.innerHTML = panelCover();
   cover.dataset.title = item.title;
   cover.setAttribute('role', 'img');
   cover.setAttribute('aria-label', `${item.title}的收藏物件封面`);

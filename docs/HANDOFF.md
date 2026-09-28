@@ -1,6 +1,6 @@
-最新变更和验证见 [开发进度-v0.21.md](开发进度-v0.21.md)。全局进度见根目录 PROGRESS.md。
+最新变更和验证见 [开发进度-v0.28.md](开发进度-v0.28.md)。全局进度见根目录 PROGRESS.md。
 
-# 当前交接 · v0.21 · 2026-09-28
+# 当前交接 · v0.28 · 2026-09-28
 
 ## Canonical path
 /Users/fred/Desktop/Project/Fred-Personal-Site
@@ -18,7 +18,7 @@
 | 公共首页、交互、菜单、模块注册 | Codex | v0.17 已交接，无运行中编辑 |
 | cinema 影院片单（dist/modules/cinema/**、scripts/add-movie.mjs、scripts/check-cinema.mjs；共享：index.html 样式链接、catalog theme、main.js 主题切换、hub.css 深色头部） | Claude Code | v0.18 已交接，无运行中编辑 |
 | stories 撕页日历（dist/modules/stories/**；共享：experience.js 中 stories 分支、catalog.js 中 stories 封面、对应样式） | Codex / GPT | 2026-09-28 分配，分支 codex/tear-calendar，先与用户讨论创意 |
-| bucketlist 百灯控制面板（原求签筒；dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画） | Claude Code | 2026-09-28 设计图待确认，分支 claude/fortune-sticks |
+| bucketlist 百灯控制面板（dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画、hub.css 清单返回箭头） | Claude Code | v0.28 已合入 main，无运行中编辑 |
 | travel 内容 | 未分配 | 当前为空状态占位 |
 | wheel | 暂停 | 源码保留，不在注册表和菜单中 |
 
@@ -119,3 +119,11 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 ## 设计语言统一（2026-09-28）
 - 新增 `docs/DESIGN.md`：Soft Retro Industrial（博朗 / 八十年代日本电子 / TE）。首页严格统一为一个产品家族，内页可为“同一栋楼的不同房间”。PROGRESS、MODULES、撕页日历提示词已引用。
 - 人生清单方向改为「百灯控制面板」（10×10 琥珀灯 = 100 件事，拨杆通电，液晶读数），竹签筒已放弃；开发前先出设计图给 Fred 确认。分支 claude/fortune-sticks 仍由 Claude 持有（将改名/重做）。
+
+## v0.28 人生清单 · 百灯控制面板（Claude Code）
+- 设计：docs/superpowers/specs/2026-09-28-life-panel-design.md（设计图经 Fred 确认）。首页面板拨杆（阻力+阈值，轻点/回车自动）→ 自检 → 进度 → 放大进入内页；内页读数屏 + 100 灯 + 年份里程表（回看人生）+ 选择旋钮（24° 档位）+ PRINT 逐行出纸。
+- 数据 data.js 新增选填 year（仅 done 时）；目前清单为空，等 Fred 填写。
+- 共享改动：catalog（panelCover）、experience（bucketlist 手势：纵向=拨杆，轻点=开机）、main（清单打开 FLIP：.panel → .deck，去掉通用子元素淡入）、hub.css（清单页返回改简笔箭头）。全局 `button{min-height:44px}` 会撑大灯，deck-lamp 已覆盖。
+- 验证：全部 check 通过（新增 lampStates/回看/年份范围/旋钮/拨杆测试）；CDP 真实鼠标键盘测试：短拖回弹不开机、长拖开机并进入、旋钮转 3 档 001→004、里程表回拨到 2018 只亮 7 盏、PRINT 输出 38 行；1440 与 390 宽截图无溢出。
+- 限制：无声音；灯在手机上约 17px，建议主要用旋钮/方向键浏览；Firefox 未测。
+- 旧的竹签筒 / 陶瓷签筒方案保留在分支 claude/fortune-sticks，未合入。
