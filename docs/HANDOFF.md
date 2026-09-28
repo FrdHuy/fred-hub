@@ -112,3 +112,5 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - v0.24：焦点框只给键盘用户。main.js 记录输入方式（html[data-input=pointer|keyboard]），hub.css 在 pointer 模式隐藏所有 :focus-visible 描边；片单/清单模块的后代焦点样式同步处理。原因：路由切换后脚本 focus() 在鼠标/触屏下也会显示红/金框。资源 v24。
 
 - v0.25：首页手势按方向判断（experience.js）：按在机票/光盘上先观望约 7px，横向交给轨道滑动，纵向才拿起物件，轻点光盘照旧读取。修复手机上从物件起手无法滑动。人生清单名称/封面/提示改为中文（catalog.js、experience.js）。本地手机尺寸验证：物件上横滑切换、纵推光盘进入片单、轻点光盘进入片单。资源 v25。
+
+- v0.26：人生清单改为只读数据文件 dist/modules/bucketlist/data.js（text、done），规则 items.js，check-bucketlist 校验真实数据；去掉添加/移除/撤销和对应样式；若浏览器 localStorage 仍有旧条目，页面提示并可一键复制为 data.js 行（storage.js 只用于读取旧数据）。data.js 目前为空，等 Fred 填写。资源 v26。

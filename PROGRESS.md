@@ -26,7 +26,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 | 电影（cinema）：俯视光驱，光盘按住拖入、松手吸入，可撤回 | ✅ 交互获用户认可 |
 | 旅行（travel）：机票吸附入槽 READING → 左→右刷卡 SUCCESS，拔出 ERROR 可重试 | ✅ 交互获用户认可 |
 | 日记（stories）：日记本翻开展开 | ✅ 交互获用户认可 |
-| 人生清单（bucketlist）：添加、勾选划线、移除 + 单步撤销、自动序号、localStorage 保存；封面与名称中文“人生清单”（v0.25），内页中文 | ✅ v0.15–v0.25 |
+| 人生清单（bucketlist）：v0.26 起为只读数据文件 `dist/modules/bucketlist/data.js`（所有访客看到同一份，只有作者改文件），自动序号、完成划线；旧 localStorage 条目可一键复制迁移；封面与名称中文“人生清单”（v0.25），内页中文 | ✅ v0.15–v0.25 |
 | 影院片单（cinema）：深色 3D CD 盒 cover-flow（中间正面、两侧渐收为书脊），原版语言海报，详情飞出，精简筛选/排序（v0.21）；静态 `data.js`；`scripts/add-movie.mjs` 从 TMDB 自动补全与下载海报 | ✅ v0.18 |
 | 模块化接口 `mount(context) → cleanup()`、模块注册表、路由 `#/collection/<id>` | ✅ |
 | 检查脚本：`check` / `check-cinema` / `check-bucketlist` / `check-contact` / `check-gallery` / `check-swipe` | ✅ 2026-09-28 全部通过 |
@@ -41,7 +41,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 1. 片单：Fred 用真实片单替换 5 部示例（`docs/片单使用说明.md`）。
 2. 旅行 travel：独立风格 + 静态数据文件（同 cinema 模式），先和用户确认风格与字段。
 3. 故事与日记 stories：同上。
-4. 人生清单目前存在访客浏览器 localStorage，公开发布后等于每个访客各自一份——需决定是否改为静态数据文件。
+4. 人生清单已改为数据文件（v0.26），等 Fred 填入内容。
 
 **P2 — 打磨**
 5. 人生清单：条目原地编辑、导出/备份、100 条压力测试。
@@ -58,7 +58,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 - 原生 HTML/CSS/ES Modules；`dist/` 就是可编辑源码，不是构建产物。无 npm、无框架、无打包器。Node 只用于 `scripts/check*.mjs`，Python 只用于本地预览服务器。
 - `dist/index.html` 单页；`main.js`（外壳/菜单/路由挂载）、`gallery.js`（横向轨道）、`experience.js`（首页物理动作）、`catalog.js`（模块元数据+封面）、`router.js`、`hub.css` 为**共享文件，同一时间只能一个集成者修改**。
 - 模块放在 `dist/modules/<id>/{index.js, style.css, storage.js?, assets/}`；入口同步 `mount({container,item,navigate,createCover})`，返回 cleanup；事件用 `AbortController` 的 `signal` 统一注销。
-- 资源缓存版本号：`?v=25` 写在 index.html 与 import 路径中，发版时整体递增。
+- 资源缓存版本号：`?v=26` 写在 index.html 与 import 路径中，发版时整体递增。
 - 每个版本用 git 提交保存，并新增 `docs/开发进度-v<新版本>.md`（v0.18 起不再复制 `checkpoints/`）。
 
 ### 视觉
@@ -90,7 +90,8 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 | 内容用静态数据文件（非后台/非 localStorage） | 网站公开后只有持有项目文件的 Fred 能改；零后端 |
 | TMDB 只在本机脚本调用 | 静态站无法隐藏 API 密钥；避免访客等待和第三方故障 |
 | 模块 data.js 动态 import | 数据写错只影响该模块页，并能显示错误 |
-| 人生清单用 localStorage，无云同步 | 先做可用的本地版本；清除浏览器数据会丢失 |
+| 人生清单改为静态数据文件（v0.26） | 原 localStorage 只存在单个浏览器，访客看不到 Fred 的清单 |
+| ~~人生清单用 localStorage~~（已废弃） | 先做可用的本地版本；清除浏览器数据会丢失 |
 | 罗盘下线但保留源码 | 用户决定暂停，未来可能恢复 |
 | git 取代 `checkpoints/` 整目录备份 | 便于两个 agent 对比和回退 |
 

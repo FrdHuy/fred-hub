@@ -1,50 +1,51 @@
-import { loadEntries, saveEntries } from './storage.js';
+import { parseItems, itemLines } from './items.js?v=26';
+import { loadEntries } from './storage.js?v=26';
 
-export function mount({container}) {
-  const events = new AbortController(), {signal} = events;
-  let entries = [], storage, writable = true, removed = null;
+// Read-only list from data.js: everyone sees the same page; only the author edits the file.
+export function mount({ container, item }) {
+  const events = new AbortController(), { signal } = events;
   const paper = document.createElement('section'); paper.className = 'life-paper'; paper.lang = 'zh-CN';
-  paper.innerHTML = `<header class="life-heading"><span class="life-owner">想做的事 · 慢慢完成</span><h1>人生清单<span aria-hidden="true">.</span></h1><span class="life-doodle" aria-hidden="true">✳</span></header><ol class="life-list" aria-label="人生清单"></ol><p class="life-empty">写下这辈子想完成的第一件事。</p><form class="life-form"><span aria-hidden="true">＋</span><input aria-label="想做的事" placeholder="再记下一件想做的事…" maxlength="200" autocomplete="off" required><button type="submit" aria-label="添加到人生清单">↵</button></form><footer class="life-footer"><span class="life-count"></span><span class="life-signature" aria-hidden="true">不赶时间，一件一件来。</span></footer><div class="life-notice"><p role="status"></p><button type="button" hidden>撤销</button></div>`;
+  paper.innerHTML = `<header class="life-heading"><span class="life-owner">想做的事 · 慢慢完成</span><h1>人生清单<span aria-hidden="true">.</span></h1><span class="life-doodle" aria-hidden="true">✳</span></header><ol class="life-list" aria-label="人生清单"></ol><p class="life-empty" hidden></p><footer class="life-footer"><span class="life-count"></span><span class="life-signature" aria-hidden="true">不赶时间，一件一件来。</span></footer><div class="life-notice" hidden><p role="status"></p><button type="button" hidden>复制旧条目</button></div>`;
   container.append(paper);
-  const list = paper.querySelector('ol'), empty = paper.querySelector('.life-empty'), input = paper.querySelector('input'), form = paper.querySelector('form'), count = paper.querySelector('.life-count'), notice = paper.querySelector('[role=status]'), undo = paper.querySelector('.life-notice button');
-  try { storage = localStorage; entries = loadEntries(storage); }
-  catch { writable = false; notice.textContent = '暂时无法读取清单，原有记录会保留。'; }
-  function persist() {
-    if (!writable) return;
-    try { saveEntries(storage,entries); }
-    catch { notice.textContent = '暂时无法保存，请保留此页面。'; }
+  const list = paper.querySelector('ol'), empty = paper.querySelector('.life-empty'), count = paper.querySelector('.life-count');
+  const notice = paper.querySelector('.life-notice'), message = notice.querySelector('p'), copy = notice.querySelector('button');
+  const say = text => { message.textContent = text; notice.hidden = !text; };
+
+  function row({ text, done }, index) {
+    const li = document.createElement('li'); li.className = `life-row${done ? ' is-done' : ''}`;
+    const number = document.createElement('span'); number.className = 'life-number'; number.setAttribute('aria-hidden', 'true'); number.textContent = String(index + 1).padStart(2, '0');
+    const body = document.createElement('span'); body.className = 'life-item';
+    const box = document.createElement('span'); box.className = 'life-checkbox'; box.setAttribute('aria-hidden', 'true'); box.textContent = '✓';
+    const label = document.createElement('span'); label.className = 'life-text'; label.textContent = text;
+    const state = document.createElement('span'); state.className = 'life-sr'; state.textContent = done ? '（已完成）' : '';
+    body.append(box, label, state); li.append(number, body); return li;
   }
-  function summary() {
-    empty.hidden = entries.length > 0;
-    [...list.children].forEach((li,index)=>li.querySelector('.life-number').textContent=String(index+1).padStart(2,'0'));
-    count.textContent = entries.length ? `${entries.filter(x=>x.done).length} / ${entries.length} 已完成` : '';
+
+  function render(data) {
+    const { items, errors } = parseItems(data);
+    list.replaceChildren(...items.map(row));
+    empty.hidden = items.length > 0; empty.textContent = item.emptyTitle;
+    count.textContent = items.length ? `${items.filter(entry => entry.done).length} / ${items.length} 已完成` : '';
+    if (errors.length) say(`有 ${errors.length} 条没显示：${errors.join('；')}。运行 node scripts/check-bucketlist.mjs 查看详情。`);
   }
-  function row(entry) {
-    const li = document.createElement('li'); li.className = 'life-row'; li.dataset.id = entry.id;
-    const label = document.createElement('label'), checkbox = document.createElement('input'), box = document.createElement('span'), text = document.createElement('span');
-    checkbox.type = 'checkbox'; checkbox.checked = entry.done;
-    box.className = 'life-checkbox'; box.setAttribute('aria-hidden','true'); box.textContent = '✓';
-    text.className = 'life-text'; text.textContent = entry.text;
-    label.append(checkbox,box,text);
-    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'life-remove'; remove.textContent = '×'; remove.setAttribute('aria-label',`移除：${entry.text}`);
-    checkbox.addEventListener('change',()=>{ entry.done = checkbox.checked; persist(); summary(); },{signal});
-    remove.addEventListener('click',()=>{
-      const index = entries.indexOf(entry); removed = {entry,index}; entries.splice(index,1); li.remove();
-      notice.textContent = `已移除「${entry.text}」`; undo.hidden = false; undo.focus(); persist(); summary();
-    },{signal});
-    const number=document.createElement('span');number.className='life-number';number.setAttribute('aria-hidden','true');
-    li.append(number,label,remove); return li;
+
+  // Entries typed into earlier versions live only in this browser; offer them for data.js.
+  let legacy = [];
+  try { legacy = loadEntries(localStorage); } catch {}
+  function offerLegacy() {
+    if (!legacy.length || !notice.hidden) return;
+    say(`这台浏览器里还存着 ${legacy.length} 条以前在网页上写的清单，其他人看不到。复制后粘贴进 data.js 即可公开。`);
+    copy.hidden = false;
   }
-  entries.forEach(entry=>list.append(row(entry))); summary();
-  form.addEventListener('submit', e=>{
-    e.preventDefault(); const text = input.value.trim(); if (!text) {input.focus(); return;}
-    const entry = {id:crypto.randomUUID(),text,done:false}; entries.push(entry);list.append(row(entry));
-    input.value = ''; input.focus(); persist(); summary();
-  },{signal});
-  undo.addEventListener('click',()=>{
-    if(!removed)return;
-    const {entry,index} = removed; entries.splice(index,0,entry); const element = row(entry);list.insertBefore(element,list.children[index]||null);
-    removed = null;undo.hidden = true;notice.textContent = '已恢复';element.querySelector('input').focus();persist();summary();
-  },{signal});
-  return ()=>events.abort();
+  copy.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(itemLines(legacy)); say('已复制。粘贴到 dist/modules/bucketlist/data.js 的方括号里。'); copy.hidden = true; }
+    catch { say(itemLines(legacy)); copy.hidden = true; }
+  }, { signal });
+
+  // A fresh URL each visit so edits to data.js show after a normal refresh.
+  import(`./data.js?t=${Date.now()}`).then(module => { if (!signal.aborted) { render(module.default); offerLegacy(); } }, error => {
+    if (signal.aborted) return;
+    render([]); say(`data.js 读取失败（多半是少了逗号、引号或括号）。运行 node scripts/check-bucketlist.mjs 查看出错位置。${error.message ? ` ${error.message}` : ''}`);
+  });
+  return () => events.abort();
 }
