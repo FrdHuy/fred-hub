@@ -103,3 +103,8 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - v0.22：左上角简笔图标光盘与盒子中心未对齐（像马克杯），已按统一中心线重画；资源 v22。
 
 - v0.23：左上角数量图标改为单张光盘线稿（去掉盒子）；资源 v23。
+
+## 部署（2026-09-28，Claude Code）
+- GitHub 私有仓库 https://github.com/FrdHuy/fred-hub （origin，main）。本机 git 需经代理 127.0.0.1:7890 访问 GitHub；凭据在钥匙串。
+- Vercel 项目 fred-hub，Root Directory = dist，无构建；push main 即自动部署。线上：https://fred-hub.vercel.app 已验证（首页、片单、海报、私有文件 404、cache revalidate）。
+- 下一步：Vercel 添加 fredhu.top / www，阿里云云解析按 Vercel 给出的记录配置。步骤见 docs/部署.md。

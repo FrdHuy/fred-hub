@@ -49,7 +49,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 7. 清理 `styles.css` / `hub.css` 中旧版未使用规则（独立任务，勿混入功能改动）。
 
 **P3 — 发布**
-8. 部署到 fredhu.top（进行中，见 docs/部署.md）；之后 OG 图片、性能检查。
+8. 已上线 https://fred-hub.vercel.app（2026-09-28，GitHub FrdHuy/fred-hub 私有仓库 push 自动部署）；绑定 fredhu.top 进行中；之后 OG 图片、性能检查。
 9. 罗盘（wheel）暂停中，源码保留，是否恢复待定。
 
 ## 5. 风格约定（必须保持，引入新库或新设计语言前先问用户）
