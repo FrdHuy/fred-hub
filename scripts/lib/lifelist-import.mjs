@@ -2,8 +2,13 @@
 //   - [x] 做过的事 2019   → { text, done: true, year: 2019 }   (year optional)
 //   - [ ] 想做的事        → { text, done: false }
 //   Under a heading containing「大事件」:  - 1998 出生  → { text, milestone: true, year: 1998 }
-// Order (by content): life events first by year, then each theme section in document order —
-// inside a theme, fulfilled wishes by year, then undated fulfilled ones, then wishes still to do.
+// Order: a scattered but stable mix. Each entry is placed by a hash of its text, so the panel looks
+// unarranged, never reshuffles on reload, and a newly added wish drops in without moving the others.
+export function scatter(text) {
+  let hash = 2166136261;
+  for (const char of text) { hash ^= char.codePointAt(0); hash = Math.imul(hash, 16777619); }
+  return (hash >>> 0) / 2 ** 32;
+}
 export function parseChecklist(markdown) {
   const entries = [], problems = [];
   let events = false, started = false, section = -1;
@@ -25,12 +30,8 @@ export function parseChecklist(markdown) {
     if (year && !done) { problems.push(`第 ${i + 1} 行：写了年份但没打勾`); return; }
     entries.push({ ...(done ? { text: m[2].trim(), done: true, ...(year ? { year } : {}) } : { text: m[2].trim(), done: false }), section });
   });
-  const rank = e => e.done ? (e.year ? 0 : 1) : 2;
-  const events_ = entries.filter(e => e.milestone).sort((a, b) => a.year - b.year);
-  const themed = entries.filter(e => !e.milestone).map((e, i) => ({ e, i }))
-    .sort((a, b) => a.e.section - b.e.section || rank(a.e) - rank(b.e) || (a.e.year ?? 0) - (b.e.year ?? 0) || a.i - b.i)
-    .map(({ e }) => { const { section: _, ...rest } = e; return rest; });
-  return { entries: [...events_, ...themed], problems };
+  const mixed = entries.map(({ section: _, ...rest }) => rest).sort((a, b) => scatter(a.text) - scatter(b.text));
+  return { entries: mixed, problems };
 }
 
 export function dataSource(entries) {
@@ -38,7 +39,7 @@ export function dataSource(entries) {
   return `// Fred 的人生清单（最多 100 件，对应面板上的 100 盏灯）。由 node scripts/import-lifelist.mjs 从 docs/人生清单候选-200.md 生成，也可以直接改。
 // 愿望：{ text: "去看一次极光", done: false }，做到了改成 done: true，可加 year（选填）。
 // 人生大事件（冷白色灯）：{ text: "大学毕业", milestone: true, year: 2020 }
-// 顺序即灯的顺序：人生大事件在前，其后按主题分组，每组里做到的事（按年份）在前、愿望在后。
+// 顺序即灯的顺序：按内容打散（每件事的位置由文字决定，稳定不变；新加的事会随机插入，不打乱其他）。
 // 改完运行 node scripts/check-bucketlist.mjs 检查格式。
 export default [
 ${entries.map(line).join('\n')}

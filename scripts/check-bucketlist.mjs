@@ -52,14 +52,17 @@ assert.equal(markCount(lampStates(timeline, 2026, 2026)), 2);
 assert.equal(litCount(lampStates(timeline, 2026, 2026)), 1, 'milestones do not count as fulfilled wishes');
 console.log('PASS: optional year, lamp states, look-back years, knob detents, lever travel, milestones');
 
-// Checklist importer (Markdown → data.js), ordered as a timeline.
+// Checklist importer (Markdown → data.js): a stable, scattered order.
 const { parseChecklist, dataSource } = await import('./lib/lifelist-import.mjs');
 const md = `# 候选\n## 旅行\n- [ ] 去看极光\n- [x] 学会游泳 2012\n- [x] 写日记\n- [X] 去冰岛 2022\n## 人生大事件\n- 1998 出生\n- 2020 大学毕业\n`;
 const imported = parseChecklist(md);
 assert.deepEqual(imported.problems, []);
-assert.deepEqual(imported.entries.map(e => e.text), ['出生', '大学毕业', '学会游泳', '去冰岛', '写日记', '去看极光'], 'events first, then each theme: dated done, undated done, wishes');
-const themes = parseChecklist('## 旅行\n- [ ] 极光\n- [x] 冰岛 2022\n## 运动\n- [x] 游泳 2012\n- [ ] 冲浪\n').entries.map(e => e.text);
-assert.deepEqual(themes, ['冰岛', '极光', '游泳', '冲浪'], 'themes stay together in document order');
+const { scatter } = await import('./lib/lifelist-import.mjs');
+assert.deepEqual(new Set(imported.entries.map(e => e.text)), new Set(['出生', '大学毕业', '学会游泳', '去冰岛', '写日记', '去看极光']));
+assert.deepEqual(imported.entries.map(e => e.text), [...imported.entries].sort((a, b) => scatter(a.text) - scatter(b.text)).map(e => e.text), 'scattered by a hash of the text');
+const again = parseChecklist(md.replace('- [ ] 去看极光', '- [ ] 去看极光\n- [ ] 学冲浪')).entries.map(e => e.text).filter(t => t !== '学冲浪');
+assert.deepEqual(again, imported.entries.map(e => e.text), 'adding a wish does not move the others');
+assert.ok(scatter('a') >= 0 && scatter('a') < 1 && scatter('a') === scatter('a'));
 assert.deepEqual(parseItems((await import(`data:text/javascript,${encodeURIComponent(dataSource(imported.entries))}`)).default).errors, []);
 assert.match(parseChecklist('## a\n- [ ] 去看极光 2019').problems[0], /没打勾/);
 assert.match(parseChecklist('## 人生大事件\n- 出生').problems[0], /年份 事件/);
