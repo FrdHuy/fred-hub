@@ -3,8 +3,8 @@
 > Claude Code 与 Codex 共用的进度总览。**开始工作前先读本文件和 `AGENTS.md`**，再读 `docs/HANDOFF.md`（逐版本交接、所有权表）和 `docs/MODULES.md`（模块接口）。
 > 本文件管“全局现状 + 待办 + 约定”；每轮的详细改动与验证继续写在 `docs/HANDOFF.md` 和 `docs/开发进度-vX.md`。
 
-最近更新：2026-09-28 · Claude Code（v0.19 片单 3D CD 架）
-上一次代码改动：v0.19 · 2026-09-28 · Claude Code
+最近更新：2026-09-28 · Claude Code（v0.20 片单 cover-flow 与筛选）
+上一次代码改动：v0.20 · 2026-09-28 · Claude Code
 
 ---
 
@@ -27,7 +27,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 | 旅行（travel）：机票吸附入槽 READING → 左→右刷卡 SUCCESS，拔出 ERROR 可重试 | ✅ 交互获用户认可 |
 | 日记（stories）：日记本翻开展开 | ✅ 交互获用户认可 |
 | 人生清单（bucketlist）：添加、勾选划线、移除 + 单步撤销、自动序号、localStorage 保存；封面英文 Life List，内页中文 | ✅ v0.15–v0.17 |
-| 影院片单（cinema）：深色 3D CD 盒横排，点击转正、详情飞出（v0.19 改版）；静态 `data.js`；`scripts/add-movie.mjs` 从 TMDB 自动补全与下载海报 | ✅ v0.18 |
+| 影院片单（cinema）：深色 3D CD 盒 cover-flow（中间正对、两侧倾斜随滑动变化），详情飞出，精简筛选/排序（v0.20）；静态 `data.js`；`scripts/add-movie.mjs` 从 TMDB 自动补全与下载海报 | ✅ v0.18 |
 | 模块化接口 `mount(context) → cleanup()`、模块注册表、路由 `#/collection/<id>` | ✅ |
 | 检查脚本：`check` / `check-cinema` / `check-bucketlist` / `check-contact` / `check-gallery` / `check-swipe` | ✅ 2026-09-28 全部通过 |
 
@@ -58,12 +58,12 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 - 原生 HTML/CSS/ES Modules；`dist/` 就是可编辑源码，不是构建产物。无 npm、无框架、无打包器。Node 只用于 `scripts/check*.mjs`，Python 只用于本地预览服务器。
 - `dist/index.html` 单页；`main.js`（外壳/菜单/路由挂载）、`gallery.js`（横向轨道）、`experience.js`（首页物理动作）、`catalog.js`（模块元数据+封面）、`router.js`、`hub.css` 为**共享文件，同一时间只能一个集成者修改**。
 - 模块放在 `dist/modules/<id>/{index.js, style.css, storage.js?, assets/}`；入口同步 `mount({container,item,navigate,createCover})`，返回 cleanup；事件用 `AbortController` 的 `signal` 统一注销。
-- 资源缓存版本号：`?v=19` 写在 index.html 与 import 路径中，发版时整体递增。
+- 资源缓存版本号：`?v=20` 写在 index.html 与 import 路径中，发版时整体递增。
 - 每个版本用 git 提交保存，并新增 `docs/开发进度-v<新版本>.md`（v0.18 起不再复制 `checkpoints/`）。
 
 ### 视觉
 - **首页**保持下面的暖白基调；**模块进入后可有独立风格**（用户 v0.18 决定，新风格先征得用户同意）。深色模块在 catalog 设 `theme: 'dark'`。
-- cinema 风格：暖黑 `#100e0c`、胶片白 `#ece4d6`、暗灰 `#8c8475`、金 `#d9a441`；Georgia/宋体标题 + 等宽小字；token 定义在 `.cinema` 上。用户偏好：界面文字越少越好，用简笔线稿图标代替文字标签。
+- cinema 风格：暖黑 `#0f0d0c`、胶片白 `#ece4d6`、暗灰 `#8a8276`、金 `#d2a052`；Didot/宋体细体标题 + Avenir Next/苹方 Light 小字（只用系统字体）；token 定义在 `.cinema` 上。用户偏好：界面文字越少越好，用简笔线稿图标代替文字标签。
 - 首页基调：暖白纸张 + 墨色，克制、留白多，“实物收藏”质感（纸张纹理、阴影、轻微旋转）。
 - 颜色 token（`styles.css :root`，模块只复用不另起）：`--paper #fafaf8`、`--ink #242726`、`--muted #747974`、`--line #dedfd9`、`--accent #b34934`（砖红，仅做点缀，如字标句点）。
 - 字体：界面 `'Manrope','PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif`；物件标签用等宽小字大字距（如 `8px monospace, letter-spacing .2em`）；人生清单内页 Georgia + 宋体（Songti SC）衬线。

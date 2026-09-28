@@ -36,3 +36,12 @@ export function filmMeta(film) {
 export function starCells(rating) {
   return Array.from({ length: 5 }, (_, index) => Math.max(0, Math.min(1, rating - index)));
 }
+
+export const ORDERS = { added: '最近加入', rating: '评分', year: '年份' };
+// Filter by type and sort; keeps each film's original position (its FH number).
+export function viewFilms(films, { type = '', order = 'added' } = {}) {
+  const view = films.map((film, index) => ({ film, index })).filter(({ film }) => !type || film.type === type);
+  const key = order === 'rating' ? 'rating' : order === 'year' ? 'year' : '';
+  if (key) view.sort((a, b) => (b.film[key] ?? -Infinity) - (a.film[key] ?? -Infinity) || a.index - b.index);
+  return view;
+}

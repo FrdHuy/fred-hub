@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { parseFilms, filmMeta, starCells } from '../dist/modules/cinema/films.js';
+import { parseFilms, filmMeta, starCells, viewFilms } from '../dist/modules/cinema/films.js';
 import { searchChoices, entryFromTmdb, insertEntry, parseRating, creator } from './lib/cinema-add.mjs';
 
 // Data rules.
@@ -15,6 +15,13 @@ assert.equal(filmMeta({ year: 2000, type: '电影', director: '王家卫' }), '2
 assert.equal(filmMeta({ title: 'x' }), '');
 assert.deepEqual(starCells(3.5), [1, 1, 1, .5, 0]);
 assert.deepEqual(starCells(0), [0, 0, 0, 0, 0]);
+const sample = [{ title: 'a', type: '电影', year: 2000, rating: 3 }, { title: 'b', type: '剧集', year: 2015 }, { title: 'c', type: '电影', year: 2019, rating: 5 }, { title: 'd', type: '电影', rating: 3 }];
+const titles = view => view.map(({ film }) => film.title).join('');
+assert.equal(titles(viewFilms(sample)), 'abcd');
+assert.equal(titles(viewFilms(sample, { type: '电影' })), 'acd');
+assert.equal(titles(viewFilms(sample, { order: 'rating' })), 'cadb');
+assert.equal(titles(viewFilms(sample, { order: 'year' })), 'cbad');
+assert.equal(viewFilms(sample, { type: '剧集' })[0].index, 1);
 
 // add-movie helpers, from mocked TMDB responses.
 const choices = searchChoices([{ media_type: 'person', id: 1 }, { media_type: 'movie', id: 843, title: '花样年华', original_title: '花樣年華', release_date: '2000-09-29' }, { media_type: 'tv', id: 7, name: '剧', first_air_date: '' }]);

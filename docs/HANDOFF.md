@@ -1,6 +1,6 @@
-最新变更和验证见 [开发进度-v0.19.md](开发进度-v0.19.md)。全局进度见根目录 PROGRESS.md。
+最新变更和验证见 [开发进度-v0.20.md](开发进度-v0.20.md)。全局进度见根目录 PROGRESS.md。
 
-# 当前交接 · v0.19 · 2026-09-28
+# 当前交接 · v0.20 · 2026-09-28
 
 ## Canonical path
 /Users/fred/Desktop/Project/Fred-Personal-Site
@@ -85,3 +85,12 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - 横向滚轮/鼠标拖动/←→/Home/End/Enter；手机紧凑尺寸；reduced-motion 直接切换；-webkit-box-reflect 地面倒影（Firefox 无倒影）。
 - 资源 v19。check 全部通过；浏览器 1280×800 与 375 宽验证：选择居中、详情开合两次、Esc 不退回首页、键盘打开。
 - 进不去片单的问题：57123 上曾是无 no-store 的 `python -m http.server`，已换成 scripts/preview.py；用户需强制刷新一次。
+
+## v0.20 片单 cover-flow 与筛选（Claude Code）
+- 书脊变薄（14px / 手机 11px），左右两侧都印书脊；字体改为系统细体：Didot/宋体（标题）、Avenir Next / 苹方 Light（书脊与信息），无新增字体文件。
+- Cover-flow：原生横向滚动 + scroll-snap，JS 按每个盒子离中心的距离连续计算转角/位移/深度，中间正对、两侧朝中间倾斜；方向键连按会累加（aim），滚轮/拖动会清除。
+- 详情光盘修复：封面与光盘同一 flight 容器一起飞；光盘旋转为 CSS 动画，打开时开始、关闭时暂停在原角度再收回（不再回弹 0°）；去掉 backdrop-filter 降低卡顿；收尾统一 cancel 残留 fill 动画。
+- 书架建立独立层叠上下文（rack z-index:1），筛选面板与详情不再被盒子遮挡。
+- 左上角红框：全局 a:focus-visible 为砖红 2px 描边，深色主题改为淡金细线（hub.css 末尾）。
+- 筛选/排序：右上角简笔滑杆图标 → 全部/电影/剧集 + 最近加入/评分/年份；非默认时图标带金点；逻辑 `viewFilms` 在 films.js，已加测试。
+- 资源 v20。验证：全部 check 通过；1280×800 与 375 宽截图；光盘开合逐帧采样无跳变；排序与筛选结果正确。注意：浏览器面板在后台时动画不推进，测试动画需前台。
