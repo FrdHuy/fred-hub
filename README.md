@@ -23,4 +23,4 @@ python3 scripts/preview.py
 
 轻量检查：项目根目录运行 `node scripts/check.mjs`（需 Node.js，仅检查时使用）。
 
-当前旅行、日记、片单仍是内容占位页。后续逐个完善，尚未发布到公网。
+片单（cinema）已完成，旅行、日记仍是内容占位页。部署：GitHub + Vercel（Root Directory 为 `dist`），域名 fredhu.top，步骤见 [docs/部署.md](docs/部署.md)。

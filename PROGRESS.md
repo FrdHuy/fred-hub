@@ -14,7 +14,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 
 - 纯静态：原生 HTML / CSS / ES Modules，无构建、无包管理器。
 - 本地预览：双击 `启动预览.command` 或 `python3 scripts/preview.py` → http://127.0.0.1:57123/
-- 尚未发布到公网（`.openai/hosting.json` 指向 `dist/` 静态托管配置）。
+- 部署方案：GitHub 私有仓库 + Vercel（Root Directory `dist`，无构建）+ 阿里云域名 fredhu.top，见 `docs/部署.md`。
 - git 仓库（分支 `main`，2026-09-28 初始化）。`checkpoints/`（v0.8–v0.16 旧备份）只留在本地，已被 git 忽略。
 
 ## 2. 已完成功能
@@ -49,7 +49,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 7. 清理 `styles.css` / `hub.css` 中旧版未使用规则（独立任务，勿混入功能改动）。
 
 **P3 — 发布**
-8. 公网部署、OG 图片、性能检查。
+8. 部署到 fredhu.top（进行中，见 docs/部署.md）；之后 OG 图片、性能检查。
 9. 罗盘（wheel）暂停中，源码保留，是否恢复待定。
 
 ## 5. 风格约定（必须保持，引入新库或新设计语言前先问用户）
