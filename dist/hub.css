@@ -39,3 +39,10 @@
 .collection-stage .collection-slot{transition:none}
 .gallery-shell{overflow-x:clip}
 .collection-stage .ticket-paper,.collection-stage .silver-disc{pointer-events:auto}
+/* Dark module pages (catalog theme:'dark'): only the shared chrome is re-coloured here; the module styles its own content. */
+[data-theme=dark] body{background:#100e0c;color:#ece4d6}
+[data-theme=dark] .wordmark,[data-theme=dark] .back-link{color:#ece4d6}
+[data-theme=dark] .module-menu-toggle>span{background:#ece4d6}
+[data-theme=dark] .skip-link:focus{background:#100e0c;color:#ece4d6}
+.detail-view[data-module=cinema]{padding:0;display:flex;flex-direction:column}
+.detail-view[data-module=cinema] .detail-toolbar{margin:0;padding:0 5%}

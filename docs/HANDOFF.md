@@ -1,6 +1,6 @@
-最新变更和验证见 [开发进度-v0.17.md](开发进度-v0.17.md)。
+最新变更和验证见 [开发进度-v0.18.md](开发进度-v0.18.md)。全局进度见根目录 PROGRESS.md。
 
-# 当前交接 · v0.17 · 2026-09-28
+# 当前交接 · v0.18 · 2026-09-28
 
 ## Canonical path
 /Users/fred/Desktop/Project/Fred-Personal-Site
@@ -16,7 +16,7 @@
 | Scope | Owner | State |
 | --- | --- | --- |
 | 公共首页、交互、菜单、模块注册 | Codex | v0.17 已交接，无运行中编辑 |
-| cinema 影院片单（dist/modules/cinema/**、scripts/add-movie.mjs、scripts/check-cinema.mjs；共享：index.html 样式链接、catalog theme、main.js 主题切换、hub.css 深色头部） | Claude Code | v0.18 进行中 2026-09-28 |
+| cinema 影院片单（dist/modules/cinema/**、scripts/add-movie.mjs、scripts/check-cinema.mjs；共享：index.html 样式链接、catalog theme、main.js 主题切换、hub.css 深色头部） | Claude Code | v0.18 已交接，无运行中编辑 |
 | travel / stories 内容 | 未分配 | 当前为空状态占位 |
 | bucketlist | 未分配 | 手稿人生清单：添加、勾选、移除/撤销、本地保存 |
 | wheel | 暂停 | 源码保留，不在注册表和菜单中 |
@@ -67,3 +67,14 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 
 ## v0.17 字体与中文内页
 封面和菜单保留 Life List（人生愿望，非日常待办）。打开后全中文，中文宋体、英文 Georgia，替换上一版手写字体。纸张最大宽640px，正文17px，行高约48px，添加序号01、02…100…，完成项目保持原位。未限制100项。数据与v16展开动画不变。check/check-bucketlist通过，浏览器新增、编号、勾选和中文排版验证，测试条目已移除。资源v17，旧版checkpoints/v0.16/dist。未进行100条真实页面压力测试。
+
+## v0.18 影院片单（Claude Code）
+- 项目已 `git init`（main）；`checkpoints/` 被忽略，今后用 git 提交代替整目录备份。
+- 用户决定：模块进入后可有独立风格，不必呼应首页。cinema 为深色放映厅：银幕 + CD 书脊架，放映光、胶片颗粒、逐字片头、光盘飞入、海报主色书脊、页面氛围色。
+- 数据：`dist/modules/cinema/data.js`（只读静态数据，用户手改或用脚本添加），规则在 `films.js`。海报在 `posters/`。
+- `scripts/add-movie.mjs`：本机调用 TMDB（Token 在 `.env`，已 gitignore），下载海报、插入 data.js、去重。网站运行时不请求任何 API。
+- 共享改动：catalog cinema 加 `theme:'dark'`；main.js 进入模块时设置 `html[data-theme]`，回首页/404 清空；hub.css 末尾追加深色主题头部与 cinema 全幅规则；index.html 加 cinema 样式；资源版本 v18。
+- 验证：check / check-cinema / check-bucketlist / check-contact / check-gallery / check-swipe 全部通过。浏览器：桌面与 375px 手机、点击与方向键切换、光盘飞行动画、错误条目提示、语法错误不影响其他页面、无海报光盘、返回首页恢复浅色。真实 TMDB 加片 5 部与重复检测通过。
+- 限制：reduced-motion 仅代码与 CSS 覆盖，未在浏览器模拟；首页光盘拖入手势未手动重测（代码未改，check-contact 通过）；TMDB 在部分网络需代理。
+- 使用说明：docs/片单使用说明.md；设计：docs/superpowers/specs/2026-09-28-cinema-design.md。
+- 下一步：用户用真实片单替换 5 部示例；再按同样流程做 travel 或 stories。

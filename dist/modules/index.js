@@ -1,7 +1,7 @@
 import { mount as travel } from './travel/index.js';
-import { mount as cinema } from './cinema/index.js';
+import { mount as cinema } from './cinema/index.js?v=18';
 import { mount as stories } from './stories/index.js';
-import { mount as bucketlist } from './bucketlist/index.js?v=17';
+import { mount as bucketlist } from './bucketlist/index.js?v=18';
 const renderers = { travel, cinema, stories, bucketlist };
 export function mountModule(context) {
   const mount = renderers[context.item.id];

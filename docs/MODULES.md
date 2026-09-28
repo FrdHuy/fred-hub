@@ -7,7 +7,7 @@
 - `dist/catalog.js`: display metadata / IDs / homepage covers. Thumbnail menu uses this registry automatically.
 - `dist/modules/index.js`: maps IDs to renderers; shared integrator edits it.
 - `dist/modules/travel/index.js`: 旅行页面。
-- `dist/modules/cinema/index.js`: 电影与剧集页面。
+- `dist/modules/cinema/`: 影院片单。`data.js` 静态数据（只有作者编辑），`films.js` 校验规则，`posters/` 海报；添加脚本 `scripts/add-movie.mjs`，检查 `scripts/check-cinema.mjs`。
 - `dist/modules/stories/index.js`: 日记与故事页面。
 - `dist/modules/bucketlist/`: 人生清单，含手稿样式、条目 UI 和 localStorage 数据边界。
 - `dist/modules/wheel/index.js`: 罗盘已暂停，源码保留，未注册。
@@ -36,7 +36,8 @@ Cleanup runs before leaving/replacing a module. Do not bind unmanaged global lis
 ## Styles and assets
 
 Add module-specific `style.css` inside its directory; ask the integrator to add its stylesheet to index.html. All selectors begin with `[data-module="travel"]` (replace ID). Store module assets in its own directory; reference them through `new URL('./assets/file', import.meta.url)` where needed. Avoid root-relative paths.
-Reuse `--paper`, `--ink`, `--muted`, `--accent`. Keep warm off-white, restrained typography and generous spacing. Do not restore decorative labels and verbose help text to the home page.
+The home page keeps warm off-white, restrained typography and generous spacing; do not restore decorative labels and verbose help text there.
+**User decision (v0.18):** once opened, a module may have its own visual language (e.g. cinema is a dark screening room). Confirm a new module style with the user first. A dark module sets `theme: 'dark'` in catalog.js; main.js mirrors it to `html[data-theme]` so the shared header/back link turn light (rules at the end of hub.css).
 Motion: honor prefers-reduced-motion. Pointer actions need keyboard equivalents. Content pages remain ordinary pages, never nested dialogs for the main experience.
 
 ## Adding a module

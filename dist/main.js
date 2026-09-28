@@ -1,7 +1,7 @@
-import { createInteraction } from './experience.js?v=17';
-import { mountModule } from './modules/index.js?v=17';
-import { modules, getModule, createCover } from './catalog.js?v=17';
-import { CollectionGallery } from './gallery.js?v=17';
+import { createInteraction } from './experience.js?v=18';
+import { mountModule } from './modules/index.js?v=18';
+import { modules, getModule, createCover } from './catalog.js?v=18';
+import { CollectionGallery } from './gallery.js?v=18';
 import { readRoute, navigate } from './router.js';
 
 const $ = selector => document.querySelector(selector);
@@ -40,6 +40,8 @@ function animate(element, frames, options) {
 function renderCollection(item) {
   disposeModule();
   detail.replaceChildren(); detail.dataset.module = item.id;
+  // A module may bring its own page theme; the shared header follows it.
+  document.documentElement.dataset.theme = item.theme || '';
   const toolbar = document.createElement('div'); toolbar.className = 'detail-toolbar';
   const back = document.createElement('a'); back.className = 'back-link'; back.href = '#/'; back.textContent = '← 放回收藏';
   toolbar.append(back); detail.append(toolbar);
@@ -47,7 +49,7 @@ function renderCollection(item) {
   disposeModule = mountModule({ container, item, navigate, createCover });
 }
 function renderMissing() {
-  disposeModule(); disposeModule = () => {};
+  disposeModule(); disposeModule = () => {}; document.documentElement.dataset.theme = '';
   detail.innerHTML = '<section class="not-found"><p class="eyebrow">NOT IN THE COLLECTION</p><h1>这件收藏还不在这里</h1><p>链接可能已经改变，回到收藏室看看吧。</p><a class="back-link" href="#/">← 返回收藏室</a></section>';
 }
 async function showRoute(initial = false) {
@@ -62,7 +64,7 @@ async function showRoute(initial = false) {
   closeMenu(false);
   gallery.freeze(); activeRoute = item ? nextRoute : nextRoute.type === 'home' ? nextRoute : { type: 'missing' };
   if (activeRoute.type === 'home') {
-    disposeModule(); disposeModule = () => {};
+    disposeModule(); disposeModule = () => {}; document.documentElement.dataset.theme = '';
     home.hidden = false; detail.hidden = true; document.title = 'Fred’s Hub — 生活收藏室';
     if (pendingModule) { gallery.focusModule(pendingModule); pendingModule = null; origin = null; }
     else if (transitionItem) gallery.focusModule(transitionItem.id); else gallery.draw();
