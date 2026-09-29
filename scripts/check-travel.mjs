@@ -43,3 +43,15 @@ console.log('PASS: flap paths, local clock');
 const real = parseTravel((await import('../dist/modules/travel/data.js')).default, localNow('America/Chicago'));
 if (real.errors.length) { console.error(`✗ 旅行 data.js 有问题：\n  ${real.errors.join('\n  ')}`); process.exit(1); }
 console.log(`PASS: travel data.js — ${real.arrivals.length} 趟去过的，${real.departures.length} 个想去的`);
+
+// The fill-in form → data.js importer.
+const { parseTravelForm, dataSource } = await import('./lib/travel-import.mjs');
+const form = `# 旅行行程\n## 基本信息\n- 城市：Madison\n- 机场：MSN\n- 时区（不懂就别改）：America/Chicago\n## 去过的地方\n<!-- 说明 -->\n### 例\n- 目的地：Reykjavik\n- 三字码：KEF\n### \n- 目的地：Kyoto\n- 三字码：KIX\n- 国家：日本\n- 出发：ORD（选填）\n- 日期：2025-04\n- 天数：6\n- 同行：\n- 一句话：樱花落了一地。\n### \n- 目的地：\n- 三字码：\n## 想去的地方\n### \n- 目的地：Lisbon\n- 三字码：LIS\n- 日期：\n`;
+const imported = parseTravelForm(form);
+assert.deepEqual(imported.problems, []);
+assert.deepEqual(imported.data, { home: { city: 'Madison', airport: 'MSN', timeZone: 'America/Chicago' }, arrivals: [{ to: 'Kyoto', code: 'KIX', country: '日本', from: 'ORD', date: '2025-04', days: 6, line: '樱花落了一地。' }], departures: [{ to: 'Lisbon', code: 'LIS' }] }, 'examples and blank slots are skipped');
+const written = (await import(`data:text/javascript,${encodeURIComponent(dataSource(imported.data))}`)).default;
+assert.deepEqual(written, imported.data, 'data.js round trip');
+assert.deepEqual(parseTravel(written, today).errors, []);
+assert.match(parseTravelForm('## 去过的地方\n### \n- 目的的：x\n').problems[0], /看不懂「目的的」/);
+console.log('PASS: travel form import');

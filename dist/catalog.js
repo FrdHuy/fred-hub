@@ -1,4 +1,15 @@
 import { panelCover } from './modules/bucketlist/cover.js?v=31';
+import travelData from './modules/travel/data.js?v=31';
+import { parseTravel, localNow, flight } from './modules/travel/trips.js?v=31';
+
+// The boarding pass on the home page carries the next planned flight, or else the latest trip.
+function nextFlight() {
+  try {
+    const board = parseTravel(travelData, localNow(travelData?.home?.timeZone || 'America/Chicago'));
+    const trip = board.departures.find(t => t.live) ?? board.arrivals[0];
+    return trip ? { from: trip.from, to: trip.code, number: flight(trip.number) } : null;
+  } catch { return null; }
+}
 
 export const categories = ['全部', '记忆', '文化', '工具'];
 
@@ -18,7 +29,7 @@ export function searchModules(query) {
 export function createCover(item) {
   const cover = document.createElement('div');
   cover.className = `collectible collectible--${item.cover}`;
-  if (item.id === 'travel') cover.innerHTML = `<div class="ticket-paper"><div class="ticket-airline">FRED AIR <span>BOARDING PASS</span></div><div class="ticket-route">HERE <span>✈</span> THERE</div><div class="ticket-fields"><span>PASSENGER<b>FRED</b></span><span>FLIGHT<b>FH 001</b></span><span>SEAT<b>01 A</b></span></div><div class="ticket-barcode"></div><small>A TICKET TO MY MEMORIES</small></div>`;
+  if (item.id === 'travel') { const next = nextFlight(); cover.innerHTML = `<div class="ticket-paper"><div class="ticket-airline">FRED AIR <span>BOARDING PASS</span></div><div class="ticket-route">${next?.from ?? 'HERE'} <span>✈</span> ${next?.to ?? 'THERE'}</div><div class="ticket-fields"><span>PASSENGER<b>FRED</b></span><span>FLIGHT<b>${next?.number ?? 'FH 001'}</b></span><span>SEAT<b>01 A</b></span></div><div class="ticket-barcode"></div><small>A TICKET TO MY MEMORIES</small></div>`; }
   if (item.id === 'cinema') cover.innerHTML = '<div class="silver-disc"><span>FRED’S COLLECTION<b>.</b></span><small>PICTURES & STORIES · VOL. 01</small></div>';
   if (item.id === 'stories') cover.innerHTML = '<div class="diary-leaves"><span>DEAR DIARY</span><p>把日子，<br>慢慢写下来。</p><small>FRED’S HUB / 01</small></div><div class="diary-front"></div>';
   if (item.id === 'bucketlist') cover.innerHTML = panelCover();
