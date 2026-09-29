@@ -1,0 +1,103 @@
+<!doctype html><meta charset="utf-8"><title>typewriter v3 + lever</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+:root{--paper:#f8f7f4;--ink:#343832;--accent:#b34934}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-ui)}
+.v{position:relative;width:1440px;height:900px;overflow:hidden}
+.tag{position:absolute;left:14px;top:10px;font:11px var(--font-mono);letter-spacing:.14em;color:#b0b2aa;z-index:9}
+.lbl{position:absolute;font:500 11px var(--font-mono);letter-spacing:.3em;color:#8d9186}
+
+/* ——— Typewriter v3: matte plastics, satin aluminium used sparingly, real proportions. ——— */
+.tw{--u:1px;position:relative;width:calc(440*var(--u));height:calc(420*var(--u))}
+.tw *{box-sizing:border-box}
+/* Paper support: a warm-white plate standing behind the sheet. */
+.tw-rest{position:absolute;left:calc(86*var(--u));top:calc(22*var(--u));width:calc(268*var(--u));height:calc(150*var(--u));border-radius:calc(10*var(--u)) calc(10*var(--u)) 0 0;background:linear-gradient(175deg,#f1ede2,#e2ddcf);box-shadow:inset 0 1px 0 #fff,inset 0 -8px 10px #3d3f2a14}
+/* Letter-size sheet: ~72% of the platen, taller than wide. */
+.tw-paper{position:absolute;left:calc(102*var(--u));top:0;width:calc(236*var(--u));height:calc(172*var(--u));background:linear-gradient(#fdfcf9,#f5f2ea 80%,#ece8dd);box-shadow:0 0 0 .5px #3d3f2a1f,calc(1*var(--u)) calc(2*var(--u)) calc(5*var(--u)) #3d3f2a14;padding:calc(20*var(--u)) calc(22*var(--u)) 0}
+.tw-paper small{display:block;font:500 calc(6.5*var(--u))/1.6 var(--font-mono);letter-spacing:.24em;color:#8e978c}
+.tw-paper b{display:block;margin-top:calc(11*var(--u));font:400 calc(15*var(--u))/1.55 var(--font-literary);color:#2c322b;letter-spacing:.05em}
+.tw-paper .caret{display:inline-block;width:calc(6*var(--u));height:1px;background:#2c322b;margin-left:2px;vertical-align:3px}
+/* Paper bail: satin aluminium, low contrast, crisp edges, two rubber rollers. */
+.tw-bail{position:absolute;left:calc(80*var(--u));top:calc(138*var(--u));width:calc(280*var(--u));height:calc(7*var(--u));border-radius:calc(3.5*var(--u));background:linear-gradient(#f3f2ee,#dcdad4 50%,#c9c7c0);box-shadow:inset 0 .5px 0 #fff,0 .5px 0 #8f8d8680,0 calc(2*var(--u)) calc(3*var(--u)) #3d3f2a26;display:flex;justify-content:space-between;align-items:flex-end;padding:0 calc(10*var(--u)) calc(.5*var(--u))}
+.tw-bail i{width:.5px;height:calc(2.5*var(--u));background:#6b6e66b3}.tw-bail i:nth-child(5n+1){height:calc(4*var(--u))}
+.tw-roller{position:absolute;top:calc(135*var(--u));width:calc(16*var(--u));height:calc(13*var(--u));border-radius:calc(4*var(--u));background:linear-gradient(#3a3d37,#23261f);box-shadow:inset 0 1px 0 #ffffff1f}
+/* Platen: matte rubber. */
+.tw-platen{position:absolute;left:calc(64*var(--u));top:calc(146*var(--u));width:calc(312*var(--u));height:calc(26*var(--u));border-radius:calc(13*var(--u));background:linear-gradient(#3d413b,#282b26 45%,#20231e 70%,#2c2f29);box-shadow:inset 0 1px 0 #ffffff1c,0 1px 2px #3d3f2a33}
+/* Platen knobs: matte charcoal plastic with fine knurl, on a thin satin collar. */
+.tw-knob{position:absolute;top:calc(138*var(--u));width:calc(28*var(--u));height:calc(42*var(--u));border-radius:calc(7*var(--u));background:repeating-linear-gradient(90deg,#ffffff00 0 calc(1.6*var(--u)),#ffffff0f calc(1.6*var(--u)) calc(2.2*var(--u))),linear-gradient(90deg,#4a4e47,#393c36 35%,#2b2e28 70%,#23261f);box-shadow:inset 0 1px 0 #ffffff26,0 calc(2*var(--u)) calc(3*var(--u)) #3d3f2a40}
+.tw-knob.l{left:calc(30*var(--u))}.tw-knob.r{right:calc(30*var(--u))}
+.tw-collar{position:absolute;top:calc(151*var(--u));width:calc(8*var(--u));height:calc(16*var(--u));background:linear-gradient(#f0efea,#cfcdc6);box-shadow:inset 0 0 0 .5px #8f8d8666}
+.tw-collar.l{left:calc(58*var(--u))}.tw-collar.r{right:calc(58*var(--u))}
+/* Shell: a lighter top deck over a slightly deeper front apron, with a crisp parting line. */
+.tw-shell{position:absolute;left:calc(12*var(--u));right:calc(12*var(--u));top:calc(164*var(--u));height:calc(200*var(--u));border-radius:calc(24*var(--u)) calc(24*var(--u)) calc(8*var(--u)) calc(8*var(--u));background:linear-gradient(176deg,#fbf9f3,var(--shell-warm-hi) 30%,var(--shell-warm) 78%,#ebe7db);box-shadow:inset 0 1.5px 0 #fff,inset 1px 0 0 #fffc,inset -1px 0 0 #d9d4c6,inset 0 -1px 0 #d9d4c6}
+.tw-apron{position:absolute;left:calc(8*var(--u));right:calc(8*var(--u));top:calc(356*var(--u));height:calc(40*var(--u));border-radius:calc(4*var(--u)) calc(4*var(--u)) calc(16*var(--u)) calc(16*var(--u));background:linear-gradient(#e6e1d3,#dcd6c6 60%,#d2ccbb);box-shadow:inset 0 1px 0 #3d3f2a2e,inset 0 2px 0 #ffffff80,0 calc(2*var(--u)) 0 #c3bdab,0 calc(28*var(--u)) calc(34*var(--u)) #3d3f2a26,0 calc(8*var(--u)) calc(12*var(--u)) #3d3f2a17}
+.tw-apron:after{content:'';position:absolute;left:50%;bottom:calc(12*var(--u));width:calc(60*var(--u));margin-left:calc(-30*var(--u));height:calc(4*var(--u));border-radius:2px;background:#3d3f2a1a;box-shadow:inset 0 1px 1px #3d3f2a33}
+.tw-window{position:absolute;left:50%;top:calc(16*var(--u));width:calc(54*var(--u));height:calc(12*var(--u));margin-left:calc(-27*var(--u));border-radius:calc(2.5*var(--u));background:#262923;box-shadow:inset 0 1px 2px #000c,0 .5px 0 #fff}
+.tw-window:after{content:'';position:absolute;left:50%;top:calc(2*var(--u));bottom:calc(2*var(--u));width:1px;background:#c5d1b055}
+.tw-silk{position:absolute;top:calc(18*var(--u));font:500 calc(6.5*var(--u)) var(--font-mono);letter-spacing:.34em;color:#9a9d92}
+.tw-silk.l{left:calc(30*var(--u));top:calc(15*var(--u))}.tw-silk.r{right:calc(30*var(--u))}
+.tw-silk.l b{font:600 calc(11*var(--u)) var(--font-wordmark);letter-spacing:-.04em;color:#59614f}
+.tw-grille{position:absolute;right:calc(30*var(--u));top:calc(38*var(--u));width:calc(40*var(--u));height:calc(15*var(--u));background:radial-gradient(circle,#6f746566 0 calc(1*var(--u)),#0000 calc(1.2*var(--u))) 0 0/calc(5*var(--u)) calc(5*var(--u))}
+/* Keys: slightly smaller, gently dished, softer shadows. */
+.tw-keys{position:absolute;left:calc(30*var(--u));right:calc(30*var(--u));top:calc(66*var(--u));display:grid;gap:calc(9*var(--u))}
+.tw-row{display:flex;justify-content:center;gap:calc(8*var(--u))}
+.tw-row:nth-child(1){transform:translateX(calc(-8*var(--u)))}.tw-row:nth-child(2){transform:translateX(calc(4*var(--u)))}
+.tw-key{flex:none;width:calc(22*var(--u));height:calc(22*var(--u));border-radius:50%;display:grid;place-items:center;font:500 calc(6.2*var(--u)) var(--font-mono);color:#c9ccc0;background:radial-gradient(circle at 50% 58%,#3a3d37 0 38%,#30332d 62%,#41453e 88%,#4d514a);box-shadow:0 calc(1.6*var(--u)) 0 #1c1f1a,0 calc(2.6*var(--u)) calc(3*var(--u)) #3d3f2a38,inset 0 calc(.8*var(--u)) 0 #ffffff1f}
+.tw-key.mod{background:radial-gradient(circle at 50% 58%,#e4e0d4 0 38%,#ece8dd 62%,#f7f4ec 88%);color:#7a7d73;box-shadow:0 calc(1.6*var(--u)) 0 #c2bdad,0 calc(2.6*var(--u)) calc(3*var(--u)) #3d3f2a2b,inset 0 1px 0 #fff}
+.tw-key.ret{width:calc(36*var(--u));border-radius:calc(11*var(--u));background:radial-gradient(ellipse at 50% 60%,#b34934 0 45%,#bd533d 75%,#c75e47);color:#f7e2da;box-shadow:0 calc(1.6*var(--u)) 0 #7a2e20,0 calc(2.6*var(--u)) calc(3*var(--u)) #3d3f2a38,inset 0 1px 0 #ffffff33}
+.tw-space{margin:calc(1*var(--u)) auto 0;width:calc(184*var(--u));height:calc(16*var(--u));border-radius:calc(8*var(--u));background:linear-gradient(#41453e,#30332d);box-shadow:0 calc(1.6*var(--u)) 0 #1c1f1a,0 calc(2.6*var(--u)) calc(3*var(--u)) #3d3f2a38,inset 0 1px 0 #ffffff1f}
+
+/* ——— Life List lever: before (current) vs after ——— */
+.lev{--w:200px;position:relative;width:calc(var(--w)*.5);height:calc(var(--w)*.62);display:grid;place-items:center}
+.plate{position:absolute;inset:0;border-radius:14px;background:linear-gradient(162deg,var(--shell-warm-hi),var(--shell-warm) 45%,var(--shell-warm-lo))}
+/* before (copied from the site) */
+.old .bezel{position:relative;width:calc(var(--w)*.13);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fbfbf7,#d8d5c8 45%,#aaa697 80%,#8f8b7c);box-shadow:0 2px 3px #3d3f2a33,inset 0 0 0 1px #ffffff90}
+.old .bezel:before{content:'';position:absolute;inset:26%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#5c6158,#2a2e28);box-shadow:inset 0 1px 2px #000a}
+.old .bat{position:absolute;left:50%;top:50%;width:calc(var(--w)*.026);height:calc(var(--w)*.1);margin-left:calc(var(--w)*-.013);border-radius:calc(var(--w)*.013);transform-origin:50% 0;background:linear-gradient(90deg,#8f8d86,#f4f3ee 40%,#c9c7bf 62%,#86847c);box-shadow:1px 2px 2px #0004}
+.old .bat:after{content:'';position:absolute;left:-18%;right:-18%;bottom:-6%;height:34%;border-radius:40%;background:linear-gradient(90deg,#8f3526,#d0634a 42%,#a13f2c)}
+/* after: a knurled satin nut around a dark bushing; a tapered satin bat, lit from the upper left, with a soft cast shadow; a matte red cap. */
+.new .bezel{position:relative;width:calc(var(--w)*.14);aspect-ratio:1;border-radius:50%;background:repeating-conic-gradient(#3d3f2a0a 0 2deg,#ffffff00 2deg 4deg),radial-gradient(circle at 38% 32%,#f7f5ef,#e2dfd6 46%,#cbc8be 76%,#b9b6ac);box-shadow:0 calc(var(--w)*.006) calc(var(--w)*.012) #3d3f2a38,0 0 0 .5px #8f8b7c80,inset 0 .6px 0 #fffffff0}
+/* A flat satin washer, then the dark bushing the bat comes out of. */
+.new .bezel:before{content:'';position:absolute;inset:20%;border-radius:50%;background:radial-gradient(circle at 42% 36%,#f3f1eb,#d6d3ca 70%,#c2bfb5);box-shadow:inset 0 .5px 0 #fff,0 0 0 .5px #7d7b7459,0 .5px 1px #3d3f2a33}
+.new .bezel:after{content:'';position:absolute;inset:33%;border-radius:50%;background:radial-gradient(circle at 50% 42%,#1f221c,#3a3d37 90%);box-shadow:inset 0 1px 1.5px #000d}
+.new .shadow{position:absolute;left:50%;top:50%;width:calc(var(--w)*.032);height:calc(var(--w)*.11);margin-left:calc(var(--w)*-.016);transform-origin:50% 0;border-radius:calc(var(--w)*.016);background:#3d3f2a;filter:blur(calc(var(--w)*.007));opacity:.42}
+/* The bat: thicker at the pivot, tapering to the tip; satin steel lit from the upper left (soft, low-contrast bands). */
+.new .bat{position:absolute;left:50%;top:50%;width:calc(var(--w)*.032);height:calc(var(--w)*.1);margin-left:calc(var(--w)*-.016);transform-origin:50% 0;clip-path:polygon(0 0,100% 0,82% 100%,18% 100%);
+  background:linear-gradient(0deg,#ffffff00 60%,#ffffff33),linear-gradient(90deg,#8d8b84 0%,#b3b1aa 18%,#dcdad3 36%,#f3f2ee 46%,#e4e2dc 54%,#c4c2bb 72%,#a19f98 88%,#8d8b84 100%)}
+/* A matte brick-red sleeve on the tip: the panel's one red touch. */
+.new .cap{position:absolute;left:50%;width:calc(var(--w)*.028);height:calc(var(--w)*.042);margin-left:calc(var(--w)*-.014);border-radius:calc(var(--w)*.014) calc(var(--w)*.014) calc(var(--w)*.006) calc(var(--w)*.006);background:linear-gradient(90deg,#8f3526,#b34934 30%,#c9624b 45%,#b34934 65%,#94382a);box-shadow:0 calc(var(--w)*.004) calc(var(--w)*.006) #3d3f2a47,inset 0 .5px 0 #ffffff38}
+.new .pivot{position:absolute;left:50%;top:50%;width:calc(var(--w)*.04);height:calc(var(--w)*.04);margin:calc(var(--w)*-.02) 0 0 calc(var(--w)*-.02);border-radius:50%;background:radial-gradient(circle at 38% 32%,#f4f3ef,#c8c6bf 45%,#8d8b84 80%,#6f6d67);box-shadow:0 .5px 1px #0006}
+</style>
+<body>
+<template id="tw"><div class="tw">
+<div class="tw-rest"></div>
+<div class="tw-paper"><small>TRAVEL LOG · 12.10.2024</small><b>极光来的那一晚<span class="caret"></span></b></div>
+<div class="tw-collar l"></div><div class="tw-collar r"></div><div class="tw-knob l"></div><div class="tw-knob r"></div><div class="tw-platen"></div>
+<div class="tw-bail"></div><div class="tw-roller" style="left:calc(150*var(--u))"></div><div class="tw-roller" style="left:calc(274*var(--u))"></div>
+<div class="tw-apron"></div>
+<div class="tw-shell"><div class="tw-silk l"><b>Fred.</b></div><div class="tw-window"></div><div class="tw-silk r">MANUAL · 01</div><div class="tw-grille"></div>
+<div class="tw-keys"><div class="tw-row"></div><div class="tw-row"></div><div class="tw-row"></div><div class="tw-space"></div></div></div>
+</div></template>
+
+<section class="v" id="tw"><span class="tag">手记 · 打字机 v3 · 哑光塑料为主、缎面铝点到为止；纸按真实比例（约为滚筒 72%），加托纸板与压纸胶轮</span>
+<div data-tw style="position:absolute;left:50%;top:40px;transform:translateX(-50%) scale(1.95);transform-origin:50% 0"></div></section>
+
+<section class="v" id="lever"><span class="tag">人生清单拨杆 · 改前 / 改后（放大 4 倍）</span>
+<div class="lbl" style="left:390px;top:170px">BEFORE</div><div class="lbl" style="left:960px;top:170px">AFTER</div>
+<div style="position:absolute;left:250px;top:230px;transform:scale(4);transform-origin:0 0" class="old"><div class="lev"><div class="plate"></div><div class="bezel"></div><div class="bat" style="transform:rotate(180deg)"></div></div></div>
+<div style="position:absolute;left:820px;top:230px;transform:scale(4);transform-origin:0 0" class="new"><div class="lev"><div class="plate"></div><div class="bezel"></div><div class="shadow" style="transform:translate(calc(var(--w)*.016),calc(var(--w)*.01)) rotate(180deg)"></div><div class="bat" style="transform:rotate(180deg)"></div><div class="pivot"></div><div class="cap" style="top:calc(50% - var(--w)*.1 - var(--w)*.012)"></div></div></div>
+</section>
+<script>
+const tpl = document.getElementById('tw').innerHTML;
+const rows = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+document.querySelectorAll('[data-tw]').forEach(host => {
+  host.innerHTML = tpl;
+  const r = host.querySelectorAll('.tw-row');
+  r[0].innerHTML = [...rows[0]].map(c => `<i class="tw-key">${c}</i>`).join('');
+  r[1].innerHTML = [...rows[1]].map(c => `<i class="tw-key">${c}</i>`).join('') + '<i class="tw-key ret">RET</i>';
+  r[2].innerHTML = '<i class="tw-key mod">⇧</i>' + [...rows[2]].map(c => `<i class="tw-key">${c}</i>`).join('') + '<i class="tw-key mod">⇧</i>';
+  host.querySelector('.tw-bail').innerHTML = '<i></i>'.repeat(41);
+});
+const v = new URLSearchParams(location.search).get('v') || 'tw';
+document.querySelectorAll('.v').forEach(s => s.style.display = s.id === v ? 'block' : 'none');
+</script>
