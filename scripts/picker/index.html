@@ -29,7 +29,7 @@ main{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:
 .screen .card.picked .art{filter:none;box-shadow:0 0 0 2px var(--gold),0 12px 22px #000a}
 .screen .card.picked .art:after{content:'★';position:absolute;right:8px;top:8px;width:24px;height:24px;border-radius:50%;background:var(--gold);color:#1a1510;display:grid;place-items:center;font:700 13px var(--ui)}
 .note{display:none;width:100%;min-height:62px;margin-top:2px;padding:8px 10px;border:1px solid #2a2622;border-radius:6px;background:var(--panel);color:var(--film);font:13px/1.5 var(--ui);resize:vertical;outline:none}
-.screen .card.picked .note{display:block}
+/* Notes are optional and not asked for here; any written in data.js stay as they are. */
 .card.removed .art:after{content:'✕';background:var(--accent);color:#fff}
 .meta b{display:block;font-weight:500;font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .meta small{font:500 10px var(--mono);letter-spacing:.14em;color:var(--dim)}
@@ -86,7 +86,7 @@ function cardEl(item) {
 function toggle(el) {
   const id = el.dataset.id;
   // On the screening tab a click puts the film on (or takes it off) the screening list.
-  if (screen()) { curated.set(id, { pick: !pickOf(id), note: noteOf(id) }); paint(el); counts(); if (pickOf(id)) el.querySelector('.note').focus(); return; }
+  if (screen()) { curated.set(id, { pick: !pickOf(id), note: noteOf(id) }); paint(el); counts(); return; }
   if (owned.has(id)) removed.has(id) ? removed.delete(id) : removed.add(id);
   else picks.has(id) ? picks.delete(id) : picks.set(id, { id, title: el.dataset.title });
   paint(el); counts();
@@ -125,7 +125,7 @@ async function load() {
 }
 // Scrolling near the end loads the next page by itself.
 const moreObserver = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { moreObserver.unobserve(entry.target); load(); } }), { rootMargin: '600px' });
-function reload() { loadToken++; loading = false; state.page = 1; grid.replaceChildren(); grid.classList.toggle('screen', screen()); $('.hint').textContent = screen() ? '点一下 = 放进放映表（建议 12–20 部，打开片单时最先看到的就是它们）· 在海报下面写一句为什么' : HINT; scrollTo({ top: 0 }); load(); }
+function reload() { loadToken++; loading = false; state.page = 1; grid.replaceChildren(); grid.classList.toggle('screen', screen()); $('.hint').textContent = screen() ? '点一下 = 放进放映表（建议 12–20 部，打开片单时最先看到的就是它们）' : HINT; scrollTo({ top: 0 }); load(); }
 const HINT = document.querySelector('.hint').textContent;
 
 document.querySelectorAll('.group').forEach(group => group.addEventListener('click', e => {
