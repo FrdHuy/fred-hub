@@ -143,13 +143,15 @@ export function createInteraction(gallery, enter) {
     }
     tx=px;ty=py;follow();
   }
-  // A press on the object is ambiguous: the first ~7px decide. Mostly sideways → the rail swipes;
-  // mostly up/down (disc into the drive, ticket into the slot) → the object is picked up.
+  // A press on the object. With a mouse it is never ambiguous: the object under the pointer is grabbed (the rail is dragged on the
+  // empty stage, or moved with the arrows / menu). With touch the first ~7px decide: mostly sideways → the rail swipes;
+  // mostly up/down (disc into the drive, ticket into the slot, lever, RETURN key) → the object is picked up.
   gallery.stage.addEventListener('pointerdown',e=>{
     pending=null;
     if(!e.target.closest('.ticket-paper,.silver-disc,.panel,.tw')||!gallery.settled||e.button!==0||!['travel','cinema','bucketlist','stories'].includes(item?.id)||e.target.closest('.collection-slot')!==gallery.currentElement)return;
     e.preventDefault();if(busy){e.stopImmediatePropagation();return;}
-    pending={id:e.pointerId,x:e.clientX,y:e.clientY};
+    pending={id:e.pointerId,x:e.clientX,y:e.clientY,mouse:e.pointerType==='mouse'};
+    if(pending.mouse)e.stopImmediatePropagation();
   },true);
   function pickUp(e){
     gallery.freeze();clearTimeout(idleTimer);returning=false;
@@ -159,8 +161,8 @@ export function createInteraction(gallery, enter) {
   gallery.stage.addEventListener('pointermove',e=>{
     if(pending?.id===e.pointerId){
       const dx=e.clientX-pending.x,dy=e.clientY-pending.y;
-      if(Math.hypot(dx,dy)<7){e.stopImmediatePropagation();return;}
-      if(Math.abs(dx)>Math.abs(dy)){pending=null;return;}
+      if(Math.hypot(dx,dy)<(pending.mouse?3:7)){e.stopImmediatePropagation();return;}
+      if(!pending.mouse&&Math.abs(dx)>Math.abs(dy)){pending=null;return;}
       e.stopImmediatePropagation();pickUp(e);
     }
     move(e);

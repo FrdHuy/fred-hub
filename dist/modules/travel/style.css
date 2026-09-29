@@ -74,7 +74,7 @@
 [data-module="travel"] .tv-stub{display:flex;flex-direction:column;gap:8px;padding:24px 22px;border-left:1.5px dashed #c9c6b8;font:500 9px var(--mono);letter-spacing:.24em;color:#8e978c}
 [data-module="travel"] .tv-stub b{font:500 26px/1 var(--face);letter-spacing:.06em;color:#2e342d;margin-bottom:6px}
 [data-module="travel"] .tv-bars{display:block;margin-top:auto;height:44px;background:repeating-linear-gradient(90deg,#3f463e 0 2px,transparent 2px 4px,#3f463e 4px 5px,transparent 5px 9px,#3f463e 9px 12px,transparent 12px 14px)}
-[data-module="travel"] .tv-row:focus-visible{outline:1px solid #d2a05273;outline-offset:4px;border-radius:2px}
+
 
 @media (max-width:900px){
   [data-module="travel"] .tv-head,[data-module="travel"] .tv-row{grid-template-columns:150px auto 1fr 140px;grid-template-areas:"info dest . status";column-gap:20px}

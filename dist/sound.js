@@ -39,6 +39,7 @@ const VOICES = {
   print() { for (let i = 0; i < 14; i++) click(1500 + Math.random() * 1200, .012, .06, i * .045); },  // dot-matrix chatter
   key() { click(1200, .025, .12); tone(160, .05, .05); },             // a key going down
   type() { click(1900 + Math.random() * 500, .02, .15); tone(120, .04, .06); click(4200, .006, .05, .014); }, // a typebar strikes the platen
+  ret() { for (let i = 0; i < 12; i++) click(1400 - i * 45, .01, .05, i * .026); click(380, .06, .28, .33); tone(78, .1, .16, { at: .33 }); }, // carriage return: ratchet, then the stop
   bell() { tone(2637, .9, .07); tone(3951, .5, .018); tone(5274, .35, .012); },                            // the margin bell
   feed() { for (let i = 0; i < 9; i++) click(900 - i * 40, .014, .08, i * .055); tone(70, .5, .025, { type: 'triangle' }); }, // platen ratchet
 };

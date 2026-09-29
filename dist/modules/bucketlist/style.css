@@ -81,7 +81,7 @@
 [data-module="bucketlist"] .deck-field{--lamp:26px;display:grid;grid-template-columns:repeat(10,var(--lamp));gap:12px;padding:22px;align-content:center;justify-content:center;border-radius:14px;background:linear-gradient(150deg,var(--sage-hi),var(--sage) 60%,var(--sage-lo));box-shadow:inset 0 2px 4px #6f7a6680,inset 0 -1px 0 #ffffff80,0 1px 0 #fff}
 [data-module="bucketlist"] .deck-lamp{width:var(--lamp);height:var(--lamp);min-height:0;cursor:pointer}
 [data-module="bucketlist"] .deck-lamp.is-sel{outline:1.5px solid #fbfaf3;outline-offset:5px}
-[data-module="bucketlist"] .deck-lamp:focus-visible{outline:1.5px solid #fbfaf3;outline-offset:5px}
+
 [data-module="bucketlist"] .is-booting .deck-lamp:is(.is-done,.is-mark):after{animation:lamp-on .6s ease-out calc(180ms + var(--n) * 9ms) both}
 [data-module="bucketlist"] .is-booting .deck-lamp.is-todo:before{animation:lamp-dim .5s ease-out calc(180ms + var(--n) * 9ms) both}
 @keyframes lamp-on{0%{opacity:0}40%{opacity:1;filter:brightness(1.3)}100%{opacity:1;filter:none}}
@@ -96,7 +96,7 @@
 [data-module="bucketlist"] .deck-drum:after{content:'';position:absolute;inset:0;background:linear-gradient(#0000004d,transparent 30%,transparent 70%,#0000004d)}
 [data-module="bucketlist"] .deck-strip{display:flex;flex-direction:column;transform:translateY(calc(var(--d,0) * var(--h) * -1));transition:transform .45s cubic-bezier(.3,1.35,.5,1)}
 [data-module="bucketlist"] .deck-strip span{height:var(--h);line-height:var(--h);text-align:center;font:600 20px var(--mono);color:#2c302b}
-[data-module="bucketlist"] .deck-odometer.is-held,[data-module="bucketlist"] .deck-odometer:focus-visible{box-shadow:inset 0 2px 3px #0009,0 0 0 1.5px #fbfaf3,0 1px 0 #fff}
+[data-module="bucketlist"] .deck-odometer.is-held{box-shadow:inset 0 2px 3px #0009,0 0 0 1.5px #fbfaf3,0 1px 0 #fff}
 /* Knob: a spun-aluminium cap on a knurled skirt. The light stays put (upper left); only the knurl and the mark turn. */
 [data-module="bucketlist"] .deck-knob{--size:78px;--turn:calc(var(--angle,0deg) + var(--drag,0deg));position:relative;width:var(--size);height:var(--size);border-radius:50%;cursor:grab;touch-action:none;box-shadow:0 1px 1px #3d3f2a4d,0 4px 6px #3d3f2a33,0 12px 18px #3d3f2a1f}
 [data-module="bucketlist"] .deck-knob.is-held{cursor:grabbing}
@@ -113,7 +113,7 @@
 [data-module="bucketlist"] .deck-control:has(.deck-knob){position:relative;gap:20px}
 /* Printed scale around the knob: one tick per detent. */
 [data-module="bucketlist"] .deck-control:has(.deck-knob):before{content:'';position:absolute;top:-10px;left:50%;width:98px;height:98px;margin-left:-49px;border-radius:50%;background:repeating-conic-gradient(from -.6deg,#6f7a68 0 1.2deg,transparent 1.2deg 24deg);-webkit-mask:radial-gradient(circle,transparent 44.5px,#000 45px 48.5px,transparent 49px);mask:radial-gradient(circle,transparent 44.5px,#000 45px 48.5px,transparent 49px);opacity:.55}
-[data-module="bucketlist"] .deck-knob:focus-visible{outline:1.5px solid var(--ink);outline-offset:6px}
+
 /* PRINT: a cream key with real travel. */
 [data-module="bucketlist"] .deck-print{width:78px;height:44px;border:0;border-radius:9px;cursor:pointer;background:linear-gradient(180deg,#fbf9f2,#ebe7da);box-shadow:inset 0 1px 0 #fff,inset 0 -2px 2px #b9b4a266,0 4px 0 #cfcab9,0 5px 1px #aea995,0 8px 10px #3d3f2a26;transition:transform .08s,box-shadow .08s}
 [data-module="bucketlist"] .deck-print span{font:600 11px/1 var(--mono);letter-spacing:.28em;color:var(--ink)}

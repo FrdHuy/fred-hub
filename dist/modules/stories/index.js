@@ -2,6 +2,7 @@ import data from './data.js?v=33';
 import { TYPES, dotDate, sortNotes, years } from './notes.js?v=33';
 import { unseal, normalise } from './seal.js?v=33';
 import { typewriterMarkup } from './typewriter.js?v=33';
+import { strike as strikeKey, setCarriage, carriageReturn, feed } from './carriage.js?v=33';
 import travelData from '../travel/data.js?v=33';
 import { parseTravel, localNow, flight } from '../travel/trips.js?v=33';
 import { collectionPath } from '../../router.js';
@@ -89,35 +90,33 @@ ${list.length ? `<ol class="nt-sheets">${list.map(sheet).join('')}</ol>` : '<p c
     if (!reduced()) typewriter.animate([{ opacity: 0, transform: 'translateY(30px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.22,.75,.2,1)' });
   }
   function closeLock() { lock.hidden = true; lock.innerHTML = ''; lockNote = null; input = typewriter = null; typed = ''; }
-  function strike(char) {
-    const k = typewriter?.querySelector(`[data-k="${CSS.escape(char)}"]`) ?? typewriter?.querySelector('[data-k=" "]');
-    if (!k) return; k.classList.add('is-down'); setTimeout(() => k.classList.remove('is-down'), 110);
-  }
+  const strike = char => typewriter && strikeKey(typewriter, char);
   function showTyped() { const out = lock.querySelector('.nt-typed'); if (out) out.textContent = '*'.repeat(typed.length); }
-  function type(char) { if (!/^[a-z0-9]$/.test(char) || typed.length >= 40) return; typed += char; strike(char); sound('type'); showTyped(); }
+  // Each character moves the carriage one step left, exactly as the line grows on the paper.
+  function type(char) { if (!/^[a-z0-9]$/.test(char) || typed.length >= 22) return; typed += char; strike(char); sound('type'); showTyped(); setCarriage(typewriter, typed.length); }
   async function attempt() {
     const note = lockNote; if (!note || !typed) return;
     const ret = typewriter.querySelector('[data-k="enter"]'); ret.classList.add('is-down'); setTimeout(() => ret.classList.remove('is-down'), 140);
     const body = await unseal(note.locked, typed);
     if (note !== lockNote) return;
     if (!body) {
-      sound('bell'); typewriter.classList.remove('is-wrong'); void typewriter.offsetWidth; typewriter.classList.add('is-wrong');
-      typed = ''; showTyped(); return;
+      // Wrong: the bell, the carriage comes back, the line is struck out.
+      const tw = typewriter; tw.classList.remove('is-wrong'); void tw.offsetWidth; tw.classList.add('is-wrong');
+      typed = ''; await carriageReturn(tw, { reduced }); showTyped(); return;
     }
     unlocked.set(note.id, body);
     try { sessionStorage.setItem(KEY(note.id), normalise(typed)); } catch {}
-    sound('feed');
-    if (!reduced()) {
-      const sheetEl = typewriter.querySelector('.tw-sheet'), u = typewriter.getBoundingClientRect().width / 440, h = sheetEl.offsetHeight;
-      await sheetEl.animate([{ transform: 'none', height: `${h}px` }, { transform: `translateY(${-160 * u}px)`, height: `${h + 160 * u}px`, opacity: 1, offset: .8 }, { transform: `translateY(${-200 * u}px)`, height: `${h + 200 * u}px`, opacity: 0 }], { duration: 700, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' }).finished.catch(() => {});
-    }
+    // Right: the carriage is thrown back, two line feeds, and the sheet rolls out.
+    await carriageReturn(typewriter, { reduced, bell: false });
+    await feed(typewriter, { reduced, lines: 2 });
+    await feed(typewriter, { reduced, out: true });
     closeLock();
     if (currentId() === note.id) read(note, body); else location.hash = collectionPath('stories', note.id);
   }
   lock.addEventListener('input', () => { if (!input) return; for (const char of input.value.toLowerCase()) type(char); input.value = ''; }, { signal });
   lock.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); attempt(); }
-    else if (e.key === 'Backspace') { e.preventDefault(); typed = typed.slice(0, -1); strike('shift'); showTyped(); }
+    else if (e.key === 'Backspace') { e.preventDefault(); typed = typed.slice(0, -1); strike('shift'); showTyped(); setCarriage(typewriter, typed.length); }
   }, { signal });
   // The on-screen keys type too (and bring the caret back to the hidden input).
   lock.addEventListener('pointerdown', e => {

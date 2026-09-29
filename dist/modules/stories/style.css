@@ -4,9 +4,11 @@
 /* ——— The typewriter. 1u = 1px when it is 440px wide. Matte plastics; satin aluminium only on small parts. ——— */
 [data-module="stories"] .tw{--u:1px;--press:0;position:relative;width:calc(440*var(--u));height:calc(420*var(--u));flex:none}
 [data-module="stories"] .tw *{box-sizing:border-box}
+/* The carriage slides as one piece: --carriage is its offset in u (negative = along the line, to the left). */
+[data-module="stories"] .tw-carriage{position:absolute;inset:0;transform:translateX(calc(var(--carriage,0) * var(--u)))}
 [data-module="stories"] .tw-rest{position:absolute;left:calc(86*var(--u));top:calc(22*var(--u));width:calc(268*var(--u));height:calc(150*var(--u));border-radius:calc(10*var(--u)) calc(10*var(--u)) 0 0;background:linear-gradient(175deg,#f1ede2,#e2ddcf);box-shadow:inset 0 1px 0 #fff,inset 0 calc(-8*var(--u)) calc(10*var(--u)) #3d3f2a14}
 [data-module="stories"] .tw-paper{position:absolute;left:calc(102*var(--u));top:0;width:calc(236*var(--u));height:calc(172*var(--u))}
-[data-module="stories"] .tw-sheet{position:absolute;left:0;right:0;top:0;height:calc(172*var(--u));background:linear-gradient(#fdfcf9,#f5f2ea 80%,#ece8dd);box-shadow:0 0 0 .5px #3d3f2a1f,calc(1*var(--u)) calc(2*var(--u)) calc(5*var(--u)) #3d3f2a14;padding:calc(20*var(--u)) calc(22*var(--u)) 0;overflow:hidden}
+[data-module="stories"] .tw-sheet{position:absolute;left:0;right:0;top:0;height:calc(172*var(--u));background:linear-gradient(#fdfcf9,#f5f2ea 80%,#ece8dd);box-shadow:0 0 0 .5px #3d3f2a1f,calc(1*var(--u)) calc(2*var(--u)) calc(5*var(--u)) #3d3f2a14;padding:calc(20*var(--u)) calc(22*var(--u)) 0;overflow:hidden;text-align:left}
 [data-module="stories"] .tw-sheet small{display:block;font:500 calc(6.5*var(--u))/1.6 var(--font-mono);letter-spacing:.24em;color:#8e978c;white-space:nowrap}
 [data-module="stories"] .tw-sheet b{display:block;margin-top:calc(11*var(--u));font:400 calc(15*var(--u))/1.55 var(--font-literary);color:#2c322b;letter-spacing:.05em}
 [data-module="stories"] .tw-caret{display:inline-block;width:calc(6*var(--u));height:1px;background:#2c322b;margin-left:2px;vertical-align:calc(3*var(--u))}
@@ -45,7 +47,8 @@
 
 /* Home rail and menu: the object fills its slot. */
 [data-module="stories"] .collectible--typewriter,.collectible--typewriter{background:none!important;display:grid;place-items:center;container-type:size;overflow:visible;filter:none}
-[data-module="stories"] .collectible--typewriter .tw{--u:calc(min(100cqw / 440, 100cqh / 420) * 1.18)}
+/* Centred from its own middle: larger than its slot, it would otherwise be pushed to one side. */
+[data-module="stories"] .collectible--typewriter .tw{--u:calc(min(100cqw / 440, 100cqh / 420) * 1.18);position:absolute;left:50%;top:50%;translate:-50% -50%}
 .module-thumbnail-image [data-module="stories"] .collectible--typewriter .tw,.module-thumbnail-image .collectible--typewriter .tw{--u:min(100cqw / 440, 100cqh / 420)}
 .collection-stage [data-module="stories"] .tw-key.ret{pointer-events:auto}
 
@@ -58,7 +61,7 @@
 [data-module="stories"] .nt-years button[aria-pressed="true"]{color:var(--ink)}
 [data-module="stories"] .nt-sheets{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:40px 34px;align-items:start;list-style:none;margin:0;padding:0}
 [data-module="stories"] .nt-sheet{--tilt:0deg;--drop:0px;position:relative;display:flex;flex-direction:column;gap:14px;width:100%;aspect-ratio:210/297;padding:26px 24px;box-sizing:border-box;border:0;text-align:left;color:inherit;font:inherit;cursor:pointer;background:linear-gradient(170deg,var(--sheet),var(--sheet-lo));box-shadow:0 1px 1px #3d3f2a1f,0 10px 22px #3d3f2a17;transform:translateY(var(--drop)) rotate(var(--tilt));transition:transform .35s var(--ease),box-shadow .35s}
-[data-module="stories"] .nt-sheet:hover,[data-module="stories"] .nt-sheet:focus-visible{transform:translateY(calc(var(--drop) - 10px)) rotate(0deg);box-shadow:0 1px 1px #3d3f2a1f,0 22px 34px #3d3f2a24}
+[data-module="stories"] .nt-sheet:hover{transform:translateY(calc(var(--drop) - 10px)) rotate(0deg);box-shadow:0 1px 1px #3d3f2a1f,0 22px 34px #3d3f2a24}
 [data-module="stories"] .nt-stamp{align-self:flex-start;padding:3px 7px 2px;border:1px solid currentColor;border-radius:2px;font:600 9px var(--font-mono);letter-spacing:.24em;color:#5c6456;transform:rotate(-2deg)}
 [data-module="stories"] .nt-sheet h3{margin:4px 0 0;font:400 21px/1.45 var(--font-literary);letter-spacing:.04em;color:var(--ink)}
 [data-module="stories"] .nt-sheet p{margin:0;font:300 12.5px/2 var(--font-ui);color:var(--soft);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
