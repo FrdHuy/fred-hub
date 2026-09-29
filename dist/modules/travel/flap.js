@@ -1,4 +1,5 @@
 import { flipPath } from './trips.js?v=31';
+import { play } from '../../sound.js?v=31';
 
 // A row of split-flap cells. Each cell: fixed top/bottom halves plus two leaves that fall over the split.
 const STEP = 72;
@@ -22,6 +23,7 @@ export function createWord(length, size, { signal, reduced }) {
     const { top, bottom, fall, rise } = state, from = state.c;
     paint(top, to); paint(bottom, from); paint(fall, from); paint(rise, to);
     fall.hidden = rise.hidden = false;
+    play('flap');
     const falling = fall.animate([{ transform: 'rotateX(0)', filter: 'brightness(1)' }, { transform: 'rotateX(-90deg)', filter: 'brightness(.55)' }], { duration: STEP / 2, easing: 'ease-in', fill: 'forwards' });
     const rising = rise.animate([{ transform: 'rotateX(90deg)', filter: 'brightness(1.5)' }, { transform: 'rotateX(0)', filter: 'brightness(1)' }], { duration: STEP / 2, delay: STEP / 2, easing: 'ease-out', fill: 'both' });
     await rising.finished.catch(() => {});

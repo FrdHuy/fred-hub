@@ -72,3 +72,11 @@
 .detail-view[data-module=cinema]{padding-top:15px}
 @media(max-width:700px){.detail-view[data-module=cinema]{padding-top:5px}.detail-view[data-module=cinema] .detail-toolbar{padding:0 22px}}
 .room-veil{position:fixed;inset:0;z-index:140;pointer-events:none}.room-veil>i{position:absolute;inset:0}
+/* Sound toggle: a hand-drawn speaker on the left gutter, mirroring the menu on the right. */
+.sound-toggle{justify-self:start;width:44px;height:44px;display:grid;place-items:center;padding:0;border:0;background:none;color:var(--ink);cursor:pointer;opacity:.75;transition:opacity .2s}
+.sound-toggle:hover{opacity:1}
+.sound-toggle svg{width:26px;height:20px}
+.sound-toggle :is(.sound-wave,.sound-mute){transition:opacity .25s}
+.sound-toggle .sound-wave,.sound-toggle[aria-pressed=true] .sound-mute{opacity:0}
+.sound-toggle[aria-pressed=true] .sound-wave{opacity:1}
+[data-theme=dark] .sound-toggle{color:#ece4d6}

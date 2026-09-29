@@ -1,5 +1,6 @@
 import { ticketContact, discContact } from './contact.js';
 import { createPanel } from './modules/bucketlist/panel-home.js?v=31';
+import { play } from './sound.js?v=31';
 
 export function createInteraction(gallery, enter) {
   const shell=document.querySelector('.gallery-shell'), hint=shell.querySelector('.interaction-hint');
@@ -39,6 +40,8 @@ export function createInteraction(gallery, enter) {
   });
   const prompts={travel:'将机票下缘插入槽口，再从左向右刷过。Enter 可完成刷卡。',cinema:'按住光盘可推进或抽回；插入后松手读取。',stories:'打开日记',bucketlist:'把人生清单面板的拨杆往上拨到 ON，面板通电后进入。回车可直接开机。'};
   function status(value) {
+    // Each reader has its voice: the gate beeps, the drive takes the disc and spins up.
+    if(receiver.dataset.state!==value){const drive=receiver.dataset.module==='cinema';play(value==='reading'?(drive?'drive':'reading'):value==='success'?(drive?'tick':'ok'):value==='error'?'error':'');}
     receiver.dataset.state=value;
     if(item) hint.textContent = value==='reading'?'READING':value==='error'?'ERROR，重新插入可重试':value==='success'?'SUCCESS':prompts[item.id];
     const display=receiver.querySelector('.gate-display');if(display)display.textContent={ready:'READY',reading:'READING',error:'ERROR',success:'SUCCESS'}[value]||'READY';

@@ -1,0 +1,52 @@
+// Every object's voice, synthesised on the fly (no audio files). Off until the visitor turns it on; the choice is remembered.
+const KEY = 'fred-sound';
+let on = false, ctx = null, noise = null, master = null, lastFlap = 0;
+try { on = localStorage.getItem(KEY) === 'on'; } catch {}
+
+function audio() {
+  if (!ctx) {
+    const Context = window.AudioContext || window.webkitAudioContext; if (!Context) return null;
+    ctx = new Context(); master = ctx.createGain(); master.gain.value = .7; master.connect(ctx.destination);
+    noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const data = noise.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  }
+  if (ctx.state === 'suspended') ctx.resume();
+  return ctx;
+}
+// A short filtered noise burst: clicks, clacks and detents.
+function click(freq, length, gain, at = 0) {
+  const t = ctx.currentTime + at, source = ctx.createBufferSource(), filter = ctx.createBiquadFilter(), amp = ctx.createGain();
+  source.buffer = noise; source.playbackRate.value = .8 + Math.random() * .4;
+  filter.type = 'bandpass'; filter.frequency.value = freq; filter.Q.value = 1.6;
+  amp.gain.setValueAtTime(gain, t); amp.gain.exponentialRampToValueAtTime(.0001, t + length);
+  source.connect(filter).connect(amp).connect(master); source.start(t, Math.random() * .5, length + .02);
+}
+function tone(freq, length, gain, { at = 0, type = 'sine', to = freq } = {}) {
+  const t = ctx.currentTime + at, osc = ctx.createOscillator(), amp = ctx.createGain();
+  osc.type = type; osc.frequency.setValueAtTime(freq, t); if (to !== freq) osc.frequency.exponentialRampToValueAtTime(to, t + length);
+  amp.gain.setValueAtTime(.0001, t); amp.gain.exponentialRampToValueAtTime(gain, t + .008); amp.gain.exponentialRampToValueAtTime(.0001, t + length);
+  osc.connect(amp).connect(master); osc.start(t); osc.stop(t + length + .02);
+}
+
+const VOICES = {
+  flap() { const now = performance.now(); if (now - lastFlap < 14) return; lastFlap = now; click(2400 + Math.random() * 900, .016, .07); click(800, .01, .04); },
+  tick() { click(3400, .012, .1); },                                  // knob detent, odometer drum, cover-flow step
+  reading() { click(1800, .02, .06); },                               // ticket seated / disc caught
+  ok() { tone(1760, .11, .06); },                                     // the gate's beep
+  error() { tone(330, .11, .07, { type: 'triangle' }); tone(330, .11, .07, { type: 'triangle', at: .16 }); },
+  drive() { click(900, .03, .12); tone(70, 1.1, .035, { type: 'sawtooth', to: 190 }); },  // the tray takes the disc and spins up
+  lever() { click(650, .05, .22); tone(95, .09, .12, { at: .01 }); tone(55, .5, .02, { at: .08 }); }, // clunk, then mains hum
+  print() { for (let i = 0; i < 14; i++) click(1500 + Math.random() * 1200, .012, .06, i * .045); },  // dot-matrix chatter
+  key() { click(1200, .025, .12); tone(160, .05, .05); },             // a key going down
+};
+
+export function play(name) {
+  if (!on || !VOICES[name]) return;
+  if (!audio()) return;
+  try { VOICES[name](); } catch {}
+}
+export const soundOn = () => on;
+export function setSound(value) {
+  on = value; try { localStorage.setItem(KEY, on ? 'on' : 'off'); } catch {}
+  if (on && audio()) VOICES.tick();
+}

@@ -1,6 +1,7 @@
 import { parseItems, itemLines } from './items.js?v=31';
 import { loadEntries } from './storage.js?v=31';
 import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=31';
+import { play } from '../../sound.js?v=31';
 
 const DETENT = 24;
 // Each odometer drum is a strip of 0–9 that rolls to the current digit.
@@ -66,6 +67,7 @@ export function mount({ container, item }) {
     i = Math.max(0, Math.min(items.length - 1, i));
     const lamps = [...field.children];
     lamps[index]?.classList.remove('is-sel'); lamps[index]?.setAttribute('aria-selected', 'false'); if (lamps[index]) lamps[index].tabIndex = -1;
+    if (i !== index) play('tick');
     index = i;
     lamps[i].classList.add('is-sel'); lamps[i].setAttribute('aria-selected', 'true'); lamps[i].tabIndex = 0;
     if (focus) lamps[i].focus({ preventScroll: true });
@@ -80,6 +82,7 @@ export function mount({ container, item }) {
       if (next !== year && !motion.matches) odometer.animate([{ translate: '0 0' }, { translate: `0 ${next > year ? -3 : 3}px` }, { translate: '0 0' }], { duration: 180, easing: 'ease-out' });
       return false;
     }
+    play('tick');
     year = clamped; render(); return true;
   }
 
@@ -160,6 +163,7 @@ export function mount({ container, item }) {
   // PRINT: the key goes down and a thermal receipt feeds out of the slot, line by line.
   let printing = null;
   printKey.addEventListener('click', () => {
+    play('key'); play('print');
     const states = lampStates(items, year, now);
     const paper = document.createElement('div'); paper.className = 'deck-paper';
     const line = (className, cells) => { const row = document.createElement('div'); row.className = className; cells.forEach(text => { const cell = document.createElement('span'); cell.textContent = text; row.append(cell); }); paper.append(row); };

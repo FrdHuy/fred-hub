@@ -1,4 +1,5 @@
 import { createInteraction } from './experience.js?v=31';
+import { soundOn, setSound } from './sound.js?v=31';
 import { mountModule } from './modules/index.js?v=31';
 import { modules, getModule, createCover } from './catalog.js?v=31';
 import { CollectionGallery } from './gallery.js?v=31';
@@ -121,6 +122,11 @@ addEventListener('resize', () => cancelRouteAnimation());
 motion.addEventListener('change', () => cancelRouteAnimation());
 
 const menu = $('#module-menu'), menuToggle = $('.module-menu-toggle');
+// Sound: off until asked for; the speaker at the top left mirrors the menu at the top right.
+const soundToggle = $('.sound-toggle');
+const showSound = () => { soundToggle.setAttribute('aria-pressed', String(soundOn())); soundToggle.setAttribute('aria-label', soundOn() ? '关闭声音' : '打开声音'); };
+soundToggle.addEventListener('click', () => { setSound(!soundOn()); showSound(); });
+showSound();
 function closeMenu(restoreFocus = true) {
   menu.hidden = true; menuToggle.setAttribute('aria-expanded', 'false');
   if (restoreFocus) menuToggle.focus({ preventScroll: true });
