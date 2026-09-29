@@ -1,6 +1,6 @@
-import { parseFilms, filmMeta, starCells, viewFilms, TYPES, ORDERS } from './films.js?v=34';
-import { pose } from './flow.js?v=34';
-import { play as sound } from '../../sound.js?v=34';
+import { parseFilms, filmMeta, starCells, viewFilms, seriesLabel, TYPES, ORDERS } from './films.js?v=35';
+import { pose } from './flow.js?v=35';
+import { play as sound } from '../../sound.js?v=35';
 
 const poster = name => new URL(`./posters/${name}`, import.meta.url).href;
 const pad = number => String(number).padStart(2, '0');
@@ -60,10 +60,10 @@ export function mount({ container, item }) {
     face.append(code, title, year); return face;
   }
 
-  function caseFor({ film, index }, position) {
-    const button = document.createElement('button'); button.type = 'button'; button.className = 'cinema-case';
+  function caseFor({ film, index, set }, position) {
+    const button = document.createElement('button'); button.type = 'button'; button.className = `cinema-case${set ? ' is-set' : ''}`;
     button.setAttribute('role', 'option'); button.setAttribute('aria-selected', 'false'); button.tabIndex = -1;
-    button.setAttribute('aria-label', [film.title, film.year].filter(Boolean).join('，'));
+    button.setAttribute('aria-label', set ? `${seriesLabel(set.name)}，系列 ${set.members.length} 部` : [film.title, film.year].filter(Boolean).join('，'));
     button.style.setProperty('--i', Math.min(position, 12));
     const lift = document.createElement('span'); lift.className = 'cinema-lift';
     const box = document.createElement('span'); box.className = 'cinema-box';
@@ -71,7 +71,10 @@ export function mount({ container, item }) {
     const back = document.createElement('span'); back.className = 'cinema-face cinema-back';
     const mirror = document.createElement('span'); mirror.className = 'cinema-face cinema-mirror';
     if (film.poster) mirror.dataset.poster = poster(film.poster);
-    box.append(back, spine(film, index, 'left'), spine(film, index, 'right'), front, mirror); lift.append(box); button.append(lift);
+    // A box set: a thicker case, the series name on its spines and a small ×N on the front.
+    if (set) { const count = document.createElement('span'); count.className = 'cinema-count'; count.textContent = `×${set.members.length}`; front.append(count); }
+    const shown = set ? { ...film, title: seriesLabel(set.name), year: `×${set.members.length}` } : film;
+    box.append(back, spine(shown, index, 'left'), spine(shown, index, 'right'), front, mirror); lift.append(box); button.append(lift);
     button.addEventListener('click', () => { if (dragged) return; position === current ? openDetail(position) : centre(position); }, { signal });
     return button;
   }
@@ -83,13 +86,27 @@ export function mount({ container, item }) {
   }
 
   // Cover-flow: each case turns by its distance from the middle, recomputed as the rack scrolls.
+  // Sizes are measured once (and on resize), and only cases that can be on screen are posed each frame:
+  // a long list would otherwise re-transform hundreds of 3D boxes on every scroll step.
+  let sizes = null, reach = 30;
+  function measure() {
+    sizes = size();
+    const edge = innerWidth / 2 + sizes.w;
+    reach = 2; while (reach < 80 && Math.abs(pose(reach, sizes.w, sizes.d).x) < edge) reach++;
+    reach += 1;
+  }
   function layout() {
     frame = 0;
-    const { w, d, pitch } = size(), middle = rack.scrollLeft;
+    if (!sizes) measure();
+    const { w, d, pitch } = sizes, middle = rack.scrollLeft;
     let nearest = -1, best = Infinity;
     [...rack.children].forEach((element, position) => {
-      const offset = (position * pitch - middle) / pitch, distance = Math.abs(offset), { x, z, turn } = pose(offset, w, d);
+      const offset = (position * pitch - middle) / pitch, distance = Math.abs(offset);
       if (distance < best) { best = distance; nearest = position; }
+      const far = distance > reach;
+      if (far !== element.classList.contains('is-far')) element.classList.toggle('is-far', far);
+      if (far) return;
+      const { x, z, turn } = pose(offset, w, d);
       // The case element stays in its scroll slot; only the box moves to its shelf position.
       element.style.setProperty('--x', `${x - offset * pitch}px`);
       element.style.setProperty('--z', `${z}px`);
@@ -112,6 +129,29 @@ export function mount({ container, item }) {
     tint = later(() => { const film = view[position]?.film; ambient.style.backgroundImage = film?.poster ? `url("${poster(film.poster)}")` : 'none'; hall.classList.add('has-pick'); }, 220);
   }
 
+  // A box set's detail: the series, then its films in release order. A film opens its own card; ← goes back to the set.
+  function fillSet(set) {
+    info.replaceChildren();
+    const reel = document.createElement('p'); reel.className = 'cinema-reel'; reel.textContent = `BOX SET · ×${set.members.length}`;
+    const title = document.createElement('h2'); title.className = 'cinema-title'; title.textContent = seriesLabel(set.name);
+    const years = set.members.map(m => m.film.year).filter(Boolean), span = years.length ? `${Math.min(...years)}–${Math.max(...years)}` : '';
+    const meta = document.createElement('p'); meta.className = 'cinema-meta'; meta.textContent = [span, `${set.members.length} 部`].filter(Boolean).join(' · ');
+    const list = document.createElement('ol'); list.className = 'cinema-members';
+    set.members.forEach(({ film, index }) => {
+      const row = document.createElement('li'), button = document.createElement('button'); button.type = 'button'; button.className = 'cinema-member';
+      const thumb = film.poster ? Object.assign(new Image(), { src: poster(film.poster), alt: '', loading: 'lazy' }) : document.createElement('span');
+      const text = document.createElement('span'); text.innerHTML = '<b></b><small></small>';
+      text.querySelector('b').textContent = film.title; text.querySelector('small').textContent = [film.year, film.rating !== undefined ? `★ ${film.rating}` : ''].filter(Boolean).join(' · ');
+      button.append(thumb, text); row.append(button); list.append(row);
+      button.addEventListener('click', () => {
+        detailCover.replaceChildren(cover(film)); dress(detailCover); fillInfo(film, index);
+        const back = document.createElement('button'); back.type = 'button'; back.className = 'cinema-back'; back.textContent = `← ${seriesLabel(set.name)}`;
+        back.addEventListener('click', () => { detailCover.replaceChildren(cover(set.members[0].film)); dress(detailCover); fillSet(set); });
+        info.prepend(back);
+      });
+    });
+    info.append(reel, title, meta, list);
+  }
   function fillInfo(film, index) {
     info.replaceChildren();
     const reel = document.createElement('p'); reel.className = 'cinema-reel'; reel.textContent = `No. ${pad(index + 1)}`;
@@ -138,8 +178,9 @@ export function mount({ container, item }) {
   // Cover and disc travel together; the disc only slides out once the cover has landed.
   async function openDetail(position) {
     if (busy) return; busy = true; opened = position;
-    const { film, index } = view[position], front = rack.children[position].querySelector('.cinema-front');
-    detailCover.replaceChildren(cover(film)); dress(detailCover); fillInfo(film, index);
+    const { film, index, set } = view[position], front = rack.children[position].querySelector('.cinema-front');
+    detailCover.replaceChildren(cover(film)); dress(detailCover);
+    if (set) fillSet(set); else fillInfo(film, index);
     detail.hidden = false; detail.classList.add('is-rolling', 'is-playing');
     const from = front.getBoundingClientRect(), to = flight.getBoundingClientRect();
     front.style.visibility = 'hidden'; close.focus({ preventScroll: true });
@@ -188,7 +229,7 @@ export function mount({ container, item }) {
     centre(next); rack.children[next]?.focus({ preventScroll: true });
   }, { signal });
   rack.addEventListener('scroll', queue, { passive: true, signal });
-  addEventListener('resize', queue, { signal });
+  addEventListener('resize', () => { sizes = null; queue(); }, { signal });
 
   // Vertical wheel and mouse drag also browse sideways; snapping settles on the nearest case.
   rack.addEventListener('wheel', e => {

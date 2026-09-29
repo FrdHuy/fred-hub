@@ -1,7 +1,7 @@
 // Pure helpers for the poster picker: TMDB list items → cards, and picks → a rewritten data.js.
 import { entrySource } from './cinema-add.mjs';
 
-const ORDER = ['title', 'original', 'type', 'year', 'director', 'rating', 'poster', 'tmdb'];
+const ORDER = ['title', 'original', 'type', 'year', 'director', 'rating', 'poster', 'tmdb', 'series'];
 const year = date => (/^\d{4}/.test(date || '') ? Number(date.slice(0, 4)) : undefined);
 
 // A TMDB list/search item → what the picker shows.

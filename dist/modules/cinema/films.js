@@ -1,7 +1,7 @@
 // Pure data rules for data.js; shared by the page and scripts/check-cinema.mjs.
 export const TYPES = ['电影', '剧集'];
-const FIELDS = ['title', 'original', 'type', 'year', 'director', 'rating', 'poster', 'tmdb'];
-const TEXT = ['original', 'director', 'tmdb'];
+const FIELDS = ['title', 'original', 'type', 'year', 'director', 'rating', 'poster', 'tmdb', 'series'];
+const TEXT = ['original', 'director', 'tmdb', 'series'];
 export const POSTER_PATTERN = /^[\w.-]+\.(jpe?g|png|webp)$/i;
 
 function problem(entry) {
@@ -43,5 +43,23 @@ export function viewFilms(films, { type = '', order = 'added' } = {}) {
   const view = films.map((film, index) => ({ film, index })).filter(({ film }) => !type || film.type === type);
   const key = order === 'rating' ? 'rating' : order === 'year' ? 'year' : '';
   if (key) view.sort((a, b) => (b.film[key] ?? -Infinity) - (a.film[key] ?? -Infinity) || a.index - b.index);
-  return view;
+  return boxSets(view);
 }
+
+// A series with two or more films on the shelf becomes one box set, standing where its first film would stand.
+// Its members are in release order; the cover is the first film of the series.
+export function boxSets(view) {
+  const members = new Map();
+  for (const item of view) if (item.film.series) members.set(item.film.series, [...(members.get(item.film.series) ?? []), item]);
+  const placed = new Set();
+  return view.flatMap(item => {
+    const set = item.film.series && members.get(item.film.series);
+    if (!set || set.length < 2) return [item];
+    if (placed.has(item.film.series)) return [];
+    placed.add(item.film.series);
+    const ordered = [...set].sort((a, b) => (a.film.year ?? 9999) - (b.film.year ?? 9999) || a.index - b.index);
+    return [{ film: ordered[0].film, index: item.index, set: { name: item.film.series, members: ordered } }];
+  });
+}
+// "蜘蛛侠（系列）" → "蜘蛛侠" for the spine.
+export const seriesLabel = name => String(name).replace(/[（(]?系列[）)]?$|\s*Collection$/i, '').trim();

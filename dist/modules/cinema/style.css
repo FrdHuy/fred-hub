@@ -109,3 +109,17 @@
   [data-module="cinema"] .cinema *,[data-module="cinema"] .cinema *:before,[data-module="cinema"] .cinema *:after{animation:none!important;transition:none!important}
 }
 [data-module="cinema"] .cinema-stars .cinema-score-source{margin-left:8px;align-self:center;font:500 9px var(--font-mono);letter-spacing:.24em;color:var(--dim)}
+/* Cases far along the shelf are not drawn (they are folded out of view anyway). */
+[data-module="cinema"] .cinema-case.is-far .cinema-lift{visibility:hidden}
+/* A box set: a case twice as deep, with a small count on its front. */
+[data-module="cinema"] .cinema-case.is-set{--d:28px}
+[data-module="cinema"] .cinema-count{position:absolute;right:8px;bottom:8px;z-index:2;padding:4px 7px 3px;border-radius:3px;background:#0f0d0cd9;font:500 11px var(--font-mono);letter-spacing:.14em;color:var(--film)}
+/* The set's films in the detail view. */
+[data-module="cinema"] .cinema-members{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:6px;max-height:min(46vh,420px);overflow-y:auto}
+[data-module="cinema"] .cinema-member{display:flex;align-items:center;gap:14px;width:100%;padding:6px 8px;border:0;border-radius:6px;background:none;color:var(--film);text-align:left;cursor:pointer;font:inherit;transition:background .2s}
+[data-module="cinema"] .cinema-member:hover{background:#ffffff0d}
+[data-module="cinema"] .cinema-member img,[data-module="cinema"] .cinema-member>span:first-child{flex:none;width:34px;aspect-ratio:2/3;object-fit:cover;border-radius:2px;background:#2a2622;box-shadow:0 3px 6px #0006}
+[data-module="cinema"] .cinema-member b{display:block;font:400 15px/1.4 var(--display);letter-spacing:.06em}
+[data-module="cinema"] .cinema-member small{font:500 10px var(--font-mono);letter-spacing:.18em;color:var(--dim)}
+[data-module="cinema"] .cinema-back{margin:0 0 14px;padding:4px 0;border:0;background:none;color:var(--dim);font:500 11px var(--font-mono);letter-spacing:.2em;cursor:pointer}
+[data-module="cinema"] .cinema-back:hover{color:var(--film)}

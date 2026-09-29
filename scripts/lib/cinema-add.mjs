@@ -29,8 +29,10 @@ export function entryFromTmdb(kind, details, { rating, poster } = {}) {
   if (rating !== undefined) entry.rating = rating;
   if (poster) entry.poster = poster;
   entry.tmdb = `${kind}/${details.id}`;
+  // A film series on TMDB (e.g. 蜘蛛侠（系列）): several of them stand on the shelf as one box set.
+  if (details.belongs_to_collection?.name) entry.series = details.belongs_to_collection.name;
   // Keep the same field order as the hand-written examples.
-  const order = ['title', 'original', 'type', 'year', 'director', 'rating', 'poster', 'tmdb'];
+  const order = ['title', 'original', 'type', 'year', 'director', 'rating', 'poster', 'tmdb', 'series'];
   return Object.fromEntries(order.filter(key => key in entry).map(key => [key, entry[key]]));
 }
 

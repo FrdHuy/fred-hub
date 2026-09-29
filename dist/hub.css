@@ -64,7 +64,7 @@
 .module-thumbnail-image .drive-display,.module-thumbnail-image .drive-eject{display:none}
 /* One brick-red touch per home object (docs/DESIGN.md): the plane on the boarding pass, the full stop on the disc label. */
 .ticket-route>span{color:var(--accent)}
-.silver-disc>span b{color:var(--accent);font-weight:inherit}
+.silver-disc>span b{color:inherit;font-weight:inherit}
 /* Every inner page puts the back arrow in the same spot: on the header's 5% gutter, 15px below it (the stories diary follows once rebuilt). */
 @media(min-width:701px){.detail-view:is([data-module=bucketlist],[data-module=travel],[data-module=stories]){padding-left:5%;padding-right:5%}}
 .detail-view[data-module=cinema]{padding-top:15px}
@@ -81,3 +81,9 @@
 
 /* No focus rings anywhere (Fred, 2026-09-29): selection is shown by the objects themselves. */
 *:focus,*:focus-visible{outline:none!important}
+
+/* The cinema object's one brick-red: the drive's EJECT key (a real function key, like the typewriter's RETURN). */
+.drive-eject{width:22px;height:11px;right:32px;bottom:7px;background:linear-gradient(#c65a44,var(--accent) 60%,#a3412e);box-shadow:inset 0 1px 0 #ffffff40,0 1px 0 #7a2e20,0 2px 3px #3b483433}
+.drive-eject:before{left:8px;top:2.5px;border-bottom-color:#f7e2da}
+.drive-eject:after{left:8px;top:6.5px;background:#f7e2da}
+.drive-eject:active{box-shadow:inset 0 1px 0 #ffffff40,0 0 0 #7a2e20}
