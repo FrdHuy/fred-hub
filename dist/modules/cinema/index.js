@@ -1,6 +1,6 @@
-import { parseFilms, filmMeta, starCells, viewFilms, seriesLabel, TYPES, ORDERS } from './films.js?v=35';
-import { pose } from './flow.js?v=35';
-import { play as sound } from '../../sound.js?v=35';
+import { parseFilms, filmMeta, starCells, viewFilms, seriesLabel, screening, report, byYear, overlap, TYPES } from './films.js?v=36';
+import { pose } from './flow.js?v=36';
+import { play as sound } from '../../sound.js?v=36';
 
 const poster = name => new URL(`./posters/${name}`, import.meta.url).href;
 const pad = number => String(number).padStart(2, '0');
@@ -9,7 +9,7 @@ const svg = body => `<svg viewBox="0 0 40 32" fill="none" stroke="currentColor" 
 // A single disc: outer rim, a faint groove, the hub ring and the hole.
 const CASE_ICON = svg('<circle cx="20" cy="16" r="12.5"/><path d="M11.6 11.2c1.6-2.9 4.4-4.8 7.6-5.2" opacity=".55"/><circle cx="20" cy="16" r="4.2"/><circle cx="20" cy="16" r="1.4"/>');
 const CLOSE_ICON = svg('<path d="M12.2 7.6c5.2 5.3 10.4 11 15.9 16.6"/><path d="M27.4 7.2c-5.6 5.4-10.6 11.2-15.6 17.2"/>');
-const SORT_ICON = svg('<path d="M7.2 11.1c8.4-.3 17-.2 25.6.2"/><path d="M7.4 21.2c8.5.2 17 .1 25.4-.3"/><circle cx="15.4" cy="11.2" r="2.6" fill="#0f0d0c"/><circle cx="25.2" cy="21" r="2.6" fill="#0f0d0c"/>');
+const SEEN_KEY = 'fred-cinema-seen';   // a visitor's own ticks in “你看过几部？” (their browser only)
 
 export function mount({ container, item }) {
   const events = new AbortController(), { signal } = events;
@@ -17,15 +17,18 @@ export function mount({ container, item }) {
   const timers = new Set();
   const later = (fn, ms) => { const id = setTimeout(() => { timers.delete(id); fn(); }, ms); timers.add(id); return id; };
   const play = (element, frames, options) => motion.matches ? Promise.resolve() : element.animate(frames, options).finished.catch(() => {});
-  let films = [], view = [], current = -1, aim = -1, opened = -1, busy = false, frame = 0;
-  const choice = { type: '', order: 'added' };
+  let films = [], picks = [], view = [], current = -1, aim = -1, opened = -1, busy = false, frame = 0, mode = 'screening', type = '';
 
   const hall = document.createElement('section'); hall.className = 'cinema'; hall.lang = 'zh-CN';
   hall.innerHTML = `<div class="cinema-bg" aria-hidden="true"><div class="cinema-ambient"></div><div class="cinema-grain"></div></div>
-<h1 class="cinema-sr">观影记录</h1><p class="cinema-tally">${CASE_ICON}<span></span></p>
-<div class="cinema-tools"><button class="cinema-sort-toggle" type="button" aria-label="筛选与排序" aria-expanded="false">${SORT_ICON}</button>
-<div class="cinema-sort" hidden><div role="group" aria-label="类型" data-key="type"></div><div role="group" aria-label="排序" data-key="order"></div></div></div>
-<div class="cinema-rack" role="listbox" aria-orientation="horizontal" aria-label="片单：左右方向键挑选，回车打开"></div>
+<h1 class="cinema-sr">观影记录</h1>
+<div class="cinema-modes" role="group" aria-label="片单"><button type="button" data-mode="screening" aria-pressed="true"><i></i>放映表<b></b></button><button type="button" data-mode="archive" aria-pressed="false"><i></i>全部看过<b></b></button></div>
+<button class="cinema-quiz" type="button">${CASE_ICON}你看过几部？</button>
+<div class="cinema-rack" role="listbox" aria-orientation="horizontal" aria-label="放映表：左右方向键挑选，回车打开"></div>
+<section class="cinema-archive" hidden><div class="cinema-report"></div><div class="cinema-filter" role="group" aria-label="类型"></div><div class="cinema-wall"></div></section>
+<div class="cinema-compare" role="dialog" aria-label="你看过几部？" hidden><button class="cinema-compare-close" type="button" aria-label="关闭">${CLOSE_ICON}</button>
+<p class="cinema-reel">HAVE YOU SEEN?</p><h2 class="cinema-compare-title">你看过几部？</h2><p class="cinema-compare-hint">点你看过的。结果只留在你的浏览器里。</p>
+<div class="cinema-compare-grid"></div><p class="cinema-compare-result" aria-live="polite"></p></div>
 <div class="cinema-detail" role="region" aria-label="影片详情" hidden><button class="cinema-close" type="button" aria-label="收起详情">${CLOSE_ICON}</button>
 <div class="cinema-art"><div class="cinema-flight"><span class="cinema-detail-disc"><i></i></span><span class="cinema-detail-cover"></span></div></div><div class="cinema-info"></div></div>
 <p class="cinema-notice" role="status"></p><i class="cinema-probe" style="width:var(--w)"></i><i class="cinema-probe" style="width:var(--slot)"></i><i class="cinema-probe" style="width:var(--d)"></i>
@@ -34,7 +37,7 @@ export function mount({ container, item }) {
   const $ = selector => hall.querySelector(selector);
   const rack = $('.cinema-rack'), ambient = $('.cinema-ambient'), detail = $('.cinema-detail'), notice = $('.cinema-notice');
   const flight = $('.cinema-flight'), detailCover = $('.cinema-detail-cover'), detailDisc = $('.cinema-detail-disc'), info = $('.cinema-info'), close = $('.cinema-close');
-  const sortToggle = $('.cinema-sort-toggle'), sortPanel = $('.cinema-sort');
+  const archive = $('.cinema-archive'), wall = $('.cinema-wall'), compare = $('.cinema-compare');
 
   // Posters load only when a case comes near the visible shelf (a long list would otherwise fetch every poster at once).
   const dress = box => {
@@ -161,6 +164,8 @@ export function mount({ container, item }) {
     let step = Math.min(Array.from(film.title).length, 14);
     const line = (className, text) => { const p = document.createElement('p'); p.className = className; p.textContent = text; p.style.setProperty('--i', ++step); info.append(p); };
     if (film.original) line('cinema-original', film.original);
+    // Fred's own line about the film: the reason it is on the screening list.
+    if (film.note) line('cinema-note', film.note);
     const meta = filmMeta(film); if (meta) line('cinema-meta', meta);
     if (film.rating !== undefined) {
       const stars = document.createElement('p'); stars.className = 'cinema-stars'; stars.setAttribute('aria-label', `评分 ${film.rating} / 5`);
@@ -175,6 +180,14 @@ export function mount({ container, item }) {
   const slide = () => `translateX(${detailDisc.offsetWidth * .5}px)`;
   const settle = () => detail.getAnimations({ subtree: true }).forEach(animation => { if (animation instanceof CSSAnimation) return; animation.cancel(); });
 
+  // From the poster wall: the card simply fades in (no case to fly from).
+  async function openFlat(film, index) {
+    if (busy) return; busy = true; opened = -2;
+    detailCover.replaceChildren(cover(film)); dress(detailCover); fillInfo(film, index);
+    detail.hidden = false; detail.classList.add('is-rolling', 'is-playing', 'is-out'); close.focus({ preventScroll: true });
+    await play(detail, [{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: 'ease-out' });
+    busy = false;
+  }
   // Cover and disc travel together; the disc only slides out once the cover has landed.
   async function openDetail(position) {
     if (busy) return; busy = true; opened = position;
@@ -193,7 +206,11 @@ export function mount({ container, item }) {
     detail.classList.add('is-out'); busy = false;
   }
   async function closeDetail() {
-    if (busy || opened < 0) return; busy = true;
+    if (busy || opened === -1) return; busy = true;
+    if (opened === -2) {
+      await play(detail, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, fill: 'forwards' });
+      detail.hidden = true; detail.classList.remove('is-rolling', 'is-playing', 'is-out'); settle(); opened = -1; busy = false; return;
+    }
     const position = opened, front = rack.children[position].querySelector('.cinema-front');
     // Pause the spin where it is (no snap back to 0°), tuck the disc in, then fly home.
     detail.classList.remove('is-playing', 'is-rolling');
@@ -218,8 +235,8 @@ export function mount({ container, item }) {
   // Esc closes the innermost layer first; main.js only sees it when nothing is open.
   hall.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    if (opened >= 0) { e.stopPropagation(); closeDetail(); }
-    else if (!sortPanel.hidden) { e.stopPropagation(); toggleSort(false); sortToggle.focus(); }
+    if (opened !== -1) { e.stopPropagation(); closeDetail(); }
+    else if (!compare.hidden) { e.stopPropagation(); closeCompare(); }
   }, { signal });
   rack.addEventListener('keydown', e => {
     // Consecutive presses add up even while the previous scroll is still travelling.
@@ -249,46 +266,93 @@ export function mount({ container, item }) {
     later(() => { dragged = false; }, 0);
   }, { signal });
 
-  // Filter / sort: one line-art toggle, two quiet rows of words.
-  function options(group, entries) {
-    group.replaceChildren(...entries.map(([value, label]) => {
-      const button = document.createElement('button'); button.type = 'button'; button.textContent = label; button.dataset.value = value;
-      button.setAttribute('aria-pressed', String(choice[group.dataset.key] === value)); return button;
-    }));
+  // ——— Screening list (the CD shelf) or everything seen (report + poster wall). ———
+  function setMode(next) {
+    mode = next;
+    hall.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
+    hall.dataset.mode = mode; rack.hidden = mode !== 'screening'; $('.cinema-quiz').hidden = mode !== 'screening'; archive.hidden = mode !== 'archive';
+    if (mode === 'screening') { sizes = null; arrange(); } else { buildArchive(); scrollTo({ top: 0 }); }
   }
-  function toggleSort(open = sortPanel.hidden) {
-    sortPanel.hidden = !open; sortToggle.setAttribute('aria-expanded', String(open));
-    if (open) play(sortPanel, [{ opacity: 0, transform: 'translateY(-4px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'ease-out' });
-  }
-  sortToggle.addEventListener('click', () => toggleSort(), { signal });
-  sortPanel.addEventListener('click', e => {
-    const button = e.target.closest('button[data-value]'); if (!button) return;
-    const key = button.parentElement.dataset.key; choice[key] = button.dataset.value;
-    button.parentElement.querySelectorAll('button').forEach(other => other.setAttribute('aria-pressed', String(other === button)));
-    sortToggle.classList.toggle('is-active', choice.type !== '' || choice.order !== 'added');
-    arrange();
-  }, { signal });
-  document.addEventListener('pointerdown', e => { if (!sortPanel.hidden && !e.target.closest('.cinema-tools')) toggleSort(false); }, { signal });
+  hall.querySelector('.cinema-modes').addEventListener('click', e => { const button = e.target.closest('[data-mode]'); if (button && button.dataset.mode !== mode) { sound('tick'); setMode(button.dataset.mode); } }, { signal });
 
   function arrange() {
-    view = viewFilms(films, choice); current = -1; aim = -1;
-    $('.cinema-tally span').textContent = pad(view.length);
-    $('.cinema-tally').setAttribute('aria-label', `共 ${view.length} 部`);
+    view = viewFilms(picks); current = -1; aim = -1;
     lazy.disconnect(); rack.replaceChildren(...view.map(caseFor)); [...rack.children].forEach(box => lazy.observe(box));
     rack.scrollLeft = 0; layout();
   }
 
+  // The report: five numbers, then the wall, newest year first.
+  function buildArchive() {
+    const r = report(films);
+    const cell = (label, value, small = '') => `<div><span>${label}</span><b>${value}</b>${small ? `<small>${small}</small>` : ''}</div>`;
+    const clean = text => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    $('.cinema-report').innerHTML = [
+      cell('看过', `${r.total}`, `电影 ${r.movies} · 剧集 ${r.shows}`),
+      r.director ? cell('最常看的导演', clean(r.director[0]), `${r.director[1]} 部`) : '',
+      r.decade ? cell('看得最多的年代', r.decade[0], `${r.decade[1]} 部`) : '',
+      r.series ? cell('最长的系列', clean(seriesLabel(r.series[0])), `× ${r.series[1]}`) : '',
+      r.span ? cell('时间跨度', `${r.span[0]}–${r.span[1]}`) : '',
+    ].join('');
+    $('.cinema-filter').innerHTML = [['', '全部'], ...TYPES.map(t => [t, t])].map(([value, label]) => `<button type="button" data-type="${value}" aria-pressed="${type === value}">${label}</button>`).join('');
+    const shown = films.map((film, index) => ({ film, index })).filter(({ film }) => !type || film.type === type);
+    const indexOf = new Map(shown.map(({ film, index }) => [film, index]));
+    wall.replaceChildren(...byYear(shown.map(({ film }) => film)).map(([year, list]) => {
+      const group = document.createElement('section'); group.className = 'cinema-year';
+      const head = document.createElement('h3'); head.textContent = year; head.dataset.count = pad(list.length);
+      const grid = document.createElement('div'); grid.className = 'cinema-tiles';
+      list.forEach(film => {
+        const tile = document.createElement('button'); tile.type = 'button'; tile.className = 'cinema-tile'; tile.title = film.title; tile.setAttribute('aria-label', film.title);
+        if (film.poster) tile.append(Object.assign(new Image(), { src: poster(film.poster), alt: '', loading: 'lazy', decoding: 'async' })); else tile.textContent = film.title;
+        if (film.pick) tile.classList.add('is-pick');
+        tile.addEventListener('click', () => openFlat(film, indexOf.get(film)), { signal });
+        grid.append(tile);
+      });
+      group.append(head, grid); return group;
+    }));
+  }
+  $('.cinema-filter').addEventListener('click', e => { const button = e.target.closest('[data-type]'); if (!button) return; type = button.dataset.type; buildArchive(); }, { signal });
+
+  // ——— “你看过几部？” A visitor ticks what they have seen; the overlap and three suggestions update as they go. ———
+  let seen = new Set();
+  try { seen = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); } catch {}
+  const keyOf = film => film.tmdb ?? film.title;
+  function paintCompare() {
+    const result = overlap(picks, seen);
+    $('.cinema-compare-result').innerHTML = result.seen
+      ? `你看过其中 <b>${result.seen} / ${result.total}</b> 部 · 口味重合 <b>${result.percent}%</b>${result.next.length ? `<br><span>还没看过的，我最推荐：${result.next.map(f => `《${f.title.replace(/</g, '&lt;')}》`).join('')}</span>` : '<br><span>全都看过——我们的口味太像了。</span>'}`
+      : '<span>从你看过的开始点。</span>';
+  }
+  function openCompare() {
+    const grid = $('.cinema-compare-grid');
+    grid.replaceChildren(...picks.map(film => {
+      const tile = document.createElement('button'); tile.type = 'button'; tile.className = 'cinema-tile'; tile.setAttribute('aria-pressed', String(seen.has(keyOf(film)))); tile.setAttribute('aria-label', film.title);
+      if (film.poster) tile.append(Object.assign(new Image(), { src: poster(film.poster), alt: '', decoding: 'async' }));
+      const name = document.createElement('small'); name.textContent = film.title; tile.append(name);
+      tile.addEventListener('click', () => {
+        const key = keyOf(film); seen.has(key) ? seen.delete(key) : seen.add(key); tile.setAttribute('aria-pressed', String(seen.has(key))); sound('tick');
+        try { localStorage.setItem(SEEN_KEY, JSON.stringify([...seen])); } catch {}
+        paintCompare();
+      }, { signal });
+      return tile;
+    }));
+    paintCompare(); compare.hidden = false;
+    play(compare, [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.22,.75,.2,1)' });
+  }
+  function closeCompare() { compare.hidden = true; $('.cinema-quiz').focus({ preventScroll: true }); }
+  $('.cinema-quiz').addEventListener('click', openCompare, { signal });
+  $('.cinema-compare-close').addEventListener('click', closeCompare, { signal });
+
   function render(data) {
-    const parsed = parseFilms(data); films = parsed.films;
+    const parsed = parseFilms(data); films = parsed.films; picks = screening(films);
     if (parsed.errors.length) notice.textContent = `有 ${parsed.errors.length} 条没显示：${parsed.errors.join('；')}。运行 node scripts/check-cinema.mjs 查看详情。`;
-    options($('[data-key=type]'), [['', '全部'], ...TYPES.map(type => [type, type])]);
-    options($('[data-key=order]'), Object.entries(ORDERS));
+    hall.querySelector('[data-mode=screening] b').textContent = pad(picks.length);
+    hall.querySelector('[data-mode=archive] b').textContent = String(films.length).padStart(3, '0');
     if (!films.length) {
-      hall.classList.add('is-empty'); $('.cinema-tools').hidden = true; $('.cinema-tally span').textContent = pad(0);
+      hall.classList.add('is-empty'); hall.querySelector('.cinema-modes').hidden = true; $('.cinema-quiz').hidden = true;
       const empty = document.createElement('p'); empty.className = 'cinema-empty'; empty.textContent = item.emptyTitle;
       rack.replaceWith(empty); return;
     }
-    arrange();
+    setMode('screening');
   }
 
   // A fresh URL each visit so edits to data.js show after a normal refresh.

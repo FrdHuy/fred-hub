@@ -87,6 +87,19 @@ const { systemProxy } = await import('./lib/proxy.mjs');
 assert.equal(systemProxy('<dictionary> {\n  HTTPEnable : 1\n  HTTPPort : 7890\n  HTTPProxy : 127.0.0.1\n  HTTPSEnable : 1\n  HTTPSPort : 7890\n  HTTPSProxy : 127.0.0.1\n}'), 'http://127.0.0.1:7890');
 assert.equal(systemProxy('  HTTPSEnable : 0\n  HTTPEnable : 0'), null);
 console.log('PASS: poster picker — cards, shelves, add / remove, data.js rewrite, TMDB score, system proxy');
+// Screening list, notes, report, overlap.
+const curatedList = applyChanges([{ title: 'A', tmdb: 'movie/1' }, { title: 'B', tmdb: 'movie/2', pick: true, note: 'old' }], { curated: { 'movie/1': { pick: true, note: '  宿舍熄灯后看完的 ' }, 'movie/2': { pick: false, note: '' } } });
+assert.deepEqual(curatedList, [{ title: 'A', tmdb: 'movie/1', pick: true, note: '宿舍熄灯后看完的' }, { title: 'B', tmdb: 'movie/2' }]);
+assert.ok(listSource('export default [\n];\n', curatedList).includes('pick: true, note: "宿舍熄灯后看完的"'));
+const { screening, report, byYear, overlap } = await import('../dist/modules/cinema/films.js');
+assert.match(parseFilms([{ title: 'x', pick: 'yes' }]).errors[0], /pick/);
+const shelf2 = [{ title: 'a', rating: 3, year: 2001, director: 'X', type: '电影' }, { title: 'b', rating: 5, year: 2011, director: 'X / Y', series: 'S', type: '电影' }, { title: 'c', rating: 4, type: '剧集', series: 'S' }];
+assert.deepEqual(screening(shelf2, 2).map(f => f.title), ['b', 'c'], 'no picks yet: the best-rated stand in');
+assert.deepEqual(screening([...shelf2, { title: 'p', pick: true }]).map(f => f.title), ['p']);
+assert.deepEqual(report(shelf2), { total: 3, movies: 2, shows: 1, director: ['X', 2], decade: ['2000s', 1], series: ['S', 2], span: [2001, 2011] });
+assert.deepEqual(byYear(shelf2).map(([y]) => y), [2011, 2001, '—']);
+assert.deepEqual(overlap(shelf2, new Set(['a'])), { seen: 1, total: 3, percent: 33, next: [shelf2[1], shelf2[2]] });
+console.log('PASS: screening list, notes, viewing report, years, “你看过几部？” overlap');
 
 // The real data file.
 let data;

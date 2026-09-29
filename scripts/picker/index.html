@@ -25,6 +25,11 @@ main{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:
 .card.seen .art:after{content:'✓';position:absolute;right:8px;top:8px;width:24px;height:24px;border-radius:50%;background:var(--gold);color:#1a1510;display:grid;place-items:center;font:700 13px var(--ui)}
 .card.owned .art:before{content:'已在片单';position:absolute;left:8px;top:8px;padding:2px 7px;border-radius:3px;background:#100e0ccc;font:500 10px var(--ui);color:var(--film)}
 .card.removed .art{filter:grayscale(1) brightness(.45)}
+.screen .card .art{filter:grayscale(.6) brightness(.6)}
+.screen .card.picked .art{filter:none;box-shadow:0 0 0 2px var(--gold),0 12px 22px #000a}
+.screen .card.picked .art:after{content:'★';position:absolute;right:8px;top:8px;width:24px;height:24px;border-radius:50%;background:var(--gold);color:#1a1510;display:grid;place-items:center;font:700 13px var(--ui)}
+.note{display:none;width:100%;min-height:62px;margin-top:2px;padding:8px 10px;border:1px solid #2a2622;border-radius:6px;background:var(--panel);color:var(--film);font:13px/1.5 var(--ui);resize:vertical;outline:none}
+.screen .card.picked .note{display:block}
 .card.removed .art:after{content:'✕';background:var(--accent);color:#fff}
 .meta b{display:block;font-weight:500;font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .meta small{font:500 10px var(--mono);letter-spacing:.14em;color:var(--dim)}
@@ -41,7 +46,7 @@ footer{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;align-items
   <h1>Fred<i>.</i><small>片单勾选器 · 只在你的电脑上运行</small></h1>
   <div class="bar">
     <div class="group" data-group="kind"><button data-kind="movie" aria-pressed="true">电影</button><button data-kind="tv" aria-pressed="false">剧集</button></div>
-    <div class="group" data-group="list"><button data-list="known" aria-pressed="true">大家都看过</button><button data-list="top" aria-pressed="false">高分</button><button data-list="zh" aria-pressed="false">华语</button><button data-list="asia" aria-pressed="false">日韩</button><button data-list="year" aria-pressed="false">按年份</button><button data-list="mine" aria-pressed="false">我的片单</button></div>
+    <div class="group" data-group="list"><button data-list="known" aria-pressed="true">大家都看过</button><button data-list="top" aria-pressed="false">高分</button><button data-list="zh" aria-pressed="false">华语</button><button data-list="asia" aria-pressed="false">日韩</button><button data-list="year" aria-pressed="false">按年份</button><button data-list="mine" aria-pressed="false">我的片单</button><button data-list="screen" aria-pressed="false">★ 放映表</button></div>
     <select id="year" hidden></select>
     <input id="q" type="search" placeholder="搜索片名，回车（中文或原名都行）">
   </div>
@@ -55,7 +60,11 @@ const state = { kind: 'movie', list: 'known', year: new Date().getFullYear(), pa
 let owned = new Map();               // tmdb id → { title, poster } already in data.js
 const picks = new Map();             // new films: id → { id, title }
 const removed = new Set();           // owned films un-ticked
-let loading = false;
+const curated = new Map();           // screening list changes: id → { pick, note }
+const pickOf = id => curated.has(id) ? curated.get(id).pick : Boolean(owned.get(id)?.pick);
+const noteOf = id => curated.has(id) ? curated.get(id).note : owned.get(id)?.note ?? '';
+const screen = () => state.list === 'screen';
+let loading = false, loadToken = 0;   // a tab switch starts a new token; late results of an old one are dropped
 
 const yearSelect = $('#year');
 for (let y = new Date().getFullYear(); y >= 1950; y--) yearSelect.add(new Option(`${y} 年`, y));
@@ -64,48 +73,60 @@ yearSelect.addEventListener('change', () => { state.year = yearSelect.value; rel
 const seen = id => picks.has(id) || (owned.has(id) && !removed.has(id));
 function paint(el) {
   const id = el.dataset.id;
-  el.classList.toggle('seen', seen(id)); el.classList.toggle('owned', owned.has(id)); el.classList.toggle('removed', removed.has(id));
+  el.classList.toggle('seen', seen(id)); el.classList.toggle('owned', owned.has(id)); el.classList.toggle('removed', removed.has(id)); el.classList.toggle('picked', pickOf(id));
 }
 function cardEl(item) {
-  const el = document.createElement('button'); el.className = 'card'; el.dataset.id = item.id; el.dataset.title = item.title;
+  // A plain element acting as a button, so the note field inside it can take typing.
+  const el = document.createElement('div'); el.className = 'card'; el.setAttribute('role', 'button'); el.tabIndex = 0; el.dataset.id = item.id; el.dataset.title = item.title;
   const img = item.poster ? `<img loading="lazy" src="${item.local ? `/poster/${item.poster}` : `/img${item.poster}`}" alt="">` : `<span class="none">${item.title}</span>`;
-  el.innerHTML = `<span class="art">${img}</span><span class="meta"><b>${item.title}</b><small>${[item.year, item.original].filter(Boolean).join(' · ')}</small></span>`;
+  el.innerHTML = `<span class="art">${img}</span><span class="meta"><b>${item.title}</b><small>${[item.year, item.original].filter(Boolean).join(' · ')}</small></span><textarea class="note" placeholder="一句话：为什么是它"></textarea>`;
+  el.querySelector('.note').value = noteOf(item.id);
   paint(el); return el;
 }
 function toggle(el) {
   const id = el.dataset.id;
+  // On the screening tab a click puts the film on (or takes it off) the screening list.
+  if (screen()) { curated.set(id, { pick: !pickOf(id), note: noteOf(id) }); paint(el); counts(); if (pickOf(id)) el.querySelector('.note').focus(); return; }
   if (owned.has(id)) removed.has(id) ? removed.delete(id) : removed.add(id);
   else picks.has(id) ? picks.delete(id) : picks.set(id, { id, title: el.dataset.title });
   paint(el); counts();
 }
 function counts() {
-  const changes = picks.size + removed.size;
-  $('#count').innerHTML = `片单 <b>${owned.size}</b> · 新增 <b>${picks.size}</b> · 移除 <b>${removed.size}</b>`;
+  const changes = picks.size + removed.size + curated.size, screened = [...owned.keys()].filter(pickOf).length;
+  $('#count').innerHTML = `片单 <b>${owned.size}</b> · 放映表 <b>${screened}</b> · 新增 <b>${picks.size}</b> · 移除 <b>${removed.size}</b>`;
   $('#save').disabled = !changes;
 }
 
+grid.addEventListener('input', e => {
+  if (!e.target.classList.contains('note')) return;
+  const id = e.target.closest('.card').dataset.id; curated.set(id, { pick: pickOf(id), note: e.target.value }); counts();
+});
 grid.addEventListener('click', e => {
+  if (e.target.classList.contains('note')) return;
   const el = e.target.closest('.card'); if (!el) { if (e.target.closest('.more')) load(); return; }
   toggle(el);
 });
 async function api(path, options) { const res = await fetch(path, options); const data = await res.json(); if (!res.ok) throw new Error(data.error || res.status); return data; }
 async function load() {
-  if (loading) return; loading = true; $('.more')?.remove(); $('#status').textContent = '加载中…';
+  if (loading) return; loading = true; const token = loadToken; $('.more')?.remove(); $('#status').textContent = '加载中…';
   try {
     let data;
-    if (state.list === 'mine') data = { items: [...owned].map(([id, f]) => ({ id, title: f.title, poster: f.poster, local: true })), more: false };
+    if (state.list === 'mine') data = { items: [...owned].map(([id, f]) => ({ id, title: f.title, poster: f.poster, year: f.year, local: true })), more: false };
+    else if (screen()) data = { items: [...owned].sort((a, b) => pickOf(b[0]) - pickOf(a[0])).map(([id, f]) => ({ id, title: f.title, poster: f.poster, year: f.year, local: true })), more: false };
     else if (state.query) data = await api(`/api/search?q=${encodeURIComponent(state.query)}`);
     else data = await api(`/api/shelf?kind=${state.kind}&list=${state.list}&year=${state.year}&page=${state.page}`);
+    if (token !== loadToken) return;
     if (!data.items.length && state.page === 1) grid.innerHTML = '<p class="empty">这里没有结果</p>';
     grid.append(...data.items.map(cardEl));
     if (data.more) { state.page++; const more = document.createElement('button'); more.className = 'more'; more.textContent = '再来一些'; grid.append(more); moreObserver.observe(more); }
     $('#status').textContent = '';
-  } catch (error) { $('#status').textContent = error.message; }
-  loading = false;
+  } catch (error) { if (token === loadToken) $('#status').textContent = error.message; }
+  if (token === loadToken) loading = false;
 }
 // Scrolling near the end loads the next page by itself.
 const moreObserver = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { moreObserver.unobserve(entry.target); load(); } }), { rootMargin: '600px' });
-function reload() { state.page = 1; grid.replaceChildren(); scrollTo({ top: 0 }); load(); }
+function reload() { loadToken++; loading = false; state.page = 1; grid.replaceChildren(); grid.classList.toggle('screen', screen()); $('.hint').textContent = screen() ? '点一下 = 放进放映表（建议 12–20 部，打开片单时最先看到的就是它们）· 在海报下面写一句为什么' : HINT; scrollTo({ top: 0 }); load(); }
+const HINT = document.querySelector('.hint').textContent;
 
 document.querySelectorAll('.group').forEach(group => group.addEventListener('click', e => {
   const button = e.target.closest('button'); if (!button) return;
@@ -120,14 +141,14 @@ $('#save').addEventListener('click', async () => {
   const button = $('#save'); button.disabled = true;
   $('#status').textContent = picks.size ? `正在保存，下载 ${picks.size} 张海报…` : '正在保存…';
   try {
-    const result = await api('/api/save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ added: [...picks.values()], removed: [...removed] }) });
-    picks.clear(); removed.clear(); await refreshOwned();
+    const result = await api('/api/save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ added: [...picks.values()], removed: [...removed], curated: Object.fromEntries(curated) }) });
+    picks.clear(); removed.clear(); curated.clear(); await refreshOwned();
     document.querySelectorAll('.card').forEach(paint); counts();
-    $('#status').textContent = `✓ 已保存：片单共 ${result.total} 部（新增 ${result.added}）${result.failed.length ? ` · ${result.failed.length} 部失败：${result.failed.join('；')}` : ''}。刷新网站预览就能看到。`;
+    $('#status').textContent = `✓ 已保存：片单共 ${result.total} 部（新增 ${result.added}）· 放映表 ${result.picks} 部${result.failed.length ? ` · ${result.failed.length} 部失败：${result.failed.join('；')}` : ''}。刷新网站预览就能看到。`;
   } catch (error) { $('#status').textContent = `保存失败：${error.message}`; button.disabled = false; }
 });
 async function refreshOwned() { owned = new Map((await api('/api/films')).map(f => [f.id, f])); }
-addEventListener('beforeunload', e => { if (picks.size + removed.size) e.preventDefault(); });
+addEventListener('beforeunload', e => { if (picks.size + removed.size + curated.size) e.preventDefault(); });
 refreshOwned().then(() => { counts(); load(); });
 </script>
 </body></html>

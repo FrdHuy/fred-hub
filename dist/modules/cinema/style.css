@@ -7,22 +7,8 @@
 [data-module="cinema"] .cinema-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 [data-module="cinema"] .cinema-probe{position:absolute;height:0;visibility:hidden;pointer-events:none}
 
-[data-module="cinema"] .cinema-tally{position:absolute;left:5%;top:4px;margin:0;display:flex;align-items:center;gap:10px}
-[data-module="cinema"] .cinema-tally svg{width:32px;height:26px;opacity:.8}
-[data-module="cinema"] .cinema-tally span{font:500 13px/1 var(--font-mono);letter-spacing:.28em;color:var(--film)}
 
 /* Filter / sort: a line-art toggle and two rows of quiet words. */
-[data-module="cinema"] .cinema-tools{position:absolute;right:5%;top:0;z-index:4;display:flex;flex-direction:column;align-items:flex-end}
-[data-module="cinema"] .cinema-sort-toggle{position:relative;width:44px;height:36px;padding:0;border:0;background:none;color:var(--film);cursor:pointer;opacity:.75;transition:opacity .2s}
-[data-module="cinema"] .cinema-sort-toggle:hover,[data-module="cinema"] .cinema-sort-toggle[aria-expanded=true]{opacity:1}
-[data-module="cinema"] .cinema-sort-toggle svg{width:36px;height:29px}
-[data-module="cinema"] .cinema-sort-toggle.is-active:after{content:'';position:absolute;right:2px;top:5px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
-[data-module="cinema"] .cinema-sort{margin-top:6px;padding:14px 18px;display:grid;gap:10px;justify-items:end;background:#171411f2;border:1px solid #ffffff12;border-radius:2px;box-shadow:0 20px 40px #0008}
-[data-module="cinema"] .cinema-sort[hidden]{display:none}
-[data-module="cinema"] .cinema-sort div{display:flex;gap:4px}
-[data-module="cinema"] .cinema-sort button{padding:6px 8px;border:0;background:none;color:var(--dim);font:300 11px/1 var(--sans);letter-spacing:.24em;cursor:pointer;transition:color .2s}
-[data-module="cinema"] .cinema-sort button:hover{color:var(--film)}
-[data-module="cinema"] .cinema-sort button[aria-pressed=true]{color:var(--film);text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:6px;text-decoration-thickness:1px}
 
 /* Rack: native scrolling with snap; JS turns each case by its distance from the middle. */
 [data-module="cinema"] .cinema-rack{position:relative;z-index:1;display:flex;align-items:center;gap:var(--gap);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-snap-type:x mandatory;padding:calc(var(--w) * .3) calc(50% - var(--slot) / 2) calc(var(--w) * .5);cursor:grab;-webkit-user-select:none;user-select:none}
@@ -95,10 +81,7 @@
 
 @media(max-width:720px){
   [data-module="cinema"] .cinema{--w:176px;--d:11px;--gap:4px;min-height:calc(100svh - 130px)}
-  [data-module="cinema"] .cinema-tally{left:16px}
-  [data-module="cinema"] .cinema-tools{right:12px}
-  [data-module="cinema"] .cinema-sort{padding:12px}
-  [data-module="cinema"] .cinema-spine b{font-size:8px;letter-spacing:.34em}
+        [data-module="cinema"] .cinema-spine b{font-size:8px;letter-spacing:.34em}
   [data-module="cinema"] .cinema-spine small{display:none}
   [data-module="cinema"] .cinema-detail{--disc:min(52vw,240px);grid-template-columns:1fr;justify-items:center;align-content:center;gap:34px;padding:56px 20px 30px;text-align:center}
   [data-module="cinema"] .cinema-close{right:12px}
@@ -123,3 +106,68 @@
 [data-module="cinema"] .cinema-member small{font:500 10px var(--font-mono);letter-spacing:.18em;color:var(--dim)}
 [data-module="cinema"] .cinema-back{margin:0 0 14px;padding:4px 0;border:0;background:none;color:var(--dim);font:500 11px var(--font-mono);letter-spacing:.2em;cursor:pointer}
 [data-module="cinema"] .cinema-back:hover{color:var(--film)}
+
+/* ——— Two layers. Top-left: a two-lamp switch (放映表 / 全部看过); top-right: the visitors' game. ——— */
+[data-module="cinema"] .cinema-modes{position:absolute;left:5%;top:0;z-index:4;display:flex;gap:26px}
+[data-module="cinema"] .cinema-modes button{display:flex;align-items:center;gap:10px;min-height:36px;padding:0;border:0;background:none;color:var(--dim);font:300 13px var(--sans);letter-spacing:.14em;cursor:pointer;transition:color .2s}
+[data-module="cinema"] .cinema-modes i{width:7px;height:7px;border-radius:50%;background:#3a342c;transition:background .2s,box-shadow .2s}
+[data-module="cinema"] .cinema-modes b{font:500 11px var(--font-mono);letter-spacing:.2em;color:var(--dim)}
+[data-module="cinema"] .cinema-modes button[aria-pressed=true]{color:var(--film)}
+[data-module="cinema"] .cinema-modes button[aria-pressed=true] i{background:var(--gold);box-shadow:0 0 8px #d2a05288}
+[data-module="cinema"] .cinema-modes button:hover{color:var(--film)}
+[data-module="cinema"] .cinema-quiz{position:absolute;right:5%;top:0;z-index:4;display:flex;align-items:center;gap:10px;min-height:36px;padding:0;border:0;background:none;color:var(--dim);font:300 13px var(--sans);letter-spacing:.12em;cursor:pointer;transition:color .2s}
+[data-module="cinema"] .cinema-quiz svg{width:26px;height:21px}
+[data-module="cinema"] .cinema-quiz:hover{color:var(--film)}
+[data-module="cinema"] .cinema-quiz[hidden],[data-module="cinema"] .cinema-archive[hidden],[data-module="cinema"] .cinema-rack[hidden]{display:none}
+/* Fred's own line on the detail card. */
+[data-module="cinema"] .cinema-note{margin:4px 0 22px;padding-left:14px;border-left:1px solid var(--gold);font:300 17px/1.8 var(--display);letter-spacing:.06em;color:var(--film)}
+
+/* ——— Everything seen: the report, then a quiet poster wall by year. ——— */
+[data-module="cinema"] .cinema[data-mode="archive"]{justify-content:flex-start}
+[data-module="cinema"] .cinema-archive{width:min(1180px,90%);margin:70px auto 60px}
+[data-module="cinema"] .cinema-report{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border-top:1px solid #ffffff14;border-bottom:1px solid #ffffff14}
+[data-module="cinema"] .cinema-report div{padding:20px 0 22px 22px;border-left:1px solid #ffffff14}
+[data-module="cinema"] .cinema-report div:first-child{padding-left:0;border-left:0}
+[data-module="cinema"] .cinema-report span{display:block;font:500 10px var(--font-mono);letter-spacing:.28em;color:var(--dim)}
+[data-module="cinema"] .cinema-report b{display:block;margin:12px 0 6px;font:300 26px/1.25 var(--display);letter-spacing:.04em;color:var(--film)}
+[data-module="cinema"] .cinema-report small{font:500 10px var(--font-mono);letter-spacing:.2em;color:var(--dim)}
+[data-module="cinema"] .cinema-filter{display:flex;gap:18px;margin:26px 0 8px}
+[data-module="cinema"] .cinema-filter button{padding:6px 0;border:0;background:none;color:var(--dim);font:300 12px var(--sans);letter-spacing:.24em;cursor:pointer}
+[data-module="cinema"] .cinema-filter button[aria-pressed=true]{color:var(--film);border-bottom:1px solid var(--gold)}
+[data-module="cinema"] .cinema-year{display:grid;grid-template-columns:90px 1fr;gap:20px;padding:22px 0;border-bottom:1px solid #ffffff0d}
+[data-module="cinema"] .cinema-year h3{margin:0;font:300 22px/1 var(--display);letter-spacing:.06em;color:var(--film)}
+[data-module="cinema"] .cinema-year h3:after{content:attr(data-count) ' 部';display:block;margin-top:10px;font:500 10px var(--font-mono);letter-spacing:.24em;color:var(--dim)}
+[data-module="cinema"] .cinema-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:12px}
+[data-module="cinema"] .cinema-tile{position:relative;display:block;aspect-ratio:2/3;padding:0;border:0;border-radius:2px;overflow:hidden;background:#1d1a17;color:var(--dim);font:11px var(--sans);cursor:pointer;box-shadow:0 6px 14px #0007;transition:transform .2s,box-shadow .2s,filter .2s}
+[data-module="cinema"] .cinema-tile img{display:block;width:100%;height:100%;object-fit:cover}
+[data-module="cinema"] .cinema-tile:hover{transform:translateY(-3px);box-shadow:0 12px 22px #000a}
+[data-module="cinema"] .cinema-tile.is-pick:after{content:'';position:absolute;right:5px;top:5px;width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px #d2a052aa}
+/* On the long wall the card sits over the page, pinned to the screen. */
+[data-module="cinema"] .cinema[data-mode="archive"] .cinema-detail{position:fixed;inset:0;z-index:200;background:#0f0d0cf2}
+
+/* ——— “你看过几部？” ——— */
+[data-module="cinema"] .cinema-compare{position:fixed;inset:0;z-index:200;overflow:auto;padding:70px max(5%,24px) 60px;background:#0f0d0cf5;text-align:center}
+[data-module="cinema"] .cinema-compare[hidden]{display:none}
+[data-module="cinema"] .cinema-compare-close{position:absolute;right:5%;top:22px;width:44px;height:36px;padding:0;border:0;background:none;color:var(--film);cursor:pointer;opacity:.75}
+[data-module="cinema"] .cinema-compare-close svg{width:30px;height:24px}
+[data-module="cinema"] .cinema-compare-title{margin:14px 0 8px;font:300 clamp(28px,4vw,40px)/1.3 var(--display);letter-spacing:.12em;color:var(--film)}
+[data-module="cinema"] .cinema-compare-hint{margin:0 0 30px;font:300 12px var(--sans);letter-spacing:.14em;color:var(--dim)}
+[data-module="cinema"] .cinema-compare-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:18px;max-width:1000px;margin:0 auto}
+[data-module="cinema"] .cinema-compare-grid .cinema-tile{overflow:visible;background:none;box-shadow:none}
+[data-module="cinema"] .cinema-compare-grid .cinema-tile img{border-radius:2px;box-shadow:0 8px 16px #0008;transition:filter .2s,box-shadow .2s}
+[data-module="cinema"] .cinema-compare-grid .cinema-tile small{display:block;margin-top:8px;font:300 11px/1.4 var(--sans);color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+[data-module="cinema"] .cinema-compare-grid .cinema-tile[aria-pressed=false] img{filter:grayscale(.7) brightness(.55)}
+[data-module="cinema"] .cinema-compare-grid .cinema-tile[aria-pressed=true] img{box-shadow:0 0 0 2px var(--gold),0 10px 18px #000a}
+[data-module="cinema"] .cinema-compare-grid .cinema-tile[aria-pressed=true]:before{content:'✓';position:absolute;right:-6px;top:-6px;z-index:2;width:22px;height:22px;border-radius:50%;background:var(--gold);color:#1a1510;display:grid;place-items:center;font:700 12px var(--sans)}
+[data-module="cinema"] .cinema-compare-result{margin:34px auto 0;max-width:640px;font:300 16px/2 var(--sans);letter-spacing:.06em;color:var(--film)}
+[data-module="cinema"] .cinema-compare-result b{font:500 18px var(--font-mono);color:var(--gold)}
+[data-module="cinema"] .cinema-compare-result span{font-size:13px;color:var(--dim)}
+@media(max-width:700px){
+  [data-module="cinema"] .cinema-modes{left:22px;gap:16px}
+  [data-module="cinema"] .cinema-modes button,[data-module="cinema"] .cinema-quiz{font-size:12px;letter-spacing:.06em}
+  [data-module="cinema"] .cinema-quiz{right:22px}[data-module="cinema"] .cinema-quiz svg{display:none}
+  [data-module="cinema"] .cinema-year{grid-template-columns:1fr;gap:12px}
+  [data-module="cinema"] .cinema-tiles{grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+  [data-module="cinema"] .cinema-report div{padding-left:14px}
+  [data-module="cinema"] .cinema-compare-grid{grid-template-columns:repeat(3,1fr);gap:12px}
+}
