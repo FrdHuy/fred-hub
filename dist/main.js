@@ -43,6 +43,17 @@ function animate(element, frames, options) {
   const animation = element.animate(frames, options); routeAnimations.push(animation);
   return animation.finished.catch(() => {});
 }
+// One way into every room: a veil in the destination's own colour. From a screen on the home page it grows out of that
+// screen and then lifts; otherwise it simply lifts. Either way no light flash before a dark room.
+function openRoom(rect, color, behind) {
+  const veil = document.createElement('div'); veil.className = 'room-veil'; veil.setAttribute('aria-hidden', 'true'); veil.style.background = rect ? behind : color;
+  document.body.append(veil); flyingCover = veil;
+  if (!rect) return animate(veil, [{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: 'cubic-bezier(.4,0,.2,1)' });
+  const screen = document.createElement('i'); screen.style.background = color; veil.append(screen);
+  const full = 'inset(0px 0px 0px 0px round 0px)', from = `inset(${rect.top}px ${innerWidth - rect.right}px ${innerHeight - rect.bottom}px ${rect.left}px round 4px)`;
+  animate(screen, [{ clipPath: from }, { clipPath: full }], { duration: 460, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' });
+  return animate(veil, [{ opacity: 1 }, { opacity: 1, offset: .6 }, { opacity: 0 }], { duration: 780, easing: 'ease-out' });
+}
 function renderCollection(item) {
   disposeModule();
   detail.replaceChildren(); detail.dataset.module = item.id;
@@ -61,9 +72,13 @@ function renderMissing() {
 async function showRoute(initial = false) {
   const sequence = ++routeSequence, nextRoute = readRoute(), item = nextRoute.type === 'collection' ? getModule(nextRoute.id) : null;
   const previousRoute = activeRoute; let origin = null, transitionItem = null;
+  const leaving = getComputedStyle(document.body).backgroundColor;
   const openingList = !initial && previousRoute.type==='home' && item?.id==='bucketlist';
   // The Life List opens out of the powered-up panel on the home page.
   const listOrigin = openingList ? gallery.currentElement?.querySelector('.panel')?.getBoundingClientRect() : null;
+  // Other objects open through their screen: the reader's display grows into the room.
+  const screen = !initial && previousRoute.type==='home' && item && !openingList ? $(`.stage-receiver[data-module="${item.id}"] :is(.gate-display,.drive-display)`)?.getBoundingClientRect() : null;
+  const screenOrigin = screen && screen.width && screen.right > 0 && screen.left < innerWidth ? screen : null;
   interaction.reset(); cancelRouteAnimation();
   if (!initial && nextRoute.type === 'home' && previousRoute.type === 'collection') {
     origin = $('.detail-cover')?.getBoundingClientRect(); transitionItem = getModule(previousRoute.id);
@@ -92,9 +107,7 @@ async function showRoute(initial = false) {
     ]);
     paper.style.removeProperty('transform-origin');
   }else if(!initial&&!motion.matches){
-    const curtain=document.createElement('div');curtain.className='fred-curtain';curtain.setAttribute('aria-hidden','true');curtain.innerHTML='<strong>FRED<span>.</span></strong>';document.body.append(curtain);
-    flyingCover=curtain;
-    await animate(curtain,[{opacity:1,offset:0},{opacity:1,offset:.3},{opacity:0,offset:1}],{duration:440,easing:'cubic-bezier(.4,0,.2,1)'});
+    await openRoom(screenOrigin, getComputedStyle(document.body).backgroundColor, leaving);
   }
   if (sequence !== routeSequence) return;
   cancelRouteAnimation();
