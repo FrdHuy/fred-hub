@@ -4,3 +4,4 @@
 node_modules/
 checkpoints/
 .vercel/
+scripts/.cache/

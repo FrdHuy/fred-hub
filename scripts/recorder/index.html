@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>旅行录入 · Fred’s Hub</title>
+<style>
+:root{--night:#100e0c;--panel:#1a1714;--line:#2a2622;--film:#efe9dc;--dim:#857e72;--faint:#5a544b;--yellow:#f2c318;--accent:#b34934;--mono:ui-monospace,"SF Mono",Menlo,monospace;--ui:"PingFang SC","Helvetica Neue",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--night);color:var(--film);font:14px/1.6 var(--ui);-webkit-font-smoothing:antialiased}
+.wrap{display:grid;grid-template-columns:340px 1fr;min-height:100vh}
+aside{border-right:1px solid var(--line);padding:26px 22px;display:flex;flex-direction:column;gap:16px;position:sticky;top:0;height:100vh;overflow:auto}
+h1{margin:0;font:600 22px/1 "Helvetica Neue",sans-serif;letter-spacing:-.04em}h1 i{color:var(--accent);font-style:normal}h1 small{display:block;margin-top:10px;font:500 10px var(--mono);letter-spacing:.3em;color:var(--dim)}
+.tabs{display:flex;gap:4px;padding:3px;border-radius:9px;background:var(--panel)}
+.tabs button{flex:1;padding:8px;border:0;border-radius:6px;background:none;color:var(--dim);font:500 12px var(--ui);cursor:pointer}
+.tabs button[aria-pressed=true]{background:#2a2622;color:var(--film)}
+.list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.trip{display:grid;grid-template-columns:1fr auto;gap:2px 10px;width:100%;padding:10px 12px;border:1px solid transparent;border-radius:8px;background:var(--panel);color:inherit;text-align:left;cursor:pointer;font:inherit}
+.trip b{font:500 13px var(--mono);letter-spacing:.14em}.trip small{grid-column:1;font:500 10px var(--mono);letter-spacing:.14em;color:var(--dim)}.trip em{grid-row:1/3;grid-column:2;align-self:center;font:500 11px var(--mono);font-style:normal;color:var(--dim)}
+.trip[aria-current=true]{border-color:#4a443c;background:#221e1a}
+.add{padding:11px;border:1px dashed #3a352e;border-radius:8px;background:none;color:var(--dim);font:500 13px var(--ui);cursor:pointer}
+.add:hover{color:var(--film);border-color:#5a544b}
+main{padding:34px 44px 120px;max-width:760px}
+.empty{color:var(--dim);margin-top:80px}
+label{display:block;margin:0 0 6px;font:500 10px var(--mono);letter-spacing:.28em;color:var(--dim)}
+.field{margin-bottom:22px;position:relative}
+input,textarea{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--film);font:15px var(--ui);outline:none}
+input:focus,textarea:focus{border-color:#5a544b}
+textarea{min-height:80px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.search input{font-size:18px;padding:14px 16px}
+.suggest{position:absolute;left:0;right:0;top:100%;z-index:3;margin-top:4px;border:1px solid var(--line);border-radius:8px;background:#1d1a17;overflow:hidden;box-shadow:0 12px 30px #000a}
+.suggest button{display:block;width:100%;padding:10px 14px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--film);text-align:left;cursor:pointer;font:inherit}
+.suggest button:hover{background:#26221e}
+.suggest b{font:500 13px var(--mono);letter-spacing:.12em}.suggest span{margin-left:10px;color:var(--dim);font-size:12px}.suggest small{display:block;font:500 10px var(--mono);letter-spacing:.1em;color:var(--faint)}
+.chips{display:flex;gap:6px;margin:8px 0 0}.chips button{padding:4px 9px;border:1px solid var(--line);border-radius:5px;background:none;color:var(--dim);font:500 11px var(--mono);letter-spacing:.12em;cursor:pointer}.chips button[aria-pressed=true]{border-color:var(--yellow);color:var(--yellow)}
+.note{margin-top:6px;font:500 10px var(--mono);letter-spacing:.14em;color:var(--faint)}.note.warn{color:var(--yellow)}
+.check{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--dim)}.check input{width:auto}
+.drop{display:grid;place-items:center;min-height:170px;border:1px dashed #3a352e;border-radius:10px;color:var(--dim);font-size:13px;cursor:pointer;overflow:hidden;position:relative}
+.drop.over{border-color:var(--yellow);color:var(--film)}
+.drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.drop .clear{position:absolute;right:8px;top:8px;z-index:2;padding:4px 10px;border:0;border-radius:4px;background:#100e0ccc;color:var(--film);font-size:12px;cursor:pointer}
+footer{position:fixed;left:340px;right:0;bottom:0;display:flex;align-items:center;gap:18px;padding:16px 44px;background:#100e0cf2;border-top:1px solid var(--line)}
+.save{padding:11px 28px;border:0;border-radius:9px;background:var(--film);color:#100e0c;font:600 13px var(--ui);cursor:pointer}
+.save:disabled{opacity:.4;cursor:default}
+.del{padding:11px 16px;border:0;background:none;color:var(--dim);font:13px var(--ui);cursor:pointer}.del:hover{color:var(--accent)}
+.status{font-size:12px;color:var(--yellow)}
+.status.err{color:#ff9c86}
+</style></head>
+<body>
+<div class="wrap">
+<aside>
+  <h1>Fred<i>.</i><small>旅行录入 · 只在你的电脑上运行</small></h1>
+  <div class="tabs"><button data-list="arrivals" aria-pressed="true">去过的</button><button data-list="departures" aria-pressed="false">想去的</button></div>
+  <ol class="list" id="list"></ol>
+  <button class="add" id="add">＋ 新的一趟</button>
+</aside>
+<main id="editor"><p class="empty">左边选一趟，或点「＋ 新的一趟」。</p></main>
+</div>
+<footer><button class="del" id="del" hidden>删除这一趟</button><span class="status" id="status"></span><span style="flex:1"></span><button class="save" id="save" disabled>保存</button></footer>
+<script>
+const $ = s => document.querySelector(s);
+let data = null, list = 'arrivals', index = -1, dirty = false, nearby = [];   // nearby: airports around the last picked city
+const FIELD = 12, flap = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^ A-Z0-9.\-:'&/]/g, ' ').replace(/\s+/g, ' ').trim();
+const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+const trips = () => data[list];
+
+function status(text, err = false) { const el = $('#status'); el.textContent = text; el.classList.toggle('err', err); }
+function mark() { dirty = true; $('#save').disabled = false; status('有改动，记得保存'); renderList(); }
+function renderList() {
+  $('#list').innerHTML = trips().map((t, i) => `<li><button class="trip" data-i="${i}" aria-current="${i === index}"><b>${esc(flap(t.to || '（未命名）'))}</b><small>${esc([t.date, t.days && `${t.days} 天`, t.country].filter(Boolean).join(' · ') || '—')}</small><em>${esc(t.code || '')}</em></button></li>`).join('');
+}
+function renderEditor() {
+  const t = trips()[index]; $('#del').hidden = !t;
+  if (!t) { $('#editor').innerHTML = '<p class="empty">左边选一趟，或点「＋ 新的一趟」。</p>'; return; }
+  const arrival = list === 'arrivals', exact = /^\d{4}-\d{2}-\d{2}$/.test(t.date || '');
+  $('#editor').innerHTML = `
+  <div class="field search"><label>搜索城市（中文或英文都行）</label><input id="q" placeholder="例如：京都 / Reykjavik，回车搜索" autocomplete="off"><div class="suggest" id="suggest" hidden></div></div>
+  <div class="row">
+    <div class="field"><label>目的地（翻牌上的英文）</label><input data-k="to" value="${esc(t.to)}" maxlength="24"><p class="note" id="len"></p></div>
+    <div class="field"><label>机场三字码</label><input data-k="code" value="${esc(t.code)}" maxlength="3" style="text-transform:uppercase">${nearby.length ? `<p class="chips">${nearby.map(a => `<button data-code="${esc(a.code)}" title="${esc(a.name)} · ${a.km} km" aria-pressed="${a.code === t.code}">${esc(a.code)}</button>`).join('')}</p>` : ''}</div>
+    ${arrival ? `<div class="field"><label>国家</label><input data-k="country" value="${esc(t.country)}"></div>` : '<div></div>'}
+  </div>
+  <div class="row">
+    <div class="field"><label>日期${arrival ? '' : '（没定就空着）'}</label><input data-k="date" type="${exact ? 'date' : 'month'}" value="${esc(t.date)}"><label class="check"><input type="checkbox" id="exact" ${exact ? 'checked' : ''}> 记得具体哪天</label></div>
+    ${arrival ? `<div class="field"><label>天数</label><input data-k="days" type="number" min="1" value="${esc(t.days)}"></div>
+    <div class="field"><label>同行（没人就写 独自）</label><input data-k="with" value="${esc(t.with)}" placeholder="小林、阿杰"></div>` : '<div></div><div></div>'}
+  </div>
+  <div class="field"><label>一句话</label><textarea data-k="line" placeholder="这一趟最想记住的一件事">${esc(t.line)}</textarea></div>
+  ${arrival ? `<div class="field"><label>照片（拖进来，或点这里选）</label><div class="drop" id="drop">${t.photo ? `<img src="/photo/${esc(t.photo)}" alt=""><button class="clear" id="clear">移除</button>` : '拖一张照片到这里'}</div><input id="file" type="file" accept="image/*" hidden></div>` : ''}`;
+  length();
+}
+function length() { const t = trips()[index], n = flap(t.to || '').length, el = $('#len'); if (el) { el.textContent = `${n} / ${FIELD} 格`; el.classList.toggle('warn', n > FIELD); } }
+
+$('#editor').addEventListener('input', e => {
+  const k = e.target.dataset.k; if (!k) return;
+  const t = trips()[index]; let v = e.target.value;
+  if (k === 'code') v = v.toUpperCase(); if (k === 'days') v = v ? Number(v) : undefined;
+  if (v === '' || v === undefined) delete t[k]; else t[k] = v;
+  if (k === 'to') length(); mark();
+});
+$('#editor').addEventListener('change', e => {
+  if (e.target.id !== 'exact') return;
+  const t = trips()[index];
+  if (t.date) t.date = e.target.checked ? (t.date.length === 7 ? `${t.date}-01` : t.date) : t.date.slice(0, 7);
+  mark(); renderEditor();
+});
+// City search → suggestions (English name, country, nearest airport).
+$('#editor').addEventListener('keydown', async e => {
+  if (e.target.id !== 'q' || e.key !== 'Enter') return;
+  e.preventDefault(); const box = $('#suggest'); box.hidden = false; box.innerHTML = '<button disabled>搜索中…</button>';
+  try {
+    const res = await fetch(`/api/place?q=${encodeURIComponent(e.target.value.trim())}`), places = await res.json();
+    if (!res.ok) throw new Error(places.error);
+    box.innerHTML = places.length ? places.map((p, i) => `<button data-p="${i}"><b>${esc(p.flap)}</b><span>${esc(p.country)} · ${esc(p.code)}</span><small>${esc(p.label)}${p.airport ? ` · ✈ ${esc(p.airport)}` : ''}</small></button>`).join('') : '<button disabled>没找到，换个写法试试</button>';
+    box.onclick = ev => {
+      const b = ev.target.closest('[data-p]'); if (!b) return; const p = places[Number(b.dataset.p)], t = trips()[index];
+      t.to = p.flap.length > FIELD ? p.flap.slice(0, FIELD).trim() : p.flap; t.code = p.code; if (list === 'arrivals') t.country = p.country;
+      nearby = p.airports || []; box.hidden = true; mark(); renderEditor();
+    };
+  } catch (error) { box.innerHTML = `<button disabled>${esc(error.message)}</button>`; }
+});
+// Photos: drop or pick one; it is resized and saved into the site's photos folder.
+async function upload(file) {
+  const t = trips()[index]; status('照片处理中…');
+  const res = await fetch(`/api/photo?name=${encodeURIComponent(`${t.code || 'trip'}-${(t.date || '').slice(0, 7)}`)}`, { method: 'POST', body: file });
+  const out = await res.json(); if (!res.ok) { status(out.error, true); return; }
+  t.photo = out.photo; mark(); renderEditor(); status('照片已放好，记得保存');
+}
+$('#editor').addEventListener('click', e => {
+  const chip = e.target.closest('[data-code]');
+  if (chip) { trips()[index].code = chip.dataset.code; mark(); renderEditor(); return; }
+  if (e.target.id === 'clear') { e.stopPropagation(); delete trips()[index].photo; mark(); renderEditor(); return; }
+  if (e.target.closest('#drop')) $('#file').click();
+});
+$('#editor').addEventListener('change', e => { if (e.target.id === 'file' && e.target.files[0]) upload(e.target.files[0]); });
+$('#editor').addEventListener('dragover', e => { const d = e.target.closest('#drop'); if (d) { e.preventDefault(); d.classList.add('over'); } });
+$('#editor').addEventListener('dragleave', e => e.target.closest('#drop')?.classList.remove('over'));
+$('#editor').addEventListener('drop', e => { const d = e.target.closest('#drop'); if (!d) return; e.preventDefault(); d.classList.remove('over'); const f = e.dataTransfer.files[0]; if (f) upload(f); });
+
+$('#list').addEventListener('click', e => { const b = e.target.closest('.trip'); if (!b) return; index = Number(b.dataset.i); nearby = []; renderList(); renderEditor(); });
+$('#add').addEventListener('click', () => { trips().unshift({}); index = 0; renderList(); renderEditor(); $('#q')?.focus(); });
+$('#del').addEventListener('click', () => { if (index < 0 || !confirm('删除这一趟？（保存后生效）')) return; trips().splice(index, 1); index = -1; mark(); renderEditor(); });
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); list = b.dataset.list; index = -1; renderList(); renderEditor(); }));
+
+$('#save').addEventListener('click', async () => {
+  // Empty "new trip" cards are dropped; everything else must pass the board's own checks.
+  for (const name of ['arrivals', 'departures']) data[name] = data[name].filter(t => Object.keys(t).length);
+  const res = await fetch('/api/save', { method: 'POST', body: JSON.stringify(data) }), out = await res.json();
+  if (!res.ok) { status(`没保存：${(out.errors || [out.error]).join('；')}`, true); return; }
+  dirty = false; $('#save').disabled = true; renderList(); status(`✓ 已保存：去过的 ${out.arrivals} 趟 · 想去的 ${out.departures} 个。刷新网站预览就能看到翻牌屏。`);
+});
+addEventListener('beforeunload', e => { if (dirty) e.preventDefault(); });
+fetch('/api/trips').then(r => r.json()).then(form => { data = form.data; data.arrivals ??= []; data.departures ??= []; renderList(); });
+</script>
+</body></html>

@@ -57,3 +57,20 @@ assert.deepEqual(written, imported.data, 'data.js round trip');
 assert.deepEqual(parseTravel(written, today).errors, []);
 assert.match(parseTravelForm('## 去过的地方\n### \n- 目的的：x\n').problems[0], /看不懂「目的的」/);
 console.log('PASS: travel form import');
+
+// Recorder helpers: the form written back, the airport table, the nearest airport, a city from OpenStreetMap.
+const { formSource } = await import('./lib/travel-import.mjs');
+const recorded = { home: { city: 'Madison', airport: 'MSN', timeZone: 'America/Chicago' }, arrivals: [{ to: 'Kyoto', code: 'KIX', country: '日本', date: '2025-04-03', days: 6, with: '独自', line: '樱花：落了一地。', photo: 'kix-2025-04.jpg' }], departures: [{ to: 'Lisbon', code: 'LIS' }] };
+assert.deepEqual(parseTravelForm(formSource(recorded)), { data: recorded, problems: [] }, 'form → trips → form is lossless');
+const { parseCsv, airportsFromCsv, nearestAirport, airportChoices, placeFrom } = await import('./lib/places.mjs');
+assert.deepEqual(parseCsv('a,"b, c","d ""e"""\n1,2,3\n'), [['a', 'b, c', 'd "e"'], ['1', '2', '3']]);
+const csv = 'id,type,name,latitude_deg,longitude_deg,iso_country,municipality,scheduled_service,iata_code\n1,large_airport,Kansai,34.43,135.23,JP,Osaka,yes,KIX\n2,medium_airport,Kobe,34.63,135.22,JP,Kobe,yes,UKB\n3,small_airport,Strip,35.0,135.7,JP,Kyoto,no,\n4,large_airport,Narita,35.76,140.39,JP,Tokyo,yes,NRT\n5,heliport,Pad,35,135,JP,X,yes,HPX\n';
+const table = airportsFromCsv(csv);
+assert.deepEqual(table.map(a => a.iata), ['KIX', 'UKB', 'NRT'], 'only large/medium airports with flights and a code');
+assert.equal(nearestAirport(table, { lat: 35.01, lon: 135.77 }).iata, 'KIX', 'Kyoto flies into Kansai, not the slightly closer Kobe');
+assert.equal(nearestAirport(table, { lat: 35.68, lon: 139.76 }).iata, 'NRT');
+const iceland = airportsFromCsv('type,name,latitude_deg,longitude_deg,iso_country,municipality,scheduled_service,iata_code\nmedium_airport,Reykjavik Domestic,64.13,-21.94,IS,Reykjavik,yes,RKV\nlarge_airport,Keflavik International,63.98,-22.61,IS,Keflavik,yes,KEF\n');
+assert.deepEqual(airportChoices(iceland, { lat: 64.14, lon: -21.9 }).map(a => a.iata), ['KEF', 'RKV'], 'the international airport first, the domestic one as a second choice');
+const kyoto = placeFrom({ name: 'Kyoto', lat: '35.02', lon: '135.75', display_name: 'Kyoto, Kyoto Prefecture, Japan', address: { city: 'Kyoto', country: 'Japan', country_code: 'jp' } });
+assert.deepEqual([kyoto.name, kyoto.country, kyoto.countryCode], ['Kyoto', '日本', 'JP']);
+console.log('PASS: travel recorder — form round trip, airport table, nearest airport, city lookup');

@@ -40,3 +40,27 @@ ${data.departures.map(row).join('\n')}
 };
 `;
 }
+
+// The other way round: trips → the fill-in form (so the recorder and hand edits share one source).
+const LABELS = [['to', '目的地'], ['code', '三字码'], ['country', '国家'], ['from', '出发'], ['date', '日期'], ['days', '天数'], ['with', '同行'], ['line', '一句话'], ['photo', '照片']];
+export function formSource(data) {
+  const block = trip => `### \n${LABELS.filter(([key]) => trip[key] !== undefined && trip[key] !== '').map(([key, label]) => `- ${label}：${trip[key]}`).join('\n')}\n`;
+  return `# 旅行行程
+
+用录入工具最方便：\`node scripts/travel-recorder.mjs\`。也可以直接改这份表，再运行 \`node scripts/import-travel.mjs\`。
+照片放在 \`dist/modules/travel/photos/\`，「照片」后面写文件名。
+
+## 基本信息
+- 城市：${data.home?.city ?? 'Madison'}
+- 机场：${data.home?.airport ?? 'MSN'}
+- 时区（不懂就别改）：${data.home?.timeZone ?? 'America/Chicago'}
+
+## 去过的地方
+<!-- 一趟一段。目的地用英文，最多 12 个字母。日期可以只写到月：2024-10 -->
+
+${(data.arrivals ?? []).map(block).join('\n')}
+## 想去的地方
+<!-- 定了日子就写日期（最近的一趟显示 BOARDING）；没定就空着（显示 SOMEDAY）。 -->
+
+${(data.departures ?? []).map(block).join('\n')}`;
+}
