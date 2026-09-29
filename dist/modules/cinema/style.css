@@ -108,3 +108,4 @@
 @media(prefers-reduced-motion:reduce){
   [data-module="cinema"] .cinema *,[data-module="cinema"] .cinema *:before,[data-module="cinema"] .cinema *:after{animation:none!important;transition:none!important}
 }
+[data-module="cinema"] .cinema-stars .cinema-score-source{margin-left:8px;align-self:center;font:500 9px var(--font-mono);letter-spacing:.24em;color:var(--dim)}

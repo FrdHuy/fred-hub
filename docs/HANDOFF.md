@@ -180,3 +180,5 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - v0.33.2：首页打字机的纸改为空白 + 闪烁光标；按 RET 后逐字打出最新一篇的标题（中文也行，滑架按每个字的实际宽度左移），再响铃、推回、换行、出纸（Fred 的提议）。
 
 - v0.33.3：① 暗号只在手记内有效，离开模块即忘（不再用 sessionStorage）。② 翻牌屏（电脑/平板）加统计条：FLIGHTS / COUNTRIES / DAYS AWAY / NEXT DEPARTURE（T-080 倒计时，翻牌显示）；表格加 PAX（同行人数+1，从「同行」拆分）与 LOG（有游记时显示）；标题下改为 SINCE · LONGEST。手机隐藏统计条和新列，保持紧凑。trips.js 新增 pax / daysUntil，stats(travel, today)。
+
+- v0.33.4 片单勾选器：`node scripts/cinema-picker.mjs` 在本机开一个 127.0.0.1 小服务 + 海报墙（scripts/picker/index.html）：电影/剧集 × 大家都看过/高分/华语/日韩/按年份/我的片单 + 搜索，点海报=看过，保存时并发 4 路补全详情与原版海报（w500）写入 data.js（scripts/lib/cinema-list.mjs 纯函数，已测）。评分改为影片自己的 TMDB 分数（tmdbStars：vote_average/2，半星，投票 <20 不显示；片单详情星星旁标 TMDB）；add-movie 不再要评分。代理：scripts/lib/proxy.mjs 自动用环境变量 → macOS 系统代理（scutil --proxy）→ 常见端口，Fred 的 .env 里不需要写代理。片单页海报改为接近视野才加载（IntersectionObserver，rootMargin 900px），避免片单变长后一次拉几十 MB。

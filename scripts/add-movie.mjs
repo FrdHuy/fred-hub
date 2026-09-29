@@ -1,4 +1,4 @@
-// Usage: node scripts/add-movie.mjs 花样年华 [4.5]
+// Usage: node scripts/add-movie.mjs 花样年华
 //        node scripts/add-movie.mjs --posters   (re-fetch original-language posters for the whole list)
 // Looks the title up on TMDB (local machine only), saves the poster and prepends an entry to data.js.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -6,25 +6,25 @@ import { spawnSync } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { parseFilms } from '../dist/modules/cinema/films.js';
-import { searchChoices, entryFromTmdb, insertEntry, parseRating, posterName, pickPoster, posterLanguage, originCountries } from './lib/cinema-add.mjs';
+import { searchChoices, entryFromTmdb, insertEntry, tmdbStars, posterName, pickPoster, posterLanguage, originCountries } from './lib/cinema-add.mjs';
+import { detectProxy } from './lib/proxy.mjs';
 
 const root = new URL('../', import.meta.url), cinema = new URL('dist/modules/cinema/', root);
 const dataFile = new URL('data.js', cinema);
 const fail = message => { console.error(`\n✗ ${message}\n`); process.exit(1); };
 
 try { process.loadEnvFile(fileURLToPath(new URL('.env', root))); } catch {}
-const proxy = process.env.HTTPS_PROXY || process.env.https_proxy;
+// Uses the proxy this Mac already has (system proxy / Clash), so nothing needs to be set up.
+const proxy = await detectProxy();
 if (proxy && !process.env.NODE_USE_ENV_PROXY) {
-  const child = spawnSync(process.execPath, process.argv.slice(1), { stdio: 'inherit', env: { ...process.env, NODE_USE_ENV_PROXY: '1' } });
+  const child = spawnSync(process.execPath, process.argv.slice(1), { stdio: 'inherit', env: { ...process.env, HTTPS_PROXY: proxy, NODE_USE_ENV_PROXY: '1' } });
   process.exit(child.status ?? 1);
 }
 
-const [query, ratingArg] = process.argv.slice(2);
-if (!query) fail('请写片名，例如：node scripts/add-movie.mjs 花样年华 4.5');
+const [query] = process.argv.slice(2);
+if (!query) fail('请写片名，例如：node scripts/add-movie.mjs 花样年华');
 const token = (process.env.TMDB_TOKEN || '').trim();
 if (!token) fail('没有找到 TMDB_TOKEN。请打开项目根目录的 .env，把 Token 粘贴在 TMDB_TOKEN= 后面。');
-let rating;
-try { rating = parseRating(ratingArg); } catch (error) { fail(error.message); }
 
 // A v3 API key is 32 hex characters; anything longer is the v4 read access token.
 const v3 = /^[a-f0-9]{32}$/i.test(token);
@@ -48,7 +48,7 @@ async function originalPoster(kind, id, details) {
 }
 async function download(path, name) {
   try {
-    const image = await fetch(`https://image.tmdb.org/t/p/w780${path}`, { signal: AbortSignal.timeout(20000) });
+    const image = await fetch(`https://image.tmdb.org/t/p/w500${path}`, { signal: AbortSignal.timeout(20000) });
     if (!image.ok) throw new Error(String(image.status));
     writeFileSync(new URL(`posters/${name}`, cinema), Buffer.from(await image.arrayBuffer()));
     return true;
@@ -74,10 +74,6 @@ choices.forEach((item, index) => console.log(`  ${index + 1}. ${item.title}${ite
 const prompt = createInterface({ input: process.stdin, output: process.stdout });
 const picked = choices[Number(await prompt.question(`\n选择编号 1–${choices.length}（直接回车取消）：`)) - 1];
 if (!picked) { prompt.close(); console.log('已取消。'); process.exit(0); }
-if (rating === undefined) {
-  try { rating = parseRating(await prompt.question('评分 0–5（可半星，直接回车跳过）：')); }
-  catch (error) { prompt.close(); fail(error.message); }
-}
 prompt.close();
 
 const source = readFileSync(dataFile, 'utf8');
@@ -93,7 +89,7 @@ if (path) {
     console.warn('  ! 海报下载失败，这一条先不带海报，之后可以手动放进 posters/。'); poster = undefined;
   }
 }
-const entry = entryFromTmdb(picked.kind, details, { rating, poster });
+const entry = entryFromTmdb(picked.kind, details, { rating: tmdbStars(details), poster });
 writeFileSync(dataFile, insertEntry(source, entry));
 console.log(`\n✓ 已加入片单最前面：${entry.title}${entry.year ? ` (${entry.year})` : ''}${poster ? '，海报已保存' : ''}`);
 console.log('  刷新预览页面就能看到。想改哪一项，直接编辑 dist/modules/cinema/data.js。\n');

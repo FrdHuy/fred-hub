@@ -45,6 +45,12 @@ export function insertEntry(source, entry) {
   return source.slice(0, at) + entrySource(entry) + '\n' + source.slice(at);
 }
 
+// The film's own score: TMDB's 0–10 average → 0–5 stars in half steps (none when too few people voted).
+export function tmdbStars(details) {
+  if (!(details.vote_count >= 20) || typeof details.vote_average !== 'number') return undefined;
+  return Math.round(details.vote_average) / 2;
+}
+
 export function parseRating(text) {
   if (text === undefined || String(text).trim() === '') return undefined;
   const value = Number(text);

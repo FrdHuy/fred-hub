@@ -64,6 +64,30 @@ assert.equal(posterLanguage({ original_language: 'cn' }), 'zh');
 assert.deepEqual(originCountries({ origin_country: ['HK'], production_countries: [{ iso_3166_1: 'HK' }, { iso_3166_1: 'FR' }] }), ['HK', 'FR']);
 console.log('PASS: cinema data rules, stars, TMDB mapping and data.js insertion');
 
+// Poster picker: TMDB items → cards, shelves → TMDB calls, picks → data.js.
+const { card, shelf, applyChanges, listSource } = await import('./lib/cinema-list.mjs');
+assert.deepEqual(card({ id: 27205, title: '盗梦空间', original_title: 'Inception', release_date: '2010-07-15', poster_path: '/a.jpg' }, 'movie'), { id: 'movie/27205', kind: 'movie', title: '盗梦空间', original: 'Inception', year: 2010, poster: '/a.jpg' });
+assert.equal(card({ id: 1, media_type: 'person' }), null);
+assert.equal(card({ id: 5, media_type: 'tv', name: '剧', original_name: '剧' }).original, undefined);
+assert.deepEqual(shelf({ kind: 'movie', list: 'top', page: 2 }), ['movie/top_rated', { page: 2 }]);
+assert.deepEqual(shelf({ kind: 'tv', list: 'year', year: 2015 }), ['discover/tv', { sort_by: 'vote_count.desc', page: 1, first_air_date_year: 2015 }]);
+assert.equal(shelf({ kind: 'movie', list: 'zh' })[1].with_original_language, 'zh|cn');
+assert.throws(() => shelf({ kind: 'movie', list: 'nope' }));
+const list = [{ title: 'A', rating: 4, tmdb: 'movie/1' }, { title: 'B', tmdb: 'movie/2' }, { title: 'C', rating: 3, tmdb: 'movie/3' }];
+const changed = applyChanges(list, { added: [{ title: 'N', tmdb: 'movie/9' }, { title: 'dup', tmdb: 'movie/1' }], rated: { 'movie/2': 4.5, 'movie/1': null }, removed: ['movie/3'] });
+assert.deepEqual(changed, [{ title: 'N', tmdb: 'movie/9' }, { title: 'A', tmdb: 'movie/1' }, { title: 'B', rating: 4.5, tmdb: 'movie/2' }], 'new first, ratings changed or cleared, removed dropped, no duplicates');
+const written = listSource('// 注释\nexport default [\n  { title: "old" },\n];\n', [{ tmdb: 'movie/9', title: 'N', year: 2010, type: '电影' }]);
+assert.ok(written.startsWith('// 注释\nexport default [\n  { title: "N", type: "电影", year: 2010, tmdb: "movie/9" },\n];'), 'header kept, fields in the usual order');
+assert.equal((await import(`data:text/javascript,${encodeURIComponent(written)}`)).default[0].title, 'N');
+assert.equal(listSource('export default [\n];\n', []), 'export default [\n];\n');
+const { tmdbStars } = await import('./lib/cinema-add.mjs');
+assert.deepEqual([tmdbStars({ vote_average: 8.4, vote_count: 900 }), tmdbStars({ vote_average: 7.6, vote_count: 50 }), tmdbStars({ vote_average: 9, vote_count: 3 }), tmdbStars({})], [4, 4, undefined, undefined], "the film's own score, in half stars, only with enough votes");
+assert.equal(tmdbStars({ vote_average: 6.5, vote_count: 100 }), 3.5);
+const { systemProxy } = await import('./lib/proxy.mjs');
+assert.equal(systemProxy('<dictionary> {\n  HTTPEnable : 1\n  HTTPPort : 7890\n  HTTPProxy : 127.0.0.1\n  HTTPSEnable : 1\n  HTTPSPort : 7890\n  HTTPSProxy : 127.0.0.1\n}'), 'http://127.0.0.1:7890');
+assert.equal(systemProxy('  HTTPSEnable : 0\n  HTTPEnable : 0'), null);
+console.log('PASS: poster picker — cards, shelves, add / remove, data.js rewrite, TMDB score, system proxy');
+
 // The real data file.
 let data;
 try { data = (await import('../dist/modules/cinema/data.js')).default; }

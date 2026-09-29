@@ -1,6 +1,6 @@
-import { parseFilms, filmMeta, starCells, viewFilms, TYPES, ORDERS } from './films.js?v=33';
-import { pose } from './flow.js?v=33';
-import { play as sound } from '../../sound.js?v=33';
+import { parseFilms, filmMeta, starCells, viewFilms, TYPES, ORDERS } from './films.js?v=34';
+import { pose } from './flow.js?v=34';
+import { play as sound } from '../../sound.js?v=34';
 
 const poster = name => new URL(`./posters/${name}`, import.meta.url).href;
 const pad = number => String(number).padStart(2, '0');
@@ -36,17 +36,24 @@ export function mount({ container, item }) {
   const flight = $('.cinema-flight'), detailCover = $('.cinema-detail-cover'), detailDisc = $('.cinema-detail-disc'), info = $('.cinema-info'), close = $('.cinema-close');
   const sortToggle = $('.cinema-sort-toggle'), sortPanel = $('.cinema-sort');
 
+  // Posters load only when a case comes near the visible shelf (a long list would otherwise fetch every poster at once).
+  const dress = box => {
+    box.querySelectorAll('img[data-src]').forEach(image => { image.src = image.dataset.src; delete image.dataset.src; });
+    box.querySelectorAll('[data-poster]').forEach(face => { face.style.setProperty('--poster', `url("${face.dataset.poster}")`); delete face.dataset.poster; });
+  };
+  const lazy = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { dress(entry.target); lazy.unobserve(entry.target); } }), { root: rack, rootMargin: '0px 900px' });
+  signal.addEventListener('abort', () => lazy.disconnect());
   function blank() { const disc = document.createElement('span'); disc.className = 'cinema-blank'; disc.innerHTML = '<i></i>'; return disc; }
   function cover(film) {
     if (!film.poster) return blank();
-    const image = new Image(); image.alt = ''; image.decoding = 'async'; image.draggable = false; image.src = poster(film.poster);
+    const image = new Image(); image.alt = ''; image.decoding = 'async'; image.draggable = false; image.dataset.src = poster(film.poster);
     image.addEventListener('error', () => image.replaceWith(blank()), { once: true, signal });
     return image;
   }
   // Both side faces carry the printed spine, so cases read well tilting either way.
   function spine(film, index, side) {
     const face = document.createElement('span'); face.className = `cinema-face cinema-spine cinema-spine--${side}`;
-    if (film.poster) face.style.setProperty('--poster', `url("${poster(film.poster)}")`); else face.classList.add('is-blank');
+    if (film.poster) face.dataset.poster = poster(film.poster); else face.classList.add('is-blank');
     const code = document.createElement('small'); code.textContent = pad(index + 1);
     const title = document.createElement('b'); title.textContent = film.title;
     const year = document.createElement('small'); year.textContent = film.year ?? '';
@@ -63,7 +70,7 @@ export function mount({ container, item }) {
     const front = document.createElement('span'); front.className = 'cinema-face cinema-front'; front.append(cover(film));
     const back = document.createElement('span'); back.className = 'cinema-face cinema-back';
     const mirror = document.createElement('span'); mirror.className = 'cinema-face cinema-mirror';
-    if (film.poster) mirror.style.setProperty('--poster', `url("${poster(film.poster)}")`);
+    if (film.poster) mirror.dataset.poster = poster(film.poster);
     box.append(back, spine(film, index, 'left'), spine(film, index, 'right'), front, mirror); lift.append(box); button.append(lift);
     button.addEventListener('click', () => { if (dragged) return; position === current ? openDetail(position) : centre(position); }, { signal });
     return button;
@@ -118,6 +125,8 @@ export function mount({ container, item }) {
     if (film.rating !== undefined) {
       const stars = document.createElement('p'); stars.className = 'cinema-stars'; stars.setAttribute('aria-label', `评分 ${film.rating} / 5`);
       starCells(film.rating).forEach(fill => { const star = document.createElement('span'); star.setAttribute('aria-hidden', 'true'); star.textContent = '★'; star.style.setProperty('--fill', `${fill * 100}%`); star.style.setProperty('--i', ++step); stars.append(star); });
+      // The film's own score (from TMDB), not a personal rating.
+      const source = document.createElement('small'); source.className = 'cinema-score-source'; source.textContent = 'TMDB'; stars.append(source);
       info.append(stars);
     }
   }
@@ -130,7 +139,7 @@ export function mount({ container, item }) {
   async function openDetail(position) {
     if (busy) return; busy = true; opened = position;
     const { film, index } = view[position], front = rack.children[position].querySelector('.cinema-front');
-    detailCover.replaceChildren(cover(film)); fillInfo(film, index);
+    detailCover.replaceChildren(cover(film)); dress(detailCover); fillInfo(film, index);
     detail.hidden = false; detail.classList.add('is-rolling', 'is-playing');
     const from = front.getBoundingClientRect(), to = flight.getBoundingClientRect();
     front.style.visibility = 'hidden'; close.focus({ preventScroll: true });
@@ -224,7 +233,7 @@ export function mount({ container, item }) {
     view = viewFilms(films, choice); current = -1; aim = -1;
     $('.cinema-tally span').textContent = pad(view.length);
     $('.cinema-tally').setAttribute('aria-label', `共 ${view.length} 部`);
-    rack.replaceChildren(...view.map(caseFor));
+    lazy.disconnect(); rack.replaceChildren(...view.map(caseFor)); [...rack.children].forEach(box => lazy.observe(box));
     rack.scrollLeft = 0; layout();
   }
 

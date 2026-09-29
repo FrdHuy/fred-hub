@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>片单勾选器 · Fred’s Hub</title>
+<style>
+:root{--night:#100e0c;--panel:#1a1714;--film:#ece4d6;--dim:#8a8276;--faint:#5a544b;--gold:#d2a052;--accent:#b34934;--mono:ui-monospace,"SF Mono",Menlo,monospace;--ui:"PingFang SC","Helvetica Neue",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--night);color:var(--film);font:14px/1.5 var(--ui);-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(var(--night) 80%,#100e0c00);padding:22px 32px 18px}
+h1{margin:0 0 16px;font:600 22px/1 "Helvetica Neue",sans-serif;letter-spacing:-.04em}h1 i{color:var(--accent);font-style:normal}h1 small{margin-left:14px;font:500 10px var(--mono);letter-spacing:.3em;color:var(--dim)}
+.bar{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
+.group{display:flex;gap:4px;padding:3px;border-radius:9px;background:var(--panel);max-width:100%;overflow-x:auto}
+.group button,select{white-space:nowrap;padding:7px 12px;border:0;border-radius:6px;background:none;color:var(--dim);font:500 12px var(--ui);cursor:pointer}
+.group button[aria-pressed=true]{background:#2a2622;color:var(--film)}
+select{background:var(--panel);color:var(--film)}
+input{flex:1;min-width:200px;padding:9px 14px;border:1px solid #2a2622;border-radius:9px;background:var(--panel);color:var(--film);font:14px var(--ui);outline:none}
+input:focus{border-color:#4a443c}
+.hint{margin-top:12px;font:500 10px var(--mono);letter-spacing:.2em;color:var(--faint)}
+main{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:26px 20px;padding:10px 32px 140px}
+.card{position:relative;display:flex;flex-direction:column;gap:8px;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.art{position:relative;aspect-ratio:2/3;border-radius:4px;overflow:hidden;background:#1d1a17;box-shadow:0 8px 18px #0006;transition:transform .18s,box-shadow .18s,filter .18s}
+.art img{width:100%;height:100%;object-fit:cover;display:block}
+.art .none{position:absolute;inset:0;display:grid;place-items:center;padding:12px;text-align:center;font:13px var(--ui);color:var(--dim)}
+.card:hover .art{transform:translateY(-3px);box-shadow:0 14px 24px #000a}
+.card.seen .art{box-shadow:0 0 0 2px var(--gold),0 12px 22px #000a}
+.card.seen .art:after{content:'✓';position:absolute;right:8px;top:8px;width:24px;height:24px;border-radius:50%;background:var(--gold);color:#1a1510;display:grid;place-items:center;font:700 13px var(--ui)}
+.card.owned .art:before{content:'已在片单';position:absolute;left:8px;top:8px;padding:2px 7px;border-radius:3px;background:#100e0ccc;font:500 10px var(--ui);color:var(--film)}
+.card.removed .art{filter:grayscale(1) brightness(.45)}
+.card.removed .art:after{content:'✕';background:var(--accent);color:#fff}
+.meta b{display:block;font-weight:500;font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta small{font:500 10px var(--mono);letter-spacing:.14em;color:var(--dim)}
+.more{grid-column:1/-1;justify-self:center;padding:12px 26px;border:1px solid #2a2622;border-radius:9px;background:none;color:var(--dim);font:500 12px var(--ui);cursor:pointer}
+.empty{grid-column:1/-1;padding:60px 0;text-align:center;color:var(--dim)}
+footer{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:center;gap:22px;padding:18px 32px;background:#100e0cf2;border-top:1px solid #2a2622;backdrop-filter:blur(8px)}
+.count{font:500 11px var(--mono);letter-spacing:.2em;color:var(--dim)}.count b{color:var(--film);font-weight:500}
+.save{margin-left:auto;padding:11px 26px;border:0;border-radius:9px;background:var(--film);color:#100e0c;font:600 13px var(--ui);cursor:pointer}
+.save:disabled{opacity:.35;cursor:default}
+.status{font-size:12px;color:var(--gold)}
+</style></head>
+<body>
+<header>
+  <h1>Fred<i>.</i><small>片单勾选器 · 只在你的电脑上运行</small></h1>
+  <div class="bar">
+    <div class="group" data-group="kind"><button data-kind="movie" aria-pressed="true">电影</button><button data-kind="tv" aria-pressed="false">剧集</button></div>
+    <div class="group" data-group="list"><button data-list="known" aria-pressed="true">大家都看过</button><button data-list="top" aria-pressed="false">高分</button><button data-list="zh" aria-pressed="false">华语</button><button data-list="asia" aria-pressed="false">日韩</button><button data-list="year" aria-pressed="false">按年份</button><button data-list="mine" aria-pressed="false">我的片单</button></div>
+    <select id="year" hidden></select>
+    <input id="q" type="search" placeholder="搜索片名，回车（中文或原名都行）">
+  </div>
+  <p class="hint">点海报 = 看过（再点一次取消）· 评分会用 TMDB 上这部片自己的分数 · 「我的片单」里点一下 = 移除</p>
+</header>
+<main id="grid"></main>
+<footer><span class="count" id="count"></span><span class="status" id="status"></span><button class="save" id="save" disabled>保存到片单</button></footer>
+<script>
+const $ = s => document.querySelector(s), grid = $('#grid');
+const state = { kind: 'movie', list: 'known', year: new Date().getFullYear(), page: 1, query: '' };
+let owned = new Map();               // tmdb id → { title, poster } already in data.js
+const picks = new Map();             // new films: id → { id, title }
+const removed = new Set();           // owned films un-ticked
+let loading = false;
+
+const yearSelect = $('#year');
+for (let y = new Date().getFullYear(); y >= 1950; y--) yearSelect.add(new Option(`${y} 年`, y));
+yearSelect.addEventListener('change', () => { state.year = yearSelect.value; reload(); });
+
+const seen = id => picks.has(id) || (owned.has(id) && !removed.has(id));
+function paint(el) {
+  const id = el.dataset.id;
+  el.classList.toggle('seen', seen(id)); el.classList.toggle('owned', owned.has(id)); el.classList.toggle('removed', removed.has(id));
+}
+function cardEl(item) {
+  const el = document.createElement('button'); el.className = 'card'; el.dataset.id = item.id; el.dataset.title = item.title;
+  const img = item.poster ? `<img loading="lazy" src="${item.local ? `/poster/${item.poster}` : `/img${item.poster}`}" alt="">` : `<span class="none">${item.title}</span>`;
+  el.innerHTML = `<span class="art">${img}</span><span class="meta"><b>${item.title}</b><small>${[item.year, item.original].filter(Boolean).join(' · ')}</small></span>`;
+  paint(el); return el;
+}
+function toggle(el) {
+  const id = el.dataset.id;
+  if (owned.has(id)) removed.has(id) ? removed.delete(id) : removed.add(id);
+  else picks.has(id) ? picks.delete(id) : picks.set(id, { id, title: el.dataset.title });
+  paint(el); counts();
+}
+function counts() {
+  const changes = picks.size + removed.size;
+  $('#count').innerHTML = `片单 <b>${owned.size}</b> · 新增 <b>${picks.size}</b> · 移除 <b>${removed.size}</b>`;
+  $('#save').disabled = !changes;
+}
+
+grid.addEventListener('click', e => {
+  const el = e.target.closest('.card'); if (!el) { if (e.target.closest('.more')) load(); return; }
+  toggle(el);
+});
+async function api(path, options) { const res = await fetch(path, options); const data = await res.json(); if (!res.ok) throw new Error(data.error || res.status); return data; }
+async function load() {
+  if (loading) return; loading = true; $('.more')?.remove(); $('#status').textContent = '加载中…';
+  try {
+    let data;
+    if (state.list === 'mine') data = { items: [...owned].map(([id, f]) => ({ id, title: f.title, poster: f.poster, local: true })), more: false };
+    else if (state.query) data = await api(`/api/search?q=${encodeURIComponent(state.query)}`);
+    else data = await api(`/api/shelf?kind=${state.kind}&list=${state.list}&year=${state.year}&page=${state.page}`);
+    if (!data.items.length && state.page === 1) grid.innerHTML = '<p class="empty">这里没有结果</p>';
+    grid.append(...data.items.map(cardEl));
+    if (data.more) { state.page++; const more = document.createElement('button'); more.className = 'more'; more.textContent = '再来一些'; grid.append(more); moreObserver.observe(more); }
+    $('#status').textContent = '';
+  } catch (error) { $('#status').textContent = error.message; }
+  loading = false;
+}
+// Scrolling near the end loads the next page by itself.
+const moreObserver = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { moreObserver.unobserve(entry.target); load(); } }), { rootMargin: '600px' });
+function reload() { state.page = 1; grid.replaceChildren(); scrollTo({ top: 0 }); load(); }
+
+document.querySelectorAll('.group').forEach(group => group.addEventListener('click', e => {
+  const button = e.target.closest('button'); if (!button) return;
+  group.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+  if (button.dataset.kind) state.kind = button.dataset.kind;
+  if (button.dataset.list) state.list = button.dataset.list;
+  yearSelect.hidden = state.list !== 'year'; state.query = ''; $('#q').value = ''; reload();
+}));
+$('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { state.query = e.target.value.trim(); reload(); } });
+
+$('#save').addEventListener('click', async () => {
+  const button = $('#save'); button.disabled = true;
+  $('#status').textContent = picks.size ? `正在保存，下载 ${picks.size} 张海报…` : '正在保存…';
+  try {
+    const result = await api('/api/save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ added: [...picks.values()], removed: [...removed] }) });
+    picks.clear(); removed.clear(); await refreshOwned();
+    document.querySelectorAll('.card').forEach(paint); counts();
+    $('#status').textContent = `✓ 已保存：片单共 ${result.total} 部（新增 ${result.added}）${result.failed.length ? ` · ${result.failed.length} 部失败：${result.failed.join('；')}` : ''}。刷新网站预览就能看到。`;
+  } catch (error) { $('#status').textContent = `保存失败：${error.message}`; button.disabled = false; }
+});
+async function refreshOwned() { owned = new Map((await api('/api/films')).map(f => [f.id, f])); }
+addEventListener('beforeunload', e => { if (picks.size + removed.size) e.preventDefault(); });
+refreshOwned().then(() => { counts(); load(); });
+</script>
+</body></html>
