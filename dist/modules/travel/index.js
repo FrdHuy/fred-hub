@@ -1,7 +1,7 @@
-import data from './data.js?v=31';
-import { parseTravel, stats, localNow, monthYear, passDate, flight, pad2, FIELD } from './trips.js?v=31';
-import { createWord } from './flap.js?v=31';
-import { play } from '../../sound.js?v=31';
+import data from './data.js?v=32';
+import { parseTravel, stats, localNow, monthYear, passDate, flight, pad2, FIELD } from './trips.js?v=32';
+import { createWord } from './flap.js?v=32';
+import { play as sound } from '../../sound.js?v=32';
 
 const esc = text => String(text).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const photo = name => new URL(`./photos/${name}`, import.meta.url).href;
@@ -95,7 +95,7 @@ export function mount({ container }) {
     const button = item.querySelector('.tv-row'); button.setAttribute('aria-controls', wrap.id); button.setAttribute('aria-expanded', 'true');
     item.append(wrap); item.classList.add('is-sel'); hall.classList.add('is-open'); openRow = { item, wrap, button };
     const height = wrap.scrollHeight, paper = wrap.querySelector('.tv-pass');
-    play('print');
+    sound('print');
     await Promise.all([play(wrap, [{ height: '0px' }, { height: `${height}px` }], { duration: 720, easing: 'cubic-bezier(.3,.7,.2,1)' }),
       play(paper, [{ transform: 'translateY(-100%)' }, { transform: 'translateY(0)' }], { duration: 720, easing: 'cubic-bezier(.3,.7,.2,1)' })]);
     if (!reduced() && wrap.getBoundingClientRect().bottom > innerHeight) wrap.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -111,7 +111,7 @@ export function mount({ container }) {
   function switchTo(next) {
     if (next === mode) return;
     mode = next; close(true);
-    play('key');
+    sound('key');
     toggle.setAttribute('aria-checked', String(mode === 'dep'));
     toggle.setAttribute('aria-label', mode === 'dep' ? '显示去过的地方（ARRIVALS）' : '显示想去的地方（DEPARTURES）');
     hall.dataset.mode = mode; title.set(MODES[mode].title, { stagger: 40 }); writeMeta(); fill(true);

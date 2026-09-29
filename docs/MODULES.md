@@ -13,6 +13,8 @@
 - `dist/modules/wheel/index.js`: 罗盘已暂停，源码保留，未注册。
 - `dist/modules/empty.js`: current common placeholder; do not change it for one module’s new feature.
 - `main.js`: shared header, menu, navigation, mounting/cleanup.
+- `tokens.css`: shared type and material variables (`--font-mono`, `--font-ui`, `--font-literary`, `--shell-*`, `--glass`). Use them instead of hard-coded font stacks or new plastic colours.
+- `sound.js`: `import { play as sound } from '../../sound.js?v=NN'` (modules often have their own `play` animation helper) then `sound('tick' | 'key' | 'print' | 'flap' | 'reading' | 'ok' | 'error' | 'drive' | 'lever')` on a mechanical action. It is silent unless the visitor turned sound on.
 - `experience.js`: homepage physical actions; `gallery.js`: horizontal browsing.
 
 ```js

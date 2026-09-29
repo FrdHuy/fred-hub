@@ -152,3 +152,13 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - 交互：ARR/DEP 拨档或点标题整屏翻牌；Esc 先收登机牌（document 捕获阶段拦截，菜单打开时不拦），再按一次回首页；↑↓ 在行间移动；reduced-motion 直接显示终态。
 - 验证：全部 check 通过；CDP 真实点击：展开/换行/Esc 收起不离开页面/切到 DEP（BOARDING,SCHEDULED,SOMEDAY,SOMEDAY）/回首页主题复位；1440 与 390 宽截图无横向溢出；reduced-motion 下 0 个动画。
 - 未做：翻牌声音（等全站声音开关）；首页登机牌仍是 HERE → THERE / FH 001，可以以后联动最新航班。
+
+## v0.32 全站打磨：基础 / 质感 / 数据 / 进门 / 声音 / 维护（Claude Code）
+- 基础：字标自托管 Inter 600 子集（dist/fonts/，所有设备一致）；首页图片下载 3.1MB → 0.1MB（fred-diary 转 700px WebP，删除从不显示的 collection-atlas.png 与未用的 cd-player.png）；片单/清单/旅行返回箭头统一在页眉 5% 边距；片单计数改等宽 `05`；分享图 dist/og.jpg + og:image。
+- 令牌：新增 dist/tokens.css（最先加载）——字体变量 `--font-wordmark/-mono/-ui/-literary`、材质变量（暖白/灰绿/石灰外壳、液晶、纸）。全站硬编码字体栈改为变量（首页 11 处裸 monospace）。闸机改石灰外壳；人生清单灯去亮珠高光、读数屏去斜反光。
+- 数据：首页登机牌显示下一班（catalog.js 读 travel data）；`node scripts/import-travel.mjs` 把 docs/旅行行程-填写.md 写成 data.js（scripts/lib/travel-import.mjs，已测）；docs/填写真实数据.md 一页说明。
+- 进门：main.js `openRoom()` 取代奶白 FRED 幕布——从首页进片单/旅行时读数屏长成房间，其余用目标页底色淡出。`.fred-curtain` 已删除。
+- 声音：dist/sound.js（`play(name)` / `soundOn()` / `setSound()`），默认关，页眉左侧喇叭开关（localStorage `fred-sound`）。接入点：experience.js status()、panel-home powerOn、清单旋钮/里程表/PRINT、片单 pick、旅行翻牌/出纸/拨档。
+- 维护：styles.css 16.6KB → 8.7KB、hub.css 31.6KB → 25.9KB（删除 192 条选择器，类名在所有 JS/HTML 中都不出现；动态拼接的前缀视为存活）。删除前后对 21 个页面/状态（含闸机 reading/error/success、光驱 reading、菜单、登机牌、打印、404、手机）做确定性截图（冻结时钟 + reduced-motion），逐像素一致。本地旧分支已删，未合并的 fortune-sticks 存为 tag archive/fortune-sticks。资源 v32。
+- 共享文件改动：index.html、main.js、experience.js、catalog.js、styles.css、hub.css、tokens.css（新）、sound.js（新）。**Codex/GPT 的 codex/tear-calendar 合并时注意**：styles.css/hub.css 删了大量旧规则，stories 相关的 `.diary-*` 规则保留未动。
+- 未做（Fred 暂缓）：片单首张左半空与 TMDB 署名、日记页、手机首页位置读数、首次示范、「关于 Fred」。

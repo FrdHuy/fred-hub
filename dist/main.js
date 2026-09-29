@@ -1,10 +1,10 @@
-import { createInteraction } from './experience.js?v=31';
-import { soundOn, setSound } from './sound.js?v=31';
-import { mountModule } from './modules/index.js?v=31';
-import { modules, getModule, createCover } from './catalog.js?v=31';
-import { CollectionGallery } from './gallery.js?v=31';
+import { createInteraction } from './experience.js?v=32';
+import { soundOn, setSound } from './sound.js?v=32';
+import { mountModule } from './modules/index.js?v=32';
+import { modules, getModule, createCover } from './catalog.js?v=32';
+import { CollectionGallery } from './gallery.js?v=32';
 import { readRoute, navigate } from './router.js';
-import { attachSheen } from './sheen.js?v=31';
+import { attachSheen } from './sheen.js?v=32';
 
 const $ = selector => document.querySelector(selector);
 // Focus rings are for keyboard users. Script-moved focus after a click or tap stays invisible.
@@ -72,7 +72,7 @@ function renderMissing() {
 }
 async function showRoute(initial = false) {
   const sequence = ++routeSequence, nextRoute = readRoute(), item = nextRoute.type === 'collection' ? getModule(nextRoute.id) : null;
-  const previousRoute = activeRoute; let origin = null, transitionItem = null;
+  const previousRoute = activeRoute; let transitionItem = null;
   const leaving = getComputedStyle(document.body).backgroundColor;
   const openingList = !initial && previousRoute.type==='home' && item?.id==='bucketlist';
   // The Life List opens out of the powered-up panel on the home page.
@@ -82,14 +82,14 @@ async function showRoute(initial = false) {
   const screenOrigin = screen && screen.width && screen.right > 0 && screen.left < innerWidth ? screen : null;
   interaction.reset(); cancelRouteAnimation();
   if (!initial && nextRoute.type === 'home' && previousRoute.type === 'collection') {
-    origin = $('.detail-cover')?.getBoundingClientRect(); transitionItem = getModule(previousRoute.id);
+    transitionItem = getModule(previousRoute.id);
   }
   closeMenu(false);
   gallery.freeze(); activeRoute = item ? nextRoute : nextRoute.type === 'home' ? nextRoute : { type: 'missing' };
   if (activeRoute.type === 'home') {
     disposeModule(); disposeModule = () => {}; document.documentElement.dataset.theme = '';
     home.hidden = false; detail.hidden = true; document.title = 'Fred’s Hub — 生活收藏室';
-    if (pendingModule) { gallery.focusModule(pendingModule); pendingModule = null; origin = null; }
+    if (pendingModule) { gallery.focusModule(pendingModule); pendingModule = null; }
     else if (transitionItem) gallery.focusModule(transitionItem.id); else gallery.draw();
   } else {
     home.hidden = true; detail.hidden = false;

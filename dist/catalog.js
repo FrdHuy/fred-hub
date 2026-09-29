@@ -1,6 +1,6 @@
-import { panelCover } from './modules/bucketlist/cover.js?v=31';
-import travelData from './modules/travel/data.js?v=31';
-import { parseTravel, localNow, flight } from './modules/travel/trips.js?v=31';
+import { panelCover } from './modules/bucketlist/cover.js?v=32';
+import travelData from './modules/travel/data.js?v=32';
+import { parseTravel, localNow, flight } from './modules/travel/trips.js?v=32';
 
 // The boarding pass on the home page carries the next planned flight, or else the latest trip.
 function nextFlight() {

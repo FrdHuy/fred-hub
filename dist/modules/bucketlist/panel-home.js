@@ -1,6 +1,6 @@
-import { parseItems } from './items.js?v=31';
-import { play } from '../../sound.js?v=31';
-import { lampStates, litCount, leverPosition, LEVER_THRESHOLD, pad, SLOTS } from './panel.js?v=31';
+import { parseItems } from './items.js?v=32';
+import { play as sound } from '../../sound.js?v=32';
+import { lampStates, litCount, leverPosition, LEVER_THRESHOLD, pad, SLOTS } from './panel.js?v=32';
 
 // Home controller: drag the lever up past its threshold (or tap) → self-test → lamps settle on real progress.
 export function createPanel(cover, { reduced }) {
@@ -52,7 +52,7 @@ export function createPanel(cover, { reduced }) {
 
   async function powerOn() {
     const run = epoch;
-    on = true; setLever(1, .12); play('lever');
+    on = true; setLever(1, .12); sound('lever');
     root.dataset.power = 'on'; root.classList.add('is-testing');
     digits.textContent = 'TEST';
     await loading; if (run !== epoch) return false;

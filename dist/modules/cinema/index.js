@@ -1,6 +1,6 @@
-import { parseFilms, filmMeta, starCells, viewFilms, TYPES, ORDERS } from './films.js?v=31';
-import { pose } from './flow.js?v=31';
-import { play } from '../../sound.js?v=31';
+import { parseFilms, filmMeta, starCells, viewFilms, TYPES, ORDERS } from './films.js?v=32';
+import { pose } from './flow.js?v=32';
+import { play as sound } from '../../sound.js?v=32';
 
 const poster = name => new URL(`./posters/${name}`, import.meta.url).href;
 const pad = number => String(number).padStart(2, '0');
@@ -97,7 +97,7 @@ export function mount({ container, item }) {
 
   let tint = 0;
   function pick(position) {
-    if (current >= 0 && position !== current) play('tick');
+    if (current >= 0 && position !== current) sound('tick');
     current = position;
     [...rack.children].forEach((element, i) => { element.setAttribute('aria-selected', String(i === position)); element.tabIndex = i === position ? 0 : -1; });
     clearTimeout(tint); timers.delete(tint);
