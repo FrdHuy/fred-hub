@@ -1,0 +1,82 @@
+<!doctype html><meta charset="utf-8"><title>手记 typewriter v2</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+:root{--paper:#f8f7f4;--ink:#343832;--accent:#b34934;--key:#34372f;--key-hi:#4a4e46}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-ui)}
+.v{position:relative;width:1440px;height:900px;overflow:hidden}
+.tag{position:absolute;left:14px;top:10px;font:11px var(--font-mono);letter-spacing:.14em;color:#b0b2aa;z-index:9}
+.brand{position:absolute;top:36px;left:0;right:0;text-align:center;font:600 34px/1 var(--font-wordmark);letter-spacing:-.06em}
+.brand i{color:var(--accent);font-style:normal}
+.burger{position:absolute;top:50px;right:72px;width:22px;height:8px;border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+.cap{position:absolute;left:0;right:0;top:806px;text-align:center;font:15px var(--font-ui);letter-spacing:.12em;color:#6b6e66}
+.ghost{position:absolute;opacity:.45;filter:saturate(.55)}
+.mini-panel{width:330px;height:216px;border-radius:16px;background:linear-gradient(162deg,var(--shell-warm-hi),var(--shell-warm) 45%,var(--shell-warm-lo));box-shadow:inset 0 1.5px 1px #fff,0 5px 0 #d2cdbc,0 22px 28px #3d3f2a1f}
+.mini-gate{width:310px;height:100px;border-radius:6px 6px 9px 9px;background:linear-gradient(130deg,var(--shell-stone-hi),var(--shell-stone) 55%,var(--shell-stone-lo));box-shadow:inset 0 2px 2px #fff9,0 10px 16px #3d3f2a1c}
+
+/* ——— Typewriter v2: Braun/TE precision. Everything sized from --u (1u = 1px at home size). ——— */
+.tw{--u:1px;position:relative;width:calc(440 * var(--u));height:calc(400 * var(--u))}
+.tw *{box-sizing:border-box}
+/* Paper, with the latest title typed on it. */
+.tw-paper{position:absolute;left:calc(128*var(--u));top:0;width:calc(184*var(--u));height:calc(150*var(--u));background:linear-gradient(#fcfbf7,#f3f0e7);box-shadow:0 0 0 .5px #3d3f2a1a,0 2px 4px #3d3f2a14;padding:calc(16*var(--u)) calc(16*var(--u)) 0}
+.tw-paper small{display:block;font:500 calc(6.5*var(--u))/1.6 var(--font-mono);letter-spacing:.22em;color:#8e978c}
+.tw-paper b{display:block;margin-top:calc(10*var(--u));font:400 calc(14*var(--u))/1.55 var(--font-literary);color:#2f352e;letter-spacing:.05em}
+.tw-paper .caret{display:inline-block;width:calc(6*var(--u));height:1px;background:#2f352e;margin-left:2px;vertical-align:3px}
+/* Paper bail: an aluminium bar with a printed scale. */
+.tw-bail{position:absolute;left:calc(86*var(--u));top:calc(118*var(--u));width:calc(268*var(--u));height:calc(9*var(--u));border-radius:calc(2*var(--u));background:linear-gradient(#fbfbf8,#d9d8d2 45%,#b9b8b1);box-shadow:0 1px 1.5px #3d3f2a40;display:flex;justify-content:space-between;padding:0 calc(8*var(--u));align-items:flex-end}
+.tw-bail i{width:1px;height:calc(3*var(--u));background:#6b6e66}.tw-bail i:nth-child(5n+1){height:calc(5*var(--u))}
+/* Platen and knobs. */
+.tw-platen{position:absolute;left:calc(64*var(--u));top:calc(132*var(--u));width:calc(312*var(--u));height:calc(28*var(--u));border-radius:calc(14*var(--u));background:linear-gradient(#50554d,#2b2f29 50%,#383d35);box-shadow:inset 0 1px 1px #ffffff2e,0 2px 3px #3d3f2a40}
+.tw-knob{position:absolute;top:calc(126*var(--u));width:calc(30*var(--u));height:calc(40*var(--u));border-radius:calc(9*var(--u));background:repeating-linear-gradient(90deg,#0000 0 calc(1.5*var(--u)),#3d3f2a0d calc(1.5*var(--u)) calc(2*var(--u))),linear-gradient(90deg,#c9c7bf,#fbfbf8 40%,#e3e1da 60%,#b1afa7);box-shadow:0 1px 2px #3d3f2a4d,inset 0 0 0 .5px #ffffffa0}
+.tw-knob.l{left:calc(34*var(--u))}.tw-knob.r{right:calc(34*var(--u))}
+/* Body: warm-white top shell over a slightly deeper plinth, split by a hairline seam. */
+.tw-shell{position:absolute;left:calc(12*var(--u));right:calc(12*var(--u));top:calc(152*var(--u));height:calc(196*var(--u));border-radius:calc(26*var(--u)) calc(26*var(--u)) calc(10*var(--u)) calc(10*var(--u));background:linear-gradient(172deg,var(--shell-warm-hi),var(--shell-warm) 55%,#e8e4d7);box-shadow:inset 0 calc(2*var(--u)) calc(1*var(--u)) #fff,inset calc(1*var(--u)) 0 1px #fffc,inset 0 calc(-2*var(--u)) calc(3*var(--u)) #aca78f26}
+.tw-plinth{position:absolute;left:calc(8*var(--u));right:calc(8*var(--u));top:calc(340*var(--u));height:calc(36*var(--u));border-radius:calc(6*var(--u)) calc(6*var(--u)) calc(18*var(--u)) calc(18*var(--u));background:linear-gradient(var(--shell-warm-lo),#d6d1c1);box-shadow:inset 0 1px 0 #3d3f2a26,0 calc(3*var(--u)) 0 #c6c1b0,0 calc(30*var(--u)) calc(36*var(--u)) #3d3f2a24,0 calc(8*var(--u)) calc(12*var(--u)) #3d3f2a14}
+/* Type-guide window. */
+.tw-window{position:absolute;left:50%;top:calc(14*var(--u));width:calc(56*var(--u));height:calc(14*var(--u));margin-left:calc(-28*var(--u));border-radius:calc(3*var(--u));background:var(--glass);box-shadow:inset 0 1px 2px #000b,0 1px 0 #fff}
+.tw-window:after{content:'';position:absolute;left:50%;top:calc(3*var(--u));bottom:calc(3*var(--u));width:1px;background:#c5d1b066}
+/* Silk-screen: wordmark left, model right, a tiny scale between. */
+.tw-silk{position:absolute;top:calc(18*var(--u));font:500 calc(7*var(--u)) var(--font-mono);letter-spacing:.32em;color:#8d9186}
+.tw-silk.l{left:calc(30*var(--u))}.tw-silk.r{right:calc(30*var(--u))}
+.tw-silk.l b{font:600 calc(11*var(--u)) var(--font-wordmark);letter-spacing:-.04em;color:#4b5549}
+/* Bell grille (Braun radio dots) — where the margin bell sounds. */
+.tw-grille{position:absolute;right:calc(30*var(--u));top:calc(40*var(--u));width:calc(48*var(--u));height:calc(18*var(--u));background:radial-gradient(circle,#8d918666 0 calc(1.3*var(--u)),#0000 calc(1.5*var(--u))) 0 0/calc(6*var(--u)) calc(6*var(--u))}
+/* Keyboard: dished charcoal keys on a grid, tiny light legends; one brick-red RETURN. */
+.tw-keys{position:absolute;left:calc(34*var(--u));right:calc(34*var(--u));top:calc(70*var(--u));display:grid;gap:calc(8*var(--u))}
+.tw-row{display:flex;justify-content:center;gap:calc(7*var(--u))}
+.tw-row:nth-child(1){transform:translateX(calc(-8*var(--u)))}.tw-row:nth-child(2){transform:translateX(calc(4*var(--u)))}
+.tw-key{position:relative;flex:none;width:calc(24*var(--u));height:calc(24*var(--u));border-radius:50%;display:grid;place-items:center;font:500 calc(7*var(--u)) var(--font-mono);color:#d9dccf;background:radial-gradient(circle at 50% 42%,#2e312b 0 42%,var(--key) 60%,var(--key-hi) 100%);box-shadow:0 calc(2.5*var(--u)) 0 #1f221d,0 calc(3.5*var(--u)) calc(3*var(--u)) #3d3f2a4d,inset 0 calc(1*var(--u)) 0 #ffffff26}
+.tw-key.mod{background:radial-gradient(circle at 50% 42%,#dcd8cb 0 42%,#e9e5d9 60%,#f6f3ea 100%);color:#6b6e66;box-shadow:0 calc(2.5*var(--u)) 0 #bdb8a8,0 calc(3.5*var(--u)) calc(3*var(--u)) #3d3f2a33,inset 0 1px 0 #fff}
+.tw-key.ret{width:calc(38*var(--u));border-radius:calc(12*var(--u));background:linear-gradient(#c65a44,var(--accent) 60%,#a3412e);color:#fbe9e2;box-shadow:0 calc(2.5*var(--u)) 0 #7e3021,0 calc(3.5*var(--u)) calc(3*var(--u)) #3d3f2a4d,inset 0 1px 0 #ffffff40}
+.tw-space{margin:calc(2*var(--u)) auto 0;width:calc(190*var(--u));height:calc(18*var(--u));border-radius:calc(9*var(--u));background:linear-gradient(var(--key-hi),var(--key));box-shadow:0 calc(2.5*var(--u)) 0 #1f221d,0 calc(3.5*var(--u)) calc(3*var(--u)) #3d3f2a4d,inset 0 1px 0 #ffffff26}
+
+#home .stage{position:absolute;left:0;right:0;top:150px;height:520px}
+#home .center{position:absolute;left:50%;top:0;transform:translateX(-50%)}
+#close .center{position:absolute;left:50%;top:60px;transform:translateX(-50%)}
+#close .tw{--u:1.95px}
+</style>
+<body>
+<template id="tw"><div class="tw">
+<div class="tw-paper"><small>TRAVEL LOG · 12.10.2024</small><b>极光来的那一晚<span class="caret"></span></b></div>
+<div class="tw-knob l"></div><div class="tw-knob r"></div><div class="tw-platen"></div><div class="tw-bail"></div>
+<div class="tw-plinth"></div>
+<div class="tw-shell"><div class="tw-silk l"><b>Fred.</b></div><div class="tw-window"></div><div class="tw-silk r">MANUAL · 01</div><div class="tw-grille"></div>
+<div class="tw-keys"><div class="tw-row"></div><div class="tw-row"></div><div class="tw-row"></div><div class="tw-space"></div></div></div>
+</div></template>
+<section class="v" id="home"><span class="tag">手记 · 打字机 v2 · 首页（暖白外壳、博朗式碟形键、唯一红色 = RETURN 键）</span>
+<span class="brand">Fred<i>.</i></span><span class="burger"></span>
+<div class="stage"><div class="ghost" style="left:-150px;top:190px"><div class="mini-gate"></div></div><div class="center" data-tw></div><div class="ghost" style="right:-160px;top:160px"><div class="mini-panel"></div></div></div>
+<div class="cap">手记</div></section>
+<section class="v" id="close"><span class="tag">手记 · 打字机 v2 · 细节特写</span><div class="center" data-tw></div></section>
+<script>
+const tpl = document.getElementById('tw').innerHTML;
+const rows = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+document.querySelectorAll('[data-tw]').forEach(host => {
+  host.innerHTML = tpl;
+  const r = host.querySelectorAll('.tw-row');
+  r[0].innerHTML = [...rows[0]].map(c => `<i class="tw-key">${c}</i>`).join('');
+  r[1].innerHTML = [...rows[1]].map(c => `<i class="tw-key">${c}</i>`).join('') + '<i class="tw-key ret">RET</i>';
+  r[2].innerHTML = '<i class="tw-key mod">⇧</i>' + [...rows[2]].map(c => `<i class="tw-key">${c}</i>`).join('') + '<i class="tw-key mod">⇧</i>';
+  host.querySelector('.tw-bail').innerHTML = '<i></i>'.repeat(31);
+});
+document.getElementById(new URLSearchParams(location.search).get('v') === 'close' ? 'home' : 'close').style.display = 'none';
+</script>
