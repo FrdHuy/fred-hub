@@ -2,7 +2,7 @@ import { panelCover } from './modules/bucketlist/cover.js?v=33';
 import travelData from './modules/travel/data.js?v=33';
 import { parseTravel, localNow, flight } from './modules/travel/trips.js?v=33';
 import notesData from './modules/stories/data.js?v=33';
-import { TYPES, dotDate, sortNotes } from './modules/stories/notes.js?v=33';
+import { sortNotes } from './modules/stories/notes.js?v=33';
 import { typewriterMarkup } from './modules/stories/typewriter.js?v=33';
 
 // The boarding pass on the home page carries the next planned flight, or else the latest trip.
@@ -14,10 +14,11 @@ function nextFlight() {
   } catch { return null; }
 }
 
-// The sheet in the typewriter shows the latest note anyone may read.
+// The typewriter's blank sheet: the latest note anyone may read is typed onto it when RETURN is pressed.
 function latestNote() {
   const note = sortNotes(Array.isArray(notesData) ? notesData : []).find(n => !n.locked);
-  return note ? { kicker: `${TYPES[note.type]} · ${dotDate(note.date)}`, title: note.title } : { kicker: 'FRED · NOTES', title: '' };
+  // A blank sheet; pressing RETURN types this title onto it (typewriter-home.js).
+  return { ink: note ? note.title : 'Fred' };
 }
 
 export const categories = ['全部', '记忆', '文化', '工具'];

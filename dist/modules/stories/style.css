@@ -124,3 +124,8 @@
   [data-module="stories"] .nt-bar{flex-wrap:wrap;gap:14px}
 }
 @media (prefers-reduced-motion:reduce){[data-module="stories"] .nt-sheet{transition:none}[data-module="stories"] .tw.is-wrong .tw-sheet{animation:none}}
+/* On the home page the sheet waits blank, a caret blinking where the first character will land. */
+[data-module="stories"] .collectible--typewriter .tw-sheet b{margin-top:calc(26*var(--u))}
+[data-module="stories"] .collectible--typewriter .tw-caret{animation:tw-blink 1.1s steps(1) infinite}
+@keyframes tw-blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){[data-module="stories"] .collectible--typewriter .tw-caret{animation:none}}

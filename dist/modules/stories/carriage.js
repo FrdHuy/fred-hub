@@ -19,6 +19,14 @@ export function setCarriage(root, steps, animate = true) {
   root.style.setProperty('--carriage', String(-Math.min(steps, 22) * STEP));
 }
 
+// Put the carriage at an exact offset in u (for proportional text: the typed width so far).
+export function setCarriageOffset(root, offset, animate = true) {
+  const carriage = root.querySelector('.tw-carriage');
+  carriage.style.transition = animate ? 'transform .07s cubic-bezier(.2,.7,.3,1)' : 'none';
+  root.style.setProperty('--carriage', String(-Math.min(offset, 170)));
+}
+export const widthInU = (root, node) => { const range = document.createRange(); range.selectNodeContents(node); return range.getBoundingClientRect().width / u(root); };
+
 // RETURN: bell, then the carriage slides right and hits its stop (a small bounce).
 export async function carriageReturn(root, { reduced, bell = true }) {
   const carriage = root.querySelector('.tw-carriage');

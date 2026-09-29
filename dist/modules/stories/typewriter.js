@@ -5,8 +5,9 @@ const ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
 const esc = text => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const key = (k, label = k.toUpperCase(), extra = '') => `<i class="tw-key${extra}" data-k="${k}">${label}</i>`;
 
-export function typewriterMarkup({ kicker = '', title = '', line = '' } = {}) {
-  return `<div class="tw" aria-hidden="true">
+// `ink` is text the machine types on the blank sheet when RETURN is pressed on the home page.
+export function typewriterMarkup({ kicker = '', title = '', line = '', ink = '' } = {}) {
+  return `<div class="tw" aria-hidden="true"${ink ? ` data-ink="${esc(ink).replace(/"/g, '&quot;')}"` : ''}>
 <div class="tw-carriage"><div class="tw-rest"></div>
 <div class="tw-paper"><div class="tw-sheet"><small>${esc(kicker)}</small><b>${esc(title)}<span class="tw-caret"></span></b><p class="tw-line">${line}</p></div></div>
 <div class="tw-collar l"></div><div class="tw-collar r"></div><div class="tw-knob l"></div><div class="tw-knob r"></div><div class="tw-platen"></div>
