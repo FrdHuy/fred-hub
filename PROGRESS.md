@@ -35,7 +35,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 ## 3. 进行中
 
 - travel 翻牌屏：已完成（v0.31），等 Fred 的真实行程数据替换占位（Claude Code）。
-- stories 撕页日历：Codex/GPT，分支 codex/tear-calendar。
+- stories → 「手记」打字机（Claude Code）：设计图待 Fred 确认。内容以游记、阶段感想为主；密码篇在打字机上敲暗号解锁（轻量加密，像彩蛋）；游记 ↔ 旅行登机牌、阶段 ↔ 人生清单大事件联动。
 
 ## 4. 待办清单（按优先级）
 

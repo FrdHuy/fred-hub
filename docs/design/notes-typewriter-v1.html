@@ -1,0 +1,134 @@
+<!doctype html><meta charset="utf-8"><title>手记 comp</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+:root{--paper:#f8f7f4;--ink:#343832;--muted:#90928a;--accent:#b34934;--sheet:#fbf9f3;--sheet-lo:#efebe0}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-ui)}
+.v{display:none;position:relative;width:1440px;height:900px;overflow:hidden}
+body[data-v="1"] #v1,body[data-v="2"] #v2,body[data-v="3"] #v3,body[data-v="4"] #v4{display:block}
+.tag{position:absolute;left:14px;top:10px;font:11px var(--font-mono);letter-spacing:.14em;color:#b0b2aa;z-index:9}
+.brand{position:absolute;top:36px;left:0;right:0;text-align:center;font:600 34px/1 var(--font-wordmark);letter-spacing:-.06em}
+.brand i{color:var(--accent);font-style:normal}
+.burger{position:absolute;top:50px;right:72px;width:22px;height:8px;border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+.spk{position:absolute;top:44px;left:81px;width:26px;height:20px}
+.back{position:absolute;left:81px;top:131px;width:26px;height:16px}
+
+/* ——— The typewriter (front view, light from the upper left) ——— */
+.tw{position:relative;width:340px;height:330px}
+.tw-paper{position:absolute;left:92px;top:0;width:156px;height:132px;background:linear-gradient(#fbf9f3,#f1ede2);box-shadow:0 1px 2px #3d3f2a26;padding:14px 14px 0;box-sizing:border-box}
+.tw-paper small{display:block;font:500 6.5px/1.6 var(--font-mono);letter-spacing:.2em;color:#8e978c}
+.tw-paper b{display:block;margin-top:9px;font:400 12.5px/1.55 var(--font-literary);color:#3f463e;letter-spacing:.04em}
+.tw-paper .caret{display:inline-block;width:5px;height:1px;background:#3f463e;margin-left:2px;vertical-align:2px}
+.tw-bail{position:absolute;left:72px;top:96px;width:196px;height:3px;border-radius:2px;background:linear-gradient(#f4f3ee,#9d9b92);box-shadow:0 1px 1px #0003}
+.tw-platen{position:absolute;left:44px;top:110px;width:252px;height:24px;border-radius:12px;background:linear-gradient(#4a4f47,#2a2e28 55%,#3a3f37);box-shadow:inset 0 1px 1px #ffffff26,0 2px 3px #0003}
+.tw-knob{position:absolute;top:104px;width:22px;height:36px;border-radius:8px;background:linear-gradient(90deg,var(--shell-warm-lo),var(--shell-warm-hi) 45%,#d3cfc1);box-shadow:0 1px 2px #3d3f2a40,inset 0 0 0 1px #ffffff80}
+.tw-knob.l{left:26px}.tw-knob.r{right:26px}
+/* Carriage-return lever: a chrome arm at the left end of the carriage. */
+.tw-lever{position:absolute;left:4px;top:84px;width:40px;height:6px;border-radius:3px;transform:rotate(-24deg);transform-origin:100% 50%;background:linear-gradient(#f6f5f1,#b7b5ac 60%,#8f8d86);box-shadow:0 1px 1px #0004}
+.tw-lever:before{content:'';position:absolute;left:-6px;top:-3px;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fbfbf7,#c9c7bf 60%,#8f8d86)}
+.tw-body{position:absolute;left:14px;top:130px;width:312px;height:176px;border-radius:22px 22px 30px 30px;background:linear-gradient(170deg,var(--shell-sage-hi),var(--shell-sage) 55%,#b3baab);box-shadow:inset 0 2px 1px #ffffffb3,inset 0 -4px 6px #6f7a6633,0 10px 0 #a9b0a1,0 11px 1px #949b8c,0 34px 40px #3d3f2a24}
+/* The only brick-red on the typewriter: the ribbon showing through its window. */
+.tw-ribbon{position:absolute;left:136px;top:14px;width:40px;height:12px;border-radius:3px;background:var(--glass);box-shadow:inset 0 1px 2px #000a}
+.tw-ribbon:after{content:'';position:absolute;left:4px;right:4px;top:5px;height:3px;background:linear-gradient(#2a2e28 0 50%,var(--accent) 50%)}
+.tw-plate{position:absolute;left:0;right:0;top:34px;text-align:center;font:500 7px var(--font-mono);letter-spacing:.34em;color:#6f7a68}
+.tw-keys{position:absolute;left:30px;right:30px;top:54px;display:grid;gap:7px}
+.tw-row{display:flex;justify-content:center;gap:6px}
+.tw-row:nth-child(2){padding-left:10px}.tw-row:nth-child(3){padding-left:22px}
+.tw-key{width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fdfcf8,#ebe7da 70%);box-shadow:0 2px 0 #9ea596,0 3px 2px #3d3f2a33,inset 0 0 0 1px #ffffffa0}
+.tw-space{margin:2px auto 0;width:150px;height:13px;border-radius:7px;background:linear-gradient(#fdfcf8,#e6e2d4);box-shadow:0 2px 0 #9ea596,0 3px 2px #3d3f2a33}
+
+/* ——— v1: home rail ——— */
+#v1 .stage{position:absolute;left:0;right:0;top:170px;height:440px}
+#v1 .center{position:absolute;left:50%;top:0;transform:translateX(-50%)}
+#v1 .ghost{position:absolute;top:60px;opacity:.45;filter:saturate(.55)}
+#v1 .cap{position:absolute;left:0;right:0;top:806px;text-align:center;font:15px var(--font-ui);letter-spacing:.12em;color:#6b6e66}
+.mini-panel{width:330px;height:216px;border-radius:16px;background:linear-gradient(162deg,var(--shell-warm-hi),var(--shell-warm) 45%,var(--shell-warm-lo));box-shadow:inset 0 1.5px 1px #fff,0 5px 0 #d2cdbc,0 22px 28px #3d3f2a1f}
+.mini-gate{width:310px;height:100px;border-radius:6px 6px 9px 9px;background:linear-gradient(130deg,var(--shell-stone-hi),var(--shell-stone) 55%,var(--shell-stone-lo));box-shadow:inset 0 2px 2px #fff9,0 10px 16px #3d3f2a1c}
+
+/* ——— v2: the manuscripts on the desk ——— */
+.desk{position:absolute;left:0;right:0;top:190px;bottom:0}
+.meta{font:500 10px var(--font-mono);letter-spacing:.26em;color:#8e978c}
+.stamp{display:inline-block;align-self:flex-start;padding:3px 7px 2px;border:1px solid currentColor;border-radius:2px;font:600 9px var(--font-mono);letter-spacing:.24em;color:#5c6456;transform:rotate(-2deg)}
+.sheets{position:absolute;left:50%;top:40px;width:1080px;transform:translateX(-50%);display:grid;grid-template-columns:repeat(4,1fr);gap:34px;align-items:start}
+.sheet{position:relative;aspect-ratio:210/297;background:linear-gradient(170deg,var(--sheet),var(--sheet-lo));box-shadow:0 1px 1px #3d3f2a1f,0 10px 22px #3d3f2a17;padding:26px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;transition:transform .3s}
+.sheet:nth-child(1){transform:rotate(-1.2deg)}.sheet:nth-child(2){transform:rotate(.8deg) translateY(18px)}.sheet:nth-child(3){transform:rotate(-.5deg) translateY(6px)}.sheet:nth-child(4){transform:rotate(1.4deg) translateY(26px)}
+.sheet.hover{transform:translateY(-10px) rotate(0);box-shadow:0 1px 1px #3d3f2a1f,0 22px 34px #3d3f2a24}
+.sheet h3{margin:6px 0 0;font:400 22px/1.45 var(--font-literary);letter-spacing:.04em;color:#2e342d}
+.sheet p{margin:0;font:300 12.5px/2 var(--font-ui);color:#6b6e66;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.sheet .foot{margin-top:auto;display:flex;justify-content:space-between}
+.sheet .typed{font:500 10px/1.9 var(--font-mono);letter-spacing:.14em;color:#8e978c}
+.sheet .link{color:#3f463e}
+.sheet.locked{background:linear-gradient(170deg,#f3efe4,#e8e3d5)}
+.sheet.locked h3,.sheet.locked p{filter:blur(4px);opacity:.55;user-select:none}
+.conf{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-8deg);padding:8px 14px 7px;border:2px solid #5c6456;border-radius:3px;font:700 13px var(--font-mono);letter-spacing:.3em;color:#5c6456;opacity:.8;background:#f3efe4cc}
+.years{position:absolute;left:81px;top:0;display:grid;gap:14px}
+.years span{font:500 11px var(--font-mono);letter-spacing:.28em;color:#b0b2aa}.years span.on{color:var(--ink)}
+.count{position:absolute;right:72px;top:0;font:500 11px var(--font-mono);letter-spacing:.28em;color:#8e978c}
+
+/* ——— v3: reading ——— */
+.read{position:absolute;left:50%;top:170px;width:700px;transform:translateX(-50%);background:linear-gradient(var(--sheet),#f6f3ea);box-shadow:0 1px 1px #3d3f2a1a,0 24px 50px #3d3f2a14;padding:56px 70px 60px;box-sizing:border-box;min-height:900px}
+.read .top{display:flex;justify-content:space-between;align-items:center}
+.flight{font:500 10px var(--font-mono);letter-spacing:.24em;color:#3f463e;border:1px solid #cfcbbd;border-radius:14px;padding:6px 12px}
+.read h1{margin:30px 0 8px;font:400 36px/1.4 var(--font-literary);letter-spacing:.05em;color:#2a2f29}
+.read .sub{margin:0 0 34px}
+.read p.b{margin:0 0 22px;font:300 17px/2.05 var(--font-ui);color:#3f463e;letter-spacing:.02em}
+.photos{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin:10px -14px 12px}
+.photo{aspect-ratio:4/3;background:linear-gradient(180deg,#2c3a44 0%,#4b6a6c 40%,#9fb2a4 55%,#1f2522 56%,#2c312d);box-shadow:0 0 0 6px #fff,0 0 0 7px #e2ded3,0 8px 14px #3d3f2a26}
+.photo.b{background:linear-gradient(180deg,#6f7d86,#aeb8b8 48%,#3d4640 49%,#262b27);aspect-ratio:3/4;margin-top:-40px;transform:rotate(1.5deg)}
+.cap2{font:500 9px var(--font-mono);letter-spacing:.2em;color:#8e978c;margin:14px 0 26px}
+
+/* ——— v4: the password, typed on the machine ——— */
+#v4{background:#f3f1ec}
+#v4 .veil{position:absolute;inset:0;background:#f8f7f4d9}
+#v4 .tw-wrap{position:absolute;left:50%;top:250px;transform:translateX(-50%) scale(1.55);transform-origin:50% 0}
+#v4 .tw-paper{height:140px}
+#v4 .tw-paper .pw{margin-top:14px;font:500 9px var(--font-mono);letter-spacing:.16em;white-space:nowrap;color:#2e342d}
+#v4 .tw-paper .pw u{text-decoration:none;border-bottom:1px solid #3f463e;display:inline-block;width:8px;margin-left:2px}
+#v4 .tw-key.down{transform:translateY(2px);box-shadow:0 0 0 #9ea596,0 1px 1px #3d3f2a33}
+#v4 .hint{position:absolute;left:0;right:0;top:790px;text-align:center;font:500 11px var(--font-mono);letter-spacing:.34em;color:#8e978c}
+#v4 .side{position:absolute;right:120px;top:300px;width:240px;font:12px/2 var(--font-ui);color:#6b6e66}
+#v4 .side b{display:block;font:500 10px var(--font-mono);letter-spacing:.24em;color:#3f463e;margin-top:18px}
+</style>
+<body>
+<template id="tw"><div class="tw"><div class="tw-paper"><small>TRAVEL LOG · 12.10.2024</small><b>极光来的那一晚<span class="caret"></span></b></div><div class="tw-bail"></div><div class="tw-lever"></div><div class="tw-knob l"></div><div class="tw-knob r"></div><div class="tw-platen"></div>
+<div class="tw-body"><div class="tw-ribbon"></div><div class="tw-plate">FRED · MANUAL 01</div><div class="tw-keys"><div class="tw-row"></div><div class="tw-row"></div><div class="tw-row"></div><div class="tw-space"></div></div></div></div></template>
+
+<section class="v" id="v1"><span class="tag">手记 · 设计图 1/4 · 首页物件（夹在滚筒里的纸 = 最新一篇的标题）</span>
+<span class="brand">Fred<i>.</i></span><span class="burger"></span>
+<div class="stage"><div class="ghost" style="left:-150px"><div class="mini-gate"></div></div><div class="center" data-tw></div><div class="ghost" style="right:-160px;top:70px"><div class="mini-panel"></div></div></div>
+<div class="cap">手记</div></section>
+
+<section class="v" id="v2"><span class="tag">手记 · 设计图 2/4 · 内页：桌上的几份稿子（篇数少也不空）</span>
+<span class="brand">Fred<i>.</i></span><span class="burger"></span>
+<div class="desk">
+<div class="years"><span class="on">2026</span><span>2025</span><span>2024</span><span>2023</span></div>
+<div class="count">04 MANUSCRIPTS</div>
+<div class="sheets">
+ <article class="sheet hover"><span class="stamp">CHAPTER</span><h3>毕业之后的第一年</h3><p>离开 Madison 的那天下了雪。我以为会难过，结果只是很平静地把钥匙放进信箱……</p><div class="foot"><span class="typed">28.09.2026<br>MADISON</span><span class="typed">9 MIN</span></div></article>
+ <article class="sheet"><span class="stamp">TRAVEL LOG</span><h3>极光来的那一晚</h3><p>在黑沙滩上等了一整晚。凌晨两点，天边先是一道很淡的白，然后忽然就绿了……</p><div class="foot"><span class="typed">12.10.2024<br><span class="link">FH 006 · KEF</span></span><span class="typed">6 MIN</span></div></article>
+ <article class="sheet locked"><span class="stamp">CHAPTER</span><h3>写给以后的自己</h3><p>这一篇只写给知道暗号的人。里面有一些现在还说不出口的事情，和一些以后想兑现的承诺。</p><div class="foot"><span class="typed">01.01.2026<br>—</span><span class="typed">4 MIN</span></div><span class="conf">CONFIDENTIAL</span></article>
+ <article class="sheet"><span class="stamp">TRAVEL LOG</span><h3>京都，四月的哲学之道</h3><p>清晨六点的哲学之道没有人，只有落了一地的樱花和一只不怕人的猫……</p><div class="foot"><span class="typed">03.04.2025<br><span class="link">FH 007 · KIX</span></span><span class="typed">5 MIN</span></div></article>
+</div></div></section>
+
+<section class="v" id="v3"><span class="tag">手记 · 设计图 3/4 · 阅读：一张稿纸，正文好读，照片像贴上去的相片</span>
+<span class="brand">Fred<i>.</i></span><span class="burger"></span>
+<div class="read"><div class="top"><span class="stamp">TRAVEL LOG</span><span class="flight">FH 006 · MSN ✈ KEF →</span></div>
+<h1>极光来的那一晚</h1><p class="sub meta">12.10.2024 · REYKJAVIK · 6 MIN</p>
+<p class="b">在黑沙滩上等了一整晚。天气预报说今晚的 KP 指数只有 3，我们几乎已经放弃，把三脚架收进了车里。</p>
+<div class="photos"><div class="photo"></div><div class="photo b"></div></div>
+<p class="cap2">VÍK · 02:14 AM</p>
+<p class="b">凌晨两点，天边先是一道很淡的白，像一条没擦干净的粉笔痕。小林说那是云，阿杰说不是。然后它忽然就绿了，从海的那一边一直铺到头顶。</p>
+</div></section>
+
+<section class="v" id="v4"><span class="tag">手记 · 设计图 4/4 · 私密篇：在打字机上敲出暗号（错了“叮”一声退纸）</span>
+<span class="brand">Fred<i>.</i></span><span class="burger"></span>
+<div class="veil"></div>
+<div class="tw-wrap" data-tw data-pw></div>
+<div class="hint">TYPE THE PASSWORD · RETURN TO OPEN</div>
+</section>
+<script>
+const tpl = document.getElementById('tw').innerHTML;
+document.querySelectorAll('[data-tw]').forEach(host => { host.innerHTML = tpl; host.querySelectorAll('.tw-row').forEach((row, i) => { row.innerHTML = '<i class="tw-key"></i>'.repeat([10, 9, 8][i]); }); });
+const pw = document.querySelector('[data-pw] .tw-paper'); pw.innerHTML = '<small>CONFIDENTIAL · Nº 003</small><b>写给以后的自己</b><div class="pw">PASSWORD · ****<u></u></div>';
+document.querySelectorAll('[data-pw] .tw-key')[14].classList.add('down');
+document.body.dataset.v = new URLSearchParams(location.search).get('v') || '1';
+</script>
