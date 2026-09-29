@@ -1,5 +1,5 @@
-import { play as sound } from '../../sound.js?v=36';
-import { strike, setCarriageOffset, widthInU, carriageReturn, feed, resetSheet } from './carriage.js?v=36';
+import { play as sound } from '../../sound.js?v=37';
+import { strike, setCarriageOffset, widthInU, carriageReturn, feed, resetSheet } from './carriage.js?v=37';
 
 // Home controller for the typewriter: press the red RETURN key down (drag, or tap / Enter for an automatic press).
 // Past the threshold the machine types the latest note's title onto the blank sheet — the carriage stepping left by each

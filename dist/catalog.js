@@ -1,9 +1,9 @@
-import { panelCover } from './modules/bucketlist/cover.js?v=36';
-import travelData from './modules/travel/data.js?v=36';
-import { parseTravel, localNow, flight } from './modules/travel/trips.js?v=36';
-import notesData from './modules/stories/data.js?v=36';
-import { sortNotes } from './modules/stories/notes.js?v=36';
-import { typewriterMarkup } from './modules/stories/typewriter.js?v=36';
+import { panelCover } from './modules/bucketlist/cover.js?v=37';
+import travelData from './modules/travel/data.js?v=37';
+import { parseTravel, localNow, flight } from './modules/travel/trips.js?v=37';
+import notesData from './modules/stories/data.js?v=37';
+import { sortNotes } from './modules/stories/notes.js?v=37';
+import { typewriterMarkup } from './modules/stories/typewriter.js?v=37';
 
 // The boarding pass on the home page carries the next planned flight, or else the latest trip.
 function nextFlight() {

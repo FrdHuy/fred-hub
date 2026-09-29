@@ -117,6 +117,7 @@
   [data-module="stories"] .nt-sheet{padding:18px 14px;gap:10px}
   [data-module="stories"] .nt-sheet h3{font-size:16px}
   [data-module="stories"] .nt-sheet p{-webkit-line-clamp:3;font-size:11.5px}
+  [data-module="stories"] .nt-conf{padding:6px 9px 5px;font-size:9px;letter-spacing:.2em;border-width:1.5px}
   [data-module="stories"] .nt-read{padding:36px 22px 34px;margin:0 -8px}
   [data-module="stories"] .nt-read h1{font-size:27px}
   [data-module="stories"] .nt-body{font-size:16px}
