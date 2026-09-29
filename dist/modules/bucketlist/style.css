@@ -1,11 +1,11 @@
 /* Life List: a hundred-lamp control panel (docs/DESIGN.md · Soft Retro Industrial). Light from the upper left. */
-[data-module="bucketlist"]{--casing-hi:#f8f5ec;--casing:#efebdf;--casing-lo:#e3dfd1;--sage-hi:#c8cec0;--sage:#b6bdae;--sage-lo:#aeb5a5;--ink:#4b5549;--muted:#8d9186;--lcd:#c5d1b0;--brick:#b34934;--mono:var(--font-mono)}
+[data-module="bucketlist"]{--casing-hi:var(--shell-warm-hi);--casing:var(--shell-warm);--casing-lo:var(--shell-warm-lo);--sage-hi:#c8cec0;--sage:#b6bdae;--sage-lo:#aeb5a5;--ink:#4b5549;--muted:#8d9186;--lcd:#c5d1b0;--brick:#b34934;--mono:var(--font-mono)}
 
 /* ——— Lamps (shared by the home panel and the deck): a metal bezel, a glass lens, a warm filament behind it ——— */
-[data-module="bucketlist"] :is(.lamp,.deck-lamp){position:relative;aspect-ratio:1;border-radius:50%;padding:0;border:0;--spec:radial-gradient(ellipse 42% 26% at 36% 27%,#ffffff8c,#fff0 72%);background:var(--spec),radial-gradient(circle,#858e7e 0 52%,#6e7768 86%,#5f6858);box-shadow:0 0 0 1.4px #e2e5da,0 0 0 2.3px #99a08f,0 1.5px 1px 1.5px #6f7a664d}
+[data-module="bucketlist"] :is(.lamp,.deck-lamp){position:relative;aspect-ratio:1;border-radius:50%;padding:0;border:0;--spec:radial-gradient(ellipse 30% 18% at 37% 29%,#ffffff3d,#fff0 72%);background:var(--spec),radial-gradient(circle at 44% 40%,#8a9283,#767f70 78%,#6c7466);box-shadow:0 0 0 1.4px #e2e5da,0 0 0 2.3px #a7ad9e,0 1px 1px 1px #6f7a6633}
 [data-module="bucketlist"] :is(.lamp,.deck-lamp):before,[data-module="bucketlist"] :is(.lamp,.deck-lamp):after{content:'';position:absolute;inset:0;border-radius:50%;opacity:0;transition:opacity .35s ease-out}
-/* Written but not done yet: a dim, warm glow. */
-[data-module="bucketlist"] :is(.lamp,.deck-lamp):before{background:var(--spec),radial-gradient(circle,#b19772 0 26%,#8f7f63 58%,#737060 90%)}
+/* Written but not done yet: an unlit, matte warm-grey lens. */
+[data-module="bucketlist"] :is(.lamp,.deck-lamp):before{background:var(--spec),radial-gradient(circle at 44% 40%,#a39b8a 0 22%,#8d8777 62%,#7d7869)}
 /* Done: lit amber, with a halo. */
 [data-module="bucketlist"] :is(.lamp,.deck-lamp):after{background:var(--spec),radial-gradient(circle,#fff6d8 0 16%,#ffd88e 34%,#f5a843 66%,#d9862a 92%);box-shadow:0 0 0 1.4px #f1ead6,0 0 0 2.3px #b3a07c,0 0 6px 2px #ffb54a8c,0 0 16px #ffa33a4d}
 /* A life event: cool white, like an old white pilot lamp — a coordinate on the timeline. */
@@ -40,7 +40,7 @@
 [data-module="bucketlist"] .panel-plate{font:500 calc(var(--w) * .03)/1.15 var(--mono);letter-spacing:.2em;color:var(--ink)}
 [data-module="bucketlist"] .panel-plate small{display:block;font-size:.72em;letter-spacing:.24em;color:var(--muted);margin-top:.35em}
 [data-module="bucketlist"] :is(.panel-lcd,.deck-readout,.deck-odometer){position:relative;overflow:hidden;background:linear-gradient(180deg,#2c302b,#363b34);box-shadow:inset 0 2px 3px #0009,inset 0 -1px 0 #ffffff14,0 1px 0 #fff}
-[data-module="bucketlist"] :is(.panel-lcd,.deck-readout):after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,#ffffff12 0 30%,transparent 42%),repeating-linear-gradient(0deg,#0000 0 2px,#00000018 2px 3px)}
+[data-module="bucketlist"] :is(.panel-lcd,.deck-readout):after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#0000 0 2px,#00000010 2px 3px)}
 [data-module="bucketlist"] .panel-lcd{height:calc(var(--w) * .13);border-radius:calc(var(--w) * .014);display:grid;place-items:center}
 [data-module="bucketlist"] .panel-lcd span{grid-area:1/1;font:500 calc(var(--w) * .058)/1 var(--mono);letter-spacing:.06em}
 [data-module="bucketlist"] .panel-lcd .ghost{color:#3f463d}

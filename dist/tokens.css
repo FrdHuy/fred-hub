@@ -11,4 +11,13 @@
   --font-literary:"Didot","Bodoni 72","Songti SC","STSong","Noto Serif SC",Georgia,serif; /* titles and lines worth reading slowly: Didot for Latin, Songti for Chinese */
 }
 
+/* Materials: three matte plastics (one family, told apart by value, not hue), the LCD glass, and paper.
+   Each object keeps its own functional light on top: amber lamps, green LCD, yellow flaps. The one brick-red is --accent. */
+:root{
+  --shell-warm-hi:#f8f5ec;--shell-warm:#efebdf;--shell-warm-lo:#e3dfd1;   /* Life List panel */
+  --shell-sage-hi:#dfe2dc;--shell-sage:#c1c7b9;--shell-sage-lo:#d6dacf;   /* optical drive */
+  --shell-stone-hi:#e2dfd5;--shell-stone:#cbc7ba;--shell-stone-lo:#b9b5a7; /* boarding-gate reader */
+  --shell-edge:#aba797;--glass:#2f332f;--glass-hi:#3a3f37;--paper-card:#f5f1e5;
+}
+
 .wordmark,.hub-entrance strong,.fred-curtain strong{font-family:var(--font-wordmark);font-weight:600}
