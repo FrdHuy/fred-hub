@@ -58,7 +58,7 @@ const server = createServer(async (req, res) => {
   const url = new URL(req.url, 'http://local');
   try {
     if (url.pathname === '/') return send(res, 200, page, 'text/html; charset=utf-8');
-    if (url.pathname === '/api/films') return send(res, 200, (await films()).filter(film => film.tmdb).map(({ title, rating, tmdb: id, poster, year, pick, note }) => ({ id, title, rating, poster, year, pick: Boolean(pick), note: note ?? '' })));
+    if (url.pathname === '/api/films') return send(res, 200, (await films()).filter(film => film.tmdb).map(({ title, original, rating, tmdb: id, poster, year, pick, note }) => ({ id, title, original, rating, poster, year, pick: Boolean(pick), note: note ?? '' })));
     if (url.pathname === '/api/shelf') {
       const [path, params] = shelf({ kind: url.searchParams.get('kind'), list: url.searchParams.get('list'), year: url.searchParams.get('year'), page: url.searchParams.get('page') || 1 });
       const data = await tmdb.get(path, params);

@@ -16,6 +16,7 @@ input{flex:1;min-width:200px;padding:9px 14px;border:1px solid #2a2622;border-ra
 input:focus{border-color:#4a443c}
 .hint{margin-top:12px;font:500 10px var(--mono);letter-spacing:.2em;color:var(--faint)}
 main{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:26px 20px;padding:10px 32px 140px}
+.card[hidden]{display:none}
 .card{position:relative;display:flex;flex-direction:column;gap:8px;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer;font:inherit}
 .art{position:relative;aspect-ratio:2/3;border-radius:4px;overflow:hidden;background:#1d1a17;box-shadow:0 8px 18px #0006;transition:transform .18s,box-shadow .18s,filter .18s}
 .art img{width:100%;height:100%;object-fit:cover;display:block}
@@ -133,9 +134,21 @@ document.querySelectorAll('.group').forEach(group => group.addEventListener('cli
   group.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
   if (button.dataset.kind) state.kind = button.dataset.kind;
   if (button.dataset.list) state.list = button.dataset.list;
-  yearSelect.hidden = state.list !== 'year'; state.query = ''; $('#q').value = ''; reload();
+  yearSelect.hidden = state.list !== 'year'; state.query = ''; $('#q').value = '';
+  $('#q').placeholder = local() ? '在你的片单里找，边打边筛（片名、原名或年份）' : '搜索片名，回车（中文或原名都行）';
+  reload();
 }));
-$('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { state.query = e.target.value.trim(); reload(); } });
+// In 我的片单 / 放映表 the box filters your own list as you type (keeping what you have ticked); elsewhere Enter searches TMDB.
+const local = () => state.list === 'mine' || screen();
+function filterLocal(text) {
+  const q = text.trim().toLowerCase();
+  grid.querySelectorAll('.card').forEach(card => {
+    const film = owned.get(card.dataset.id), hay = `${card.dataset.title} ${film?.original ?? ''} ${film?.year ?? ''}`.toLowerCase();
+    card.hidden = Boolean(q) && !hay.includes(q);
+  });
+}
+$('#q').addEventListener('input', e => { if (local()) filterLocal(e.target.value); });
+$('#q').addEventListener('keydown', e => { if (e.key === 'Enter' && !local()) { state.query = e.target.value.trim(); reload(); } });
 
 $('#save').addEventListener('click', async () => {
   const button = $('#save'); button.disabled = true;
