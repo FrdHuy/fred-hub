@@ -32,9 +32,9 @@
 [data-module="travel"] .tv-switch:hover span{color:var(--film)}
 
 /* Rows. */
-[data-module="travel"] .tv-head,[data-module="travel"] .tv-row{display:grid;grid-template-columns:190px auto 1fr 90px 180px;grid-template-areas:"info dest . days status";column-gap:32px;align-items:center}
+[data-module="travel"] .tv-head,[data-module="travel"] .tv-row{display:grid;grid-template-columns:190px auto 1fr 64px 76px 56px 170px;grid-template-areas:"info dest . pax days mark status";column-gap:26px;align-items:center}
 [data-module="travel"] .tv-head{padding:18px 0 4px;font:500 10px var(--mono);letter-spacing:.3em;color:var(--faint)}
-[data-module="travel"] .tv-head span:nth-child(2){grid-area:dest}[data-module="travel"] .tv-head span:nth-child(3){grid-area:days;text-align:right}[data-module="travel"] .tv-head span:nth-child(4){grid-area:status;text-align:right}
+[data-module="travel"] .tv-head span:nth-child(2){grid-area:dest}[data-module="travel"] .tv-head span:nth-child(3){grid-area:pax;text-align:right}[data-module="travel"] .tv-head span:nth-child(4){grid-area:days;text-align:right}[data-module="travel"] .tv-head span:nth-child(5){grid-area:mark;text-align:center}[data-module="travel"] .tv-head span:nth-child(6){grid-area:status;text-align:right}
 [data-module="travel"] .tv-rows{list-style:none;margin:0;padding:0}
 [data-module="travel"] .tv-item{border-bottom:1px solid var(--line);transition:opacity .35s}
 [data-module="travel"] .tv-row{width:100%;padding:16px 0;background:none;border:0;color:inherit;text-align:left;cursor:pointer;font:inherit}
@@ -76,9 +76,19 @@
 [data-module="travel"] .tv-bars{display:block;margin-top:auto;height:44px;background:repeating-linear-gradient(90deg,#3f463e 0 2px,transparent 2px 4px,#3f463e 4px 5px,transparent 5px 9px,#3f463e 9px 12px,transparent 12px 14px)}
 
 
+/* The stats strip: four readouts on flaps between the title and the table. */
+[data-module="travel"] .tv-band{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+[data-module="travel"] .tv-cell{display:flex;flex-direction:column;gap:10px;padding:18px 0 20px 24px;border-left:1px solid var(--line)}
+[data-module="travel"] .tv-cell:first-child{padding-left:0;border-left:0}
+[data-module="travel"] .tv-cell span{font:500 10px var(--font-mono);letter-spacing:.3em;color:var(--faint)}
+[data-module="travel"] .tv-pax{grid-area:pax;text-align:right;font:500 12px var(--font-mono);letter-spacing:.2em;color:var(--dim)}
+[data-module="travel"] .tv-pax b{font-size:15px;font-weight:500;color:var(--film)}
+[data-module="travel"] .tv-mark{grid-area:mark;text-align:center}
+[data-module="travel"] .tv-mark i{font:600 9px var(--font-mono);font-style:normal;letter-spacing:.2em;padding:3px 5px 2px 7px;border:1px solid #efe9dc66;border-radius:2px;color:var(--film)}
+[data-module="travel"] .tv-info,[data-module="travel"] .tv-pax,[data-module="travel"] .tv-mark{animation:tv-in .5s var(--in,0ms) both}
 @media (max-width:900px){
   [data-module="travel"] .tv-head,[data-module="travel"] .tv-row{grid-template-columns:150px auto 1fr 140px;grid-template-areas:"info dest . status";column-gap:20px}
-  [data-module="travel"] .tv-days,[data-module="travel"] .tv-head span:nth-child(3){display:none}
+  [data-module="travel"] :is(.tv-days,.tv-pax,.tv-mark),[data-module="travel"] .tv-head span:is(:nth-child(3),:nth-child(4),:nth-child(5)){display:none}
   [data-module="travel"] .tv-slot,[data-module="travel"] .tv-empty{margin-left:0;padding-left:0}
   [data-module="travel"] .tv-pass{margin:0 0 22px 16px}
 }
@@ -89,6 +99,7 @@
   [data-module="travel"] .tv-switch{display:flex;gap:18px}
   [data-module="travel"] .tv-meta,[data-module="travel"] .tv-place{font-size:10px;letter-spacing:.2em}
   [data-module="travel"] .tv-head{display:none}
+  [data-module="travel"] .tv-band{display:none}
   [data-module="travel"] .tv-row{grid-template-columns:1fr auto;grid-template-areas:"info status" "dest dest";row-gap:10px;padding:14px 0}
   [data-module="travel"] .tv-info{display:flex;gap:14px;font-size:10px;line-height:1.4}
   [data-module="travel"] .tv-status{font-size:10px;letter-spacing:.2em;gap:8px}

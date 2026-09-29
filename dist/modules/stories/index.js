@@ -1,6 +1,6 @@
 import data from './data.js?v=33';
 import { TYPES, dotDate, sortNotes, years } from './notes.js?v=33';
-import { unseal, normalise } from './seal.js?v=33';
+import { unseal } from './seal.js?v=33';
 import { typewriterMarkup } from './typewriter.js?v=33';
 import { strike as strikeKey, setCarriage, carriageReturn, feed } from './carriage.js?v=33';
 import travelData from '../travel/data.js?v=33';
@@ -10,7 +10,6 @@ import { play as sound } from '../../sound.js?v=33';
 
 const esc = text => String(text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const pad3 = n => String(n).padStart(3, '0');
-const KEY = id => `fred-note-${id}`;
 // A sheet's tilt comes from its id, so the desk looks the same on every visit.
 const tilt = id => { let h = 7; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return [(h % 29) / 10 - 1.4, (h >> 5) % 22]; };
 
@@ -19,7 +18,7 @@ export function mount({ container, route }) {
   const motion = matchMedia('(prefers-reduced-motion: reduce)'), reduced = () => motion.matches;
   const notes = sortNotes(Array.isArray(data) ? data : []);
   const numbers = new Map([...notes].reverse().map((note, i) => [note.id, i + 1]));  // Nº in the order they were written
-  const unlocked = new Map();                                                         // id → { html, excerpt } this visit
+  const unlocked = new Map();   // id → { html, excerpt }: open only while you stay in 手记; leaving the module forgets them
   let year = '', lockNote = null;
 
   // Flights on the travel board, to link a travel log back to its boarding pass.
@@ -105,7 +104,6 @@ ${list.length ? `<ol class="nt-sheets">${list.map(sheet).join('')}</ol>` : '<p c
       typed = ''; await carriageReturn(tw, { reduced }); showTyped(); return;
     }
     unlocked.set(note.id, body);
-    try { sessionStorage.setItem(KEY(note.id), normalise(typed)); } catch {}
     // Right: the carriage is thrown back, two line feeds, and the sheet rolls out.
     await carriageReturn(typewriter, { reduced, bell: false });
     await feed(typewriter, { reduced, lines: 2 });
@@ -136,11 +134,6 @@ ${list.length ? `<ol class="nt-sheets">${list.map(sheet).join('')}</ol>` : '<p c
     const note = sub && notes.find(n => n.id === sub);
     if (!note) { closeLock(); desk(); return; }
     if (!note.locked) { closeLock(); read(note, note); return; }
-    if (!unlocked.has(note.id)) {
-      let saved = null; try { saved = sessionStorage.getItem(KEY(note.id)); } catch {}
-      const body = saved && await unseal(note.locked, saved);
-      if (body) unlocked.set(note.id, body);
-    }
     if (unlocked.has(note.id)) { closeLock(); read(note, unlocked.get(note.id)); }
     else { desk(); openLock(note); }
   }

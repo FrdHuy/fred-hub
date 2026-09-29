@@ -1,5 +1,5 @@
 import data from './data.js?v=33';
-import { parseTravel, stats, localNow, monthYear, passDate, flight, pad2, FIELD } from './trips.js?v=33';
+import { parseTravel, stats, pax, localNow, monthYear, passDate, flight, pad2, FIELD } from './trips.js?v=33';
 import { createWord } from './flap.js?v=33';
 import { play as sound } from '../../sound.js?v=33';
 import notes from '../stories/data.js?v=33';
@@ -23,7 +23,7 @@ export function mount({ container, route }) {
   let today; try { today = localNow(data?.home?.timeZone || 'America/Chicago'); } catch { today = localNow('America/Chicago'); }
   const travel = parseTravel(data, today);
   if (travel.errors.length) console.warn(`旅行 data.js 有问题：\n  ${travel.errors.join('\n  ')}`);
-  const total = stats(travel);
+  const total = stats(travel, today);
   let mode = 'arr', openRow = null;
 
   const hall = document.createElement('section'); hall.className = 'tv'; hall.lang = 'zh-CN';
@@ -31,13 +31,21 @@ export function mount({ container, route }) {
 <div class="tv-top"><div class="tv-title"></div>
 <button class="tv-switch" type="button" role="switch" aria-checked="false" aria-label="显示想去的地方（DEPARTURES）"><span data-mode="arr"><i></i>ARR</span><span data-mode="dep"><i></i>DEP</span></button>
 <div class="tv-clock"></div><p class="tv-meta"></p><p class="tv-place">${esc(travel.home.city)} · LOCAL TIME</p></div>
-<div class="tv-head" aria-hidden="true"><span>DATE / FLIGHT</span><span>DESTINATION</span><span>DAYS</span><span>REMARKS</span></div>
+<div class="tv-band" aria-hidden="true"></div>
+<div class="tv-head" aria-hidden="true"><span>DATE / FLIGHT</span><span>DESTINATION</span><span>PAX</span><span>DAYS</span><span>LOG</span><span>REMARKS</span></div>
 <ol class="tv-rows"></ol><p class="tv-foot" aria-hidden="true">FRED AIR · ${esc(travel.home.airport)}</p>`;
   container.append(hall);
   const $ = selector => hall.querySelector(selector);
   const rows = $('.tv-rows'), toggle = $('.tv-switch'), meta = $('.tv-meta');
   const title = createWord(10, 'xl', { signal, reduced }), clock = createWord(5, 'l', { signal, reduced });
   $('.tv-title').append(title.el); $('.tv-clock').append(clock.el);
+  // The stats strip: the numbers of a life of travel, on flaps too. NEXT DEPARTURE counts down to the planned trip.
+  const band = [['FLIGHTS', 2, pad2(total.flights)], ['COUNTRIES', 2, pad2(total.countries)], ['DAYS AWAY', 3, String(total.daysAway).padStart(3, '0')], ['NEXT DEPARTURE', 5, total.nextIn === null ? '-----' : `T-${String(Math.min(total.nextIn, 999)).padStart(3, '0')}`]];
+  const cells = band.map(([label, width, value]) => {
+    const cell = document.createElement('div'); cell.className = 'tv-cell';
+    const word = createWord(width, 'm', { signal, reduced }), name = document.createElement('span'); name.textContent = label;
+    cell.append(name, word.el); $('.tv-band').append(cell); return [word, value];
+  });
 
   function tick() {
     clock.set(localNow(travel.home.timeZone).time, { stagger: 70, steps: [1, 3] });
@@ -46,7 +54,7 @@ export function mount({ container, route }) {
 
   function writeMeta() {
     meta.innerHTML = mode === 'arr'
-      ? `<b>${total.flights}</b> FLIGHTS · <b>${total.countries}</b> COUNTRIES${total.since ? ` · SINCE ${total.since}` : ''}`
+      ? [total.since && `SINCE <b>${total.since}</b>`, total.longest && `LONGEST <b>${pad2(total.longest.days)} D</b> · ${total.longest.code}`].filter(Boolean).join(' · ')
       : `<b>${total.plans}</b> DESTINATIONS · NEXT <b>${total.next ? monthYear(total.next) : 'TBD'}</b>`;
   }
 
@@ -58,7 +66,7 @@ export function mount({ container, route }) {
     const when = trip.date ? `${trip.date.year}年${trip.date.month}月` : '日期未定';
     button.innerHTML = `<span class="tv-sr">${esc(trip.to)}，${when}${trip.days ? `，${trip.days} 天` : ''}，${trip.status}</span>
 <span class="tv-info" aria-hidden="true"><b>${monthYear(trip.date)}</b>${flight(trip.number)} · ${trip.code}</span><span class="tv-dest"></span>
-<span class="tv-days" aria-hidden="true">${days}</span><span class="tv-status" aria-hidden="true"><i></i>${trip.status}</span>`;
+<span class="tv-pax" aria-hidden="true">${mode === 'arr' ? `<b>${pad2(pax(trip))}</b>` : '<b>—</b>'}</span><span class="tv-days" aria-hidden="true">${days}</span><span class="tv-mark" aria-hidden="true">${log(trip) ? '<i>LOG</i>' : ''}</span><span class="tv-status" aria-hidden="true"><i></i>${trip.status}</span>`;
     button.setAttribute('aria-expanded', 'false');
     const word = createWord(FIELD, 'm', { signal, reduced });
     button.querySelector('.tv-dest').append(word.el);
@@ -135,6 +143,7 @@ export function mount({ container, route }) {
   }, { signal });
 
   hall.dataset.mode = mode; writeMeta(); fill(true);
+  cells.forEach(([word, value], i) => word.set(value, { delay: 260 + i * 90 }));
   title.set(MODES[mode].title, { stagger: 40 }); later(tick, reduced() ? 0 : 200);
   // #/collection/travel/FH 006 → that flight's pass is printed (links from 手记).
   function goFlight(sub) {

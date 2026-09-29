@@ -85,10 +85,27 @@ function readHome(home, errors) {
   return { city: flapText(home.city ?? 'MADISON') || 'HOME', airport, timeZone };
 }
 
-export function stats({ arrivals, departures }) {
+export function stats({ arrivals, departures }, today) {
   const countries = new Set(arrivals.map(trip => trip.country.trim().toLowerCase()));
   const since = arrivals.length ? Math.min(...arrivals.map(trip => trip.date.year)) : null;
-  return { flights: arrivals.length, countries: countries.size, since, plans: departures.length, next: departures.find(trip => trip.live)?.date ?? null };
+  const longest = arrivals.reduce((best, trip) => !best || trip.days > best.days ? trip : best, null);
+  const next = departures.find(trip => trip.live) ?? null;
+  return {
+    flights: arrivals.length, countries: countries.size, since, plans: departures.length,
+    daysAway: arrivals.reduce((sum, trip) => sum + trip.days, 0),
+    longest: longest ? { days: longest.days, code: longest.code } : null,
+    next: next?.date ?? null, nextIn: next && today ? daysUntil(next.date, today) : null,
+  };
+}
+// Whole days from today to a date (a month-only date counts from its first day); never negative.
+export function daysUntil(date, today) {
+  const at = Date.UTC(date.year, date.month - 1, date.day), now = Date.UTC(today.year, today.month - 1, today.day);
+  return Math.max(0, Math.round((at - now) / 864e5));
+}
+// Passengers: Fred plus whoever travelled with him (names split on 、，, / 和 & +; “独自” means alone).
+export function pax(trip) {
+  const others = String(trip.with ?? '').split(/[、，,/&+]|和|\s+and\s+/).map(name => name.trim()).filter(name => name && !/^(独自|一个人|alone|solo)$/i.test(name));
+  return others.length + 1;
 }
 
 // The local wall clock in Fred's city: { year, month, day, time: '14:32' }.

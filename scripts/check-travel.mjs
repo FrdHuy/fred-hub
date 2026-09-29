@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { parseTravel, stats, flapText, readDate, monthYear, passDate, flipPath, localNow, CHARSET, FIELD } from '../dist/modules/travel/trips.js';
+import { parseTravel, stats, pax, daysUntil, flapText, readDate, monthYear, passDate, flipPath, localNow, CHARSET, FIELD } from '../dist/modules/travel/trips.js';
 
 const today = { year: 2026, month: 9, day: 29 };
 assert.equal(flapText('Reykjavík'), 'REYKJAVIK');
@@ -20,7 +20,9 @@ assert.deepEqual(board.errors, []);
 assert.deepEqual(board.arrivals.map(t => [t.to, t.number, t.from]), [['C', 3, 'ORD'], ['B', 2, 'MSN'], ['A', 1, 'MSN']], 'latest first, numbered in the order they happened');
 assert.deepEqual(board.arrivals.map(t => Boolean(t.live)), [true, false, false]);
 assert.deepEqual(board.departures.map(t => [t.to, t.status, t.number]), [['LATE', 'DELAYED', 4], ['THIS MONTH', 'BOARDING', 5], ['NEXT', 'SCHEDULED', 6], ['LATER', 'SCHEDULED', 7], ['SOMEDAY', 'SOMEDAY', 8]]);
-assert.deepEqual(stats(board), { flights: 3, countries: 2, since: 2021, plans: 5, next: readDate('2026-09') });
+assert.deepEqual(stats(board, today), { flights: 3, countries: 2, since: 2021, plans: 5, daysAway: 9, longest: { days: 3, code: 'ABC' }, next: readDate('2026-09'), nextIn: 0 });
+assert.deepEqual([pax({ with: '小林、阿杰' }), pax({ with: '独自' }), pax({}), pax({ with: 'Tom and Ann' }), pax({ with: 'A, B / C' })], [3, 1, 1, 3, 4]);
+assert.equal(daysUntil({ year: 2026, month: 12, day: 18 }, today), 80);
 console.log('PASS: ordering, flight numbers, departure statuses, stats');
 
 const bad = parseTravel({ arrivals: [trip('Llanfairpwllgwyngyll', '2020-01'), { to: 'X', code: 'KEFF', country: 'x', date: '2020-01', days: 1 }, trip('X', '2020-01', { days: 0 }), trip('X', '2020-01', { photo: '../a.jpg' }), trip('X', '2020-01', { note: 'x' }), trip('X', '2020-01', { country: '' })], departures: [{ to: 'X', code: 'ABC', date: 'soon' }], extra: 1 }, today);

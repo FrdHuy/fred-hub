@@ -165,7 +165,7 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 
 ## v0.33 手记（打字机）+ 缎面拨杆（Claude Code）
 - stories 改为「手记」：首页暖白便携打字机（设计 docs/design/notes-typewriter-v3.html；唯一砖红 = RET 键），纸上是最新一篇公开手记的标题。手势：纵向按住 RET 往下压（26px，阈值 .62）→ 响铃、纸卷出 → 进门；轻点/回车自动按下。进门时打字机的纸长成页面（main.js openRoom）。
-- 内页：桌上的稿子（按 id 固定的微倾斜，年份筛选，`NN MANUSCRIPTS`）→ 阅读页（一张稿纸；照片像贴上的相片；FIN；上一篇/下一篇）。私密篇盖 CONFIDENTIAL 章，点开后在打字机上敲暗号（实体键盘、手机键盘、屏幕按键都行）：错了响铃、纸抖、清空；对了纸卷出、正文出现；本次访问内记住（sessionStorage）。
+- 内页：桌上的稿子（按 id 固定的微倾斜，年份筛选，`NN MANUSCRIPTS`）→ 阅读页（一张稿纸；照片像贴上的相片；FIN；上一篇/下一篇）。私密篇盖 CONFIDENTIAL 章，点开后在打字机上敲暗号（实体键盘、手机键盘、屏幕按键都行）：错了响铃、纸抖、清空；对了纸卷出、正文出现；在手记内部（桌面↔文章）保持解锁，离开手记再进来要重新输入（v0.33.3）。
 - 写作：notes/*.md（开头 标题/日期/类型 必填；地点/旅行/大事件/暗号 选填；照片放同一文件夹）→ `node scripts/publish-notes.mjs` → dist/modules/stories/data.js + media/（sips 压到 1600px，文件名为内容哈希）。有暗号的正文用 AES-GCM（PBKDF2 12 万次）加密后才写进 data.js（dist/modules/stories/seal.js，浏览器与 Node 共用）。notes/ 不部署；仓库是私有的，但暗号也在 notes/ 原文里。说明见 notes/README.md。
 - 路由：新增子路径 `#/collection/<id>/<sub>`（router.js）；同一模块内切换时 main.js 调用模块 cleanup.route(sub)，不重新挂载。手记用它打开文章；旅行 `#/collection/travel/FH 006` 打开那一趟登机牌；清单 `#/collection/bucketlist/<原文>` 选中那盏灯。
 - 联动：登机牌底部 `READ THE LOG →`（同三字码、90 天内最近的一篇游记）；手记游记 → `FH 006 · MSN ✈ KEF →`；阶段 → `◎ 大事件 →`；清单读数屏出现 `READ →`。
@@ -178,3 +178,5 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 
 - v0.33.1（Fred 反馈）：① 打字机加滑架（.tw-carriage，carriage.js）：首页按 RET → 打出 READ ON（每一击滑架左移一格）→ 响铃 → 滑架被推回右侧撞停（微回弹 + 回车声）→ 换两行 → 纸卷出；暗号页每敲一个字滑架左移一格，退格右移，错了滑架推回并清空，对了推回、换行、出纸。② 首页打字机居中（比格子宽时 grid 会把它挤到一边，改为从自身中心定位）。③ 手势：鼠标按在物件上任何方向都抓物件（3px），不再被判为横滑；触屏规则不变。④ 全站去掉焦点框（`*:focus{outline:none}`，删除各处 focus 样式）。Fred 的质量排名：机票 > 人生清单 > 电影片单。
 - v0.33.2：首页打字机的纸改为空白 + 闪烁光标；按 RET 后逐字打出最新一篇的标题（中文也行，滑架按每个字的实际宽度左移），再响铃、推回、换行、出纸（Fred 的提议）。
+
+- v0.33.3：① 暗号只在手记内有效，离开模块即忘（不再用 sessionStorage）。② 翻牌屏（电脑/平板）加统计条：FLIGHTS / COUNTRIES / DAYS AWAY / NEXT DEPARTURE（T-080 倒计时，翻牌显示）；表格加 PAX（同行人数+1，从「同行」拆分）与 LOG（有游记时显示）；标题下改为 SINCE · LONGEST。手机隐藏统计条和新列，保持紧凑。trips.js 新增 pax / daysUntil，stats(travel, today)。
