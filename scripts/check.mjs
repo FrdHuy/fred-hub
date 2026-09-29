@@ -22,8 +22,8 @@ for (const file of ['main.js','gallery.js','catalog.js','router.js','wheel.js','
 }
 const html = readFileSync('dist/index.html','utf8');
 for (const match of html.matchAll(/(?:href|src)="\.\/([^"#]+)"/g)) assert.ok(existsSync(`dist/${match[1].split("?")[0]}`), match[1]);
-assert.ok(existsSync('dist/assets/collection-atlas.png'));
-assert.ok(existsSync('dist/assets/fred-diary.png'));
+assert.ok(!existsSync('dist/assets/collection-atlas.png'), 'the old object atlas is no longer shipped');
+assert.ok(existsSync('dist/assets/fred-diary.webp'));
 assert.ok(!html.includes('search-dialog'));
 assert.ok(!html.includes('category-nav'));
 assert.ok(html.includes('module-menu'));
@@ -33,4 +33,4 @@ assert.equal(modules.find(x=>x.id==='bucketlist').cover, 'list');
 assert.ok(!modules.some(x=>x.id==='wheel'));
 console.log('PASS: module registry, search, routes, local assets and JavaScript syntax');
 
-for (const asset of ['compass.png','cd-player.png']) assert.ok(existsSync(`dist/assets/${asset}`));
+assert.ok(existsSync('dist/assets/compass.png'), 'kept for the paused compass');

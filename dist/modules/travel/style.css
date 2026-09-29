@@ -1,6 +1,6 @@
 /* Departure hall: a flat, matte Solari board. The retro lives in the motion, not in glossy flaps (docs/design/travel.md). */
 @font-face{font-family:"Fred Flap";src:url("./fonts/barlow-semi-condensed-500.woff2") format("woff2");font-weight:500;font-display:swap}
-[data-module="travel"] .tv{--film:#efe9dc;--dim:#857e72;--faint:#4e4a43;--line:#ffffff12;--flap:#1f1c19;--blank:#161412;--night:#100e0c;--yellow:#f2c318;--mono:ui-monospace,"SF Mono",Menlo,monospace;--face:"Fred Flap","Barlow Semi Condensed","DIN Condensed","Arial Narrow",sans-serif;--ease:cubic-bezier(.22,.75,.2,1);position:relative;max-width:1400px;margin:10px auto 0;padding-bottom:60px;color:var(--film);-webkit-font-smoothing:antialiased}
+[data-module="travel"] .tv{--film:#efe9dc;--dim:#857e72;--faint:#4e4a43;--line:#ffffff12;--flap:#1f1c19;--blank:#161412;--night:#100e0c;--yellow:#f2c318;--mono:var(--font-mono);--face:"Fred Flap","Barlow Semi Condensed","DIN Condensed","Arial Narrow",sans-serif;--ease:cubic-bezier(.22,.75,.2,1);position:relative;max-width:1400px;margin:10px auto 0;padding-bottom:60px;color:var(--film);-webkit-font-smoothing:antialiased}
 [data-module="travel"] .tv-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
 /* Flaps: one matte colour, a 1px split, 2px between cells. */
@@ -70,7 +70,7 @@
 [data-module="travel"] .tv-to{margin:-6px 0 0;font:500 10px var(--mono);letter-spacing:.3em;color:#8e978c}
 [data-module="travel"] .tv-fields{display:flex;flex-wrap:wrap;gap:12px 34px;font:500 9px var(--mono);letter-spacing:.24em;color:#8e978c}
 [data-module="travel"] .tv-fields b{display:block;margin-top:5px;font-size:13px;font-weight:500;letter-spacing:.12em;color:#3f463e}
-[data-module="travel"] .tv-line{margin:auto 0 0;padding-top:6px;font:300 16px/1.6 "Songti SC","STSong",serif;color:#4b5549}
+[data-module="travel"] .tv-line{margin:auto 0 0;padding-top:6px;font:300 16px/1.6 var(--font-literary);color:#4b5549}
 [data-module="travel"] .tv-stub{display:flex;flex-direction:column;gap:8px;padding:24px 22px;border-left:1.5px dashed #c9c6b8;font:500 9px var(--mono);letter-spacing:.24em;color:#8e978c}
 [data-module="travel"] .tv-stub b{font:500 26px/1 var(--face);letter-spacing:.06em;color:#2e342d;margin-bottom:6px}
 [data-module="travel"] .tv-bars{display:block;margin-top:auto;height:44px;background:repeating-linear-gradient(90deg,#3f463e 0 2px,transparent 2px 4px,#3f463e 4px 5px,transparent 5px 9px,#3f463e 9px 12px,transparent 12px 14px)}

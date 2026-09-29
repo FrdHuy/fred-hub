@@ -1,5 +1,5 @@
 /* Life List: a hundred-lamp control panel (docs/DESIGN.md · Soft Retro Industrial). Light from the upper left. */
-[data-module="bucketlist"]{--casing-hi:#f8f5ec;--casing:#efebdf;--casing-lo:#e3dfd1;--sage-hi:#c8cec0;--sage:#b6bdae;--sage-lo:#aeb5a5;--ink:#4b5549;--muted:#8d9186;--lcd:#c5d1b0;--brick:#b34934;--mono:ui-monospace,"SF Mono",Menlo,monospace}
+[data-module="bucketlist"]{--casing-hi:#f8f5ec;--casing:#efebdf;--casing-lo:#e3dfd1;--sage-hi:#c8cec0;--sage:#b6bdae;--sage-lo:#aeb5a5;--ink:#4b5549;--muted:#8d9186;--lcd:#c5d1b0;--brick:#b34934;--mono:var(--font-mono)}
 
 /* ——— Lamps (shared by the home panel and the deck): a metal bezel, a glass lens, a warm filament behind it ——— */
 [data-module="bucketlist"] :is(.lamp,.deck-lamp){position:relative;aspect-ratio:1;border-radius:50%;padding:0;border:0;--spec:radial-gradient(ellipse 42% 26% at 36% 27%,#ffffff8c,#fff0 72%);background:var(--spec),radial-gradient(circle,#858e7e 0 52%,#6e7768 86%,#5f6858);box-shadow:0 0 0 1.4px #e2e5da,0 0 0 2.3px #99a08f,0 1.5px 1px 1.5px #6f7a664d}
@@ -64,7 +64,7 @@
 [data-module="bucketlist"] .deck-readout{box-sizing:border-box;min-height:380px;padding:26px 28px;border-radius:12px;color:var(--lcd);display:flex;flex-direction:column}
 [data-module="bucketlist"] .deck-readout p{margin:0;position:relative;z-index:1}
 [data-module="bucketlist"] .deck-no{font:500 14px/1 var(--mono);letter-spacing:.3em;color:#8f9a80}
-[data-module="bucketlist"] .deck-text{margin-top:22px!important;font:300 28px/1.45 "PingFang SC","Helvetica Neue",sans-serif;letter-spacing:.08em;text-shadow:0 0 8px #c5d1b044;overflow-wrap:anywhere}
+[data-module="bucketlist"] .deck-text{margin-top:22px!important;font:300 28px/1.45 var(--font-ui);letter-spacing:.08em;text-shadow:0 0 8px #c5d1b044;overflow-wrap:anywhere}
 [data-module="bucketlist"] .deck-state{margin-top:auto!important;font:500 14px/1 var(--mono);letter-spacing:.24em;color:#9aa58b}
 [data-module="bucketlist"] .deck-state b{font-weight:500;margin-right:.4em}
 [data-module="bucketlist"] .deck-state.is-lit{color:var(--lcd)}
@@ -124,12 +124,12 @@
 [data-module="bucketlist"] .deck-head{border-bottom:1px dashed #cfcbbd;margin-bottom:6px}
 [data-module="bucketlist"] .deck-foot{border-top:1px dashed #cfcbbd;margin-top:6px}
 [data-module="bucketlist"] .deck-row{display:grid;grid-template-columns:40px 1fr 16px 42px;gap:8px}
-[data-module="bucketlist"] .deck-row span:nth-child(2){font-family:"PingFang SC",sans-serif;font-weight:300;letter-spacing:.06em;color:#343832;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+[data-module="bucketlist"] .deck-row span:nth-child(2){font-family:var(--font-ui);font-weight:300;letter-spacing:.06em;color:#343832;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 [data-module="bucketlist"] .deck-row.is-done span:nth-child(2){color:var(--muted)}
 [data-module="bucketlist"] .deck-row.is-mark span:nth-child(2){color:#343832;font-weight:400}
 
 [data-module="bucketlist"] .deck-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0;padding:0}
-[data-module="bucketlist"] .deck-notice{display:flex;gap:10px;align-items:baseline;margin:22px 4px 0;font:12px/1.8 "PingFang SC",sans-serif;color:var(--muted)}
+[data-module="bucketlist"] .deck-notice{display:flex;gap:10px;align-items:baseline;margin:22px 4px 0;font:12px/1.8 var(--font-ui);color:var(--muted)}
 [data-module="bucketlist"] .deck-notice[hidden]{display:none}
 [data-module="bucketlist"] .deck-notice p{margin:0;overflow-wrap:anywhere}
 [data-module="bucketlist"] .deck-notice button{flex:none;text-decoration:underline;color:var(--ink)}

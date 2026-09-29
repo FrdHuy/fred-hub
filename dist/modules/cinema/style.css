@@ -1,5 +1,5 @@
 /* A dark listening-room shelf: cover-flow jewel cases with poster-printed spines. */
-[data-module="cinema"] .cinema{--night:#0f0d0c;--film:#ece4d6;--dim:#8a8276;--gold:#d2a052;--display:"Didot","Bodoni 72","Songti SC","STSong",Georgia,serif;--sans:"Avenir Next","Helvetica Neue","PingFang SC",sans-serif;--ease:cubic-bezier(.22,.75,.2,1);--w:min(300px,38vh);--d:14px;--slot:calc(var(--w) * .36);--gap:6px;position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;min-height:calc(100svh - 160px);color:var(--film);isolation:isolate;-webkit-font-smoothing:antialiased}
+[data-module="cinema"] .cinema{--night:#0f0d0c;--film:#ece4d6;--dim:#8a8276;--gold:#d2a052;--display:var(--font-literary);--sans:var(--font-ui);--ease:cubic-bezier(.22,.75,.2,1);--w:min(300px,38vh);--d:14px;--slot:calc(var(--w) * .36);--gap:6px;position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;min-height:calc(100svh - 160px);color:var(--film);isolation:isolate;-webkit-font-smoothing:antialiased}
 [data-module="cinema"] .cinema-bg{position:absolute;inset:0;overflow:hidden;z-index:-1;pointer-events:none;-webkit-mask-image:linear-gradient(transparent,#000 140px);mask-image:linear-gradient(transparent,#000 140px)}
 [data-module="cinema"] .cinema-ambient{position:absolute;inset:-15%;background:center/cover no-repeat;filter:blur(100px) saturate(1.4);opacity:0;transition:background-image 1s,opacity 1s;-webkit-mask-image:radial-gradient(closest-side,#000 40%,transparent);mask-image:radial-gradient(closest-side,#000 40%,transparent)}
 [data-module="cinema"] .has-pick .cinema-ambient{opacity:.18}
@@ -9,7 +9,7 @@
 
 [data-module="cinema"] .cinema-tally{position:absolute;left:5%;top:4px;margin:0;display:flex;align-items:center;gap:10px}
 [data-module="cinema"] .cinema-tally svg{width:32px;height:26px;opacity:.8}
-[data-module="cinema"] .cinema-tally span{font:400 22px/1 var(--display);letter-spacing:.04em;font-variant-numeric:lining-nums}
+[data-module="cinema"] .cinema-tally span{font:500 13px/1 var(--font-mono);letter-spacing:.28em;color:var(--film)}
 
 /* Filter / sort: a line-art toggle and two rows of quiet words. */
 [data-module="cinema"] .cinema-tools{position:absolute;right:5%;top:0;z-index:4;display:flex;flex-direction:column;align-items:flex-end}

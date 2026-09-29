@@ -144,8 +144,6 @@ $('.skip-link').addEventListener('click', e => {
   e.preventDefault();
   (activeRoute.type === 'home' ? gallery.currentElement : $('.back-link'))?.focus({ preventScroll: true });
 });
-const asset = new Image(); asset.src = new URL('./assets/collection-atlas.png', import.meta.url).href;
-asset.onerror = () => { document.documentElement.classList.add('asset-error'); };
 showRoute(true);
 document.documentElement.dataset.ready = 'true';
 

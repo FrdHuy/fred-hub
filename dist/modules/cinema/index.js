@@ -220,7 +220,7 @@ export function mount({ container, item }) {
 
   function arrange() {
     view = viewFilms(films, choice); current = -1; aim = -1;
-    $('.cinema-tally span').textContent = view.length;
+    $('.cinema-tally span').textContent = pad(view.length);
     $('.cinema-tally').setAttribute('aria-label', `共 ${view.length} 部`);
     rack.replaceChildren(...view.map(caseFor));
     rack.scrollLeft = 0; layout();
@@ -232,7 +232,7 @@ export function mount({ container, item }) {
     options($('[data-key=type]'), [['', '全部'], ...TYPES.map(type => [type, type])]);
     options($('[data-key=order]'), Object.entries(ORDERS));
     if (!films.length) {
-      hall.classList.add('is-empty'); $('.cinema-tools').hidden = true; $('.cinema-tally span').textContent = 0;
+      hall.classList.add('is-empty'); $('.cinema-tools').hidden = true; $('.cinema-tally span').textContent = pad(0);
       const empty = document.createElement('p'); empty.className = 'cinema-empty'; empty.textContent = item.emptyTitle;
       rack.replaceWith(empty); return;
     }
