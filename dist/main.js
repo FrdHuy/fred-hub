@@ -1,10 +1,10 @@
-import { createInteraction } from './experience.js?v=32';
-import { soundOn, setSound } from './sound.js?v=32';
-import { mountModule } from './modules/index.js?v=32';
-import { modules, getModule, createCover } from './catalog.js?v=32';
-import { CollectionGallery } from './gallery.js?v=32';
+import { createInteraction } from './experience.js?v=33';
+import { soundOn, setSound } from './sound.js?v=33';
+import { mountModule } from './modules/index.js?v=33';
+import { modules, getModule, createCover } from './catalog.js?v=33';
+import { CollectionGallery } from './gallery.js?v=33';
 import { readRoute, navigate } from './router.js';
-import { attachSheen } from './sheen.js?v=32';
+import { attachSheen } from './sheen.js?v=33';
 
 const $ = selector => document.querySelector(selector);
 // Focus rings are for keyboard users. Script-moved focus after a click or tap stays invisible.
@@ -64,7 +64,7 @@ function renderCollection(item) {
   const back = document.createElement('a'); back.className = 'back-link'; back.href = '#/'; back.textContent = '← 放回收藏';
   toolbar.append(back); detail.append(toolbar);
   const container = document.createElement('div'); container.className = 'module-content'; detail.append(container);
-  disposeModule = mountModule({ container, item, navigate, createCover });
+  disposeModule = mountModule({ container, item, navigate, createCover, route: activeRoute.sub });
 }
 function renderMissing() {
   disposeModule(); disposeModule = () => {}; document.documentElement.dataset.theme = '';
@@ -72,13 +72,17 @@ function renderMissing() {
 }
 async function showRoute(initial = false) {
   const sequence = ++routeSequence, nextRoute = readRoute(), item = nextRoute.type === 'collection' ? getModule(nextRoute.id) : null;
+  // Moving inside the same module (article ↔ list, a flight on the board): the module handles it, no remount.
+  if (!initial && activeRoute.type === 'collection' && nextRoute.type === 'collection' && nextRoute.id === activeRoute.id && disposeModule.route) {
+    activeRoute = nextRoute; disposeModule.route(nextRoute.sub); return;
+  }
   const previousRoute = activeRoute; let transitionItem = null;
   const leaving = getComputedStyle(document.body).backgroundColor;
   const openingList = !initial && previousRoute.type==='home' && item?.id==='bucketlist';
   // The Life List opens out of the powered-up panel on the home page.
   const listOrigin = openingList ? gallery.currentElement?.querySelector('.panel')?.getBoundingClientRect() : null;
   // Other objects open through their screen: the reader's display grows into the room.
-  const screen = !initial && previousRoute.type==='home' && item && !openingList ? $(`.stage-receiver[data-module="${item.id}"] :is(.gate-display,.drive-display)`)?.getBoundingClientRect() : null;
+  const screen = !initial && previousRoute.type==='home' && item && !openingList ? (item.id === 'stories' ? gallery.currentElement?.querySelector('.tw-paper') : $(`.stage-receiver[data-module="${item.id}"] :is(.gate-display,.drive-display)`))?.getBoundingClientRect() : null;
   const screenOrigin = screen && screen.width && screen.right > 0 && screen.left < innerWidth ? screen : null;
   interaction.reset(); cancelRouteAnimation();
   if (!initial && nextRoute.type === 'home' && previousRoute.type === 'collection') {
@@ -108,7 +112,8 @@ async function showRoute(initial = false) {
     ]);
     paper.style.removeProperty('transform-origin');
   }else if(!initial&&!motion.matches){
-    await openRoom(screenOrigin, getComputedStyle(document.body).backgroundColor, leaving);
+    // The typewriter's sheet of paper grows into the page; the readers' screens grow into their dark rooms.
+    await openRoom(screenOrigin, item?.id === 'stories' && screenOrigin ? '#fdfcf8' : getComputedStyle(document.body).backgroundColor, leaving);
   }
   if (sequence !== routeSequence) return;
   cancelRouteAnimation();

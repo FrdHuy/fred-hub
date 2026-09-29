@@ -17,7 +17,7 @@
 | --- | --- | --- |
 | 公共首页、交互、菜单、模块注册 | Codex | v0.17 已交接，无运行中编辑 |
 | cinema 影院片单（dist/modules/cinema/**、scripts/add-movie.mjs、scripts/check-cinema.mjs；共享：index.html 样式链接、catalog theme、main.js 主题切换、hub.css 深色头部） | Claude Code | v0.18 已交接，无运行中编辑 |
-| stories → 手记（打字机；dist/modules/stories/**；共享：catalog 封面/名称、experience 分支） | Claude Code | 2026-09-29 由 Fred 改派；撕页日历方案取消（GPT 未开始，其目录无提交）。设计图 docs/design/notes-typewriter-v1.html 待确认 |
+| stories → 手记（打字机；dist/modules/stories/**；共享：catalog 封面/名称、experience 分支） | Claude Code | v0.33 已完成（占位文章），无运行中编辑 |
 | bucketlist 百灯控制面板（dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画、hub.css 清单返回箭头） | Claude Code | v0.28 已合入 main，无运行中编辑 |
 | travel 翻牌屏（dist/modules/travel/**；设计见 docs/design/travel.md） | Claude Code | v0.31 已完成（占位数据），无运行中编辑 |
 | wheel | 暂停 | 源码保留，不在注册表和菜单中 |
@@ -162,3 +162,16 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - 维护：styles.css 16.6KB → 8.7KB、hub.css 31.6KB → 25.9KB（删除 192 条选择器，类名在所有 JS/HTML 中都不出现；动态拼接的前缀视为存活）。删除前后对 21 个页面/状态（含闸机 reading/error/success、光驱 reading、菜单、登机牌、打印、404、手机）做确定性截图（冻结时钟 + reduced-motion），逐像素一致。本地旧分支已删，未合并的 fortune-sticks 存为 tag archive/fortune-sticks。资源 v32。
 - 共享文件改动：index.html、main.js、experience.js、catalog.js、styles.css、hub.css、tokens.css（新）、sound.js（新）。**Codex/GPT 的 codex/tear-calendar 合并时注意**：styles.css/hub.css 删了大量旧规则，stories 相关的 `.diary-*` 规则保留未动。
 - 未做（Fred 暂缓）：片单首张左半空与 TMDB 署名、日记页、手机首页位置读数、首次示范、「关于 Fred」。
+
+## v0.33 手记（打字机）+ 缎面拨杆（Claude Code）
+- stories 改为「手记」：首页暖白便携打字机（设计 docs/design/notes-typewriter-v3.html；唯一砖红 = RET 键），纸上是最新一篇公开手记的标题。手势：纵向按住 RET 往下压（26px，阈值 .62）→ 响铃、纸卷出 → 进门；轻点/回车自动按下。进门时打字机的纸长成页面（main.js openRoom）。
+- 内页：桌上的稿子（按 id 固定的微倾斜，年份筛选，`NN MANUSCRIPTS`）→ 阅读页（一张稿纸；照片像贴上的相片；FIN；上一篇/下一篇）。私密篇盖 CONFIDENTIAL 章，点开后在打字机上敲暗号（实体键盘、手机键盘、屏幕按键都行）：错了响铃、纸抖、清空；对了纸卷出、正文出现；本次访问内记住（sessionStorage）。
+- 写作：notes/*.md（开头 标题/日期/类型 必填；地点/旅行/大事件/暗号 选填；照片放同一文件夹）→ `node scripts/publish-notes.mjs` → dist/modules/stories/data.js + media/（sips 压到 1600px，文件名为内容哈希）。有暗号的正文用 AES-GCM（PBKDF2 12 万次）加密后才写进 data.js（dist/modules/stories/seal.js，浏览器与 Node 共用）。notes/ 不部署；仓库是私有的，但暗号也在 notes/ 原文里。说明见 notes/README.md。
+- 路由：新增子路径 `#/collection/<id>/<sub>`（router.js）；同一模块内切换时 main.js 调用模块 cleanup.route(sub)，不重新挂载。手记用它打开文章；旅行 `#/collection/travel/FH 006` 打开那一趟登机牌；清单 `#/collection/bucketlist/<原文>` 选中那盏灯。
+- 联动：登机牌底部 `READ THE LOG →`（同三字码、90 天内最近的一篇游记）；手记游记 → `FH 006 · MSN ✈ KEF →`；阶段 → `◎ 大事件 →`；清单读数屏出现 `READ →`。
+- 声音：新增 type / bell / feed。注意：模块内若已有本地 `play` 动画函数，声音用 `import { play as sound }`（v0.32 曾因重名导致切换失灵）。
+- 人生清单拨杆改为缎面结构（滚花螺母、垫圈、球轴、渐细拨杆、哑光红套头）；阴影用 cos/sin 反向旋转，光始终在左上。DESIGN.md：金属只做缎面。
+- 删除：日记本 fred-diary.webp、hub.css 里的 diary/journal 规则和 stories 占位页样式（13 条死选择器 + 旧 .detail-view[data-module=stories]）。资源 v33。
+- 验证：新增 check-stories（头部、Markdown、封印往返、联动规则、data.js）；全部 check 通过。CDP 真实输入：短按回弹/长按进门、打开文章、Esc 回桌面、错暗号清空、对暗号解锁、会话内记住、手记↔旅行↔清单三向链接；1440 与 390 宽无横向溢出。
+- 调试记录：隐藏输入框在 Chrome 中光标不在末尾，逐字输入会被倒序（fred → derf），暗号永远不对。改为暗号保存在变量里，输入框只接收按键后清空。
+- 占位：notes/ 里 4 篇示例（标注“（占位）”，私密篇暗号 fred）与 3 张占位图。

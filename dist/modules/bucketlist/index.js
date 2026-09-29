@@ -1,14 +1,17 @@
-import { parseItems, itemLines } from './items.js?v=32';
-import { loadEntries } from './storage.js?v=32';
-import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=32';
-import { play as sound } from '../../sound.js?v=32';
+import { parseItems, itemLines } from './items.js?v=33';
+import { loadEntries } from './storage.js?v=33';
+import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=33';
+import { play as sound } from '../../sound.js?v=33';
+import notes from '../stories/data.js?v=33';
+import { noteForItem } from '../stories/notes.js?v=33';
+import { collectionPath } from '../../router.js';
 
 const DETENT = 24;
 // Each odometer drum is a strip of 0–9 that rolls to the current digit.
 const digitsStrip = `<span class="deck-strip">${[...'0123456789'].map(d => `<span>${d}</span>`).join('')}</span>`;
 
 // Inside the Life List: the full deck. Readout + 100 lamps + year odometer, selector knob and a PRINT key.
-export function mount({ container, item }) {
+export function mount({ container, item, route }) {
   const events = new AbortController(), { signal } = events;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const now = new Date().getFullYear();
@@ -52,6 +55,9 @@ export function mount({ container, item }) {
     readout.state.replaceChildren(mark, state.slice(1));
     readout.state.classList.toggle('is-lit', state.startsWith('●'));
     readout.state.classList.toggle('is-mark', state.startsWith('◎'));
+    // A chapter written in 手记 about this item: the readout offers it.
+    const note = entry && noteForItem(Array.isArray(notes) ? notes : [], entry.text);
+    if (note) { const link = document.createElement('a'); link.className = 'deck-read'; link.href = collectionPath('stories', note.id); link.textContent = 'READ →'; readout.state.append(link); }
   }
   function render() {
     const states = lampStates(items, year, now);
@@ -102,7 +108,9 @@ export function mount({ container, item }) {
       return lamp;
     }));
     full.replaceChildren(...items.map(entry => { const li = document.createElement('li'); li.textContent = `${entry.text}${entry.milestone ? `（人生大事件 ${entry.year}）` : entry.done ? `（已完成${entry.year ? ` ${entry.year}` : ''}）` : ''}`; return li; }));
-    render(); if (items.length) select(0); else show();
+    // #/collection/bucketlist/<item text> (links from 手记) selects that lamp.
+    const wanted = route ? items.findIndex(entry => entry.text === route) : -1;
+    render(); if (items.length) select(Math.max(0, wanted)); else show();
     if (parsed.errors.length) say(`有 ${parsed.errors.length} 条没显示：${parsed.errors.join('；')}。运行 node scripts/check-bucketlist.mjs 查看详情。`);
     if (!motion.matches) deck.classList.add('is-booting');
   }

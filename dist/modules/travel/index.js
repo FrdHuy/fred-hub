@@ -1,7 +1,10 @@
-import data from './data.js?v=32';
-import { parseTravel, stats, localNow, monthYear, passDate, flight, pad2, FIELD } from './trips.js?v=32';
-import { createWord } from './flap.js?v=32';
-import { play as sound } from '../../sound.js?v=32';
+import data from './data.js?v=33';
+import { parseTravel, stats, localNow, monthYear, passDate, flight, pad2, FIELD } from './trips.js?v=33';
+import { createWord } from './flap.js?v=33';
+import { play as sound } from '../../sound.js?v=33';
+import notes from '../stories/data.js?v=33';
+import { noteForTrip } from '../stories/notes.js?v=33';
+import { collectionPath } from '../../router.js';
 
 const esc = text => String(text).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const photo = name => new URL(`./photos/${name}`, import.meta.url).href;
@@ -10,7 +13,7 @@ const MODES = { arr: { title: 'ARRIVALS', list: 'arrivals', empty: 'NO FLIGHTS' 
 const SKIES = [['#3b4a5a', '#c9a58a', '#2a2a2c'], ['#2c3a44', '#9fb2a4', '#1f2522'], ['#3d3550', '#d08a6a', '#262226'], ['#5b625f', '#a9aea5', '#343834'], ['#141c2b', '#3e5a6e', '#10141a']];
 const hash = text => [...text].reduce((sum, c) => (sum * 31 + c.charCodeAt(0)) >>> 0, 7);
 
-export function mount({ container }) {
+export function mount({ container, route }) {
   const events = new AbortController(), { signal } = events;
   const motion = matchMedia('(prefers-reduced-motion: reduce)'), reduced = () => motion.matches;
   const timers = new Set();
@@ -75,6 +78,8 @@ export function mount({ container }) {
     }
   }
 
+  // A travel log in 手记 for this trip → a link printed at the foot of the pass.
+  const log = trip => { const note = mode === 'arr' && noteForTrip(Array.isArray(notes) ? notes : [], trip); return note ? `<a class="tv-log" href="${collectionPath('stories', note.id)}">READ THE LOG →</a>` : ''; };
   function pass(trip) {
     const sky = SKIES[hash(trip.code) % SKIES.length];
     const art = trip.photo ? `<img src="${photo(trip.photo)}" alt="" loading="lazy">` : `<span class="tv-sky" style="--a:${sky[0]};--b:${sky[1]};--c:${sky[2]}"><b>${trip.code}</b></span>`;
@@ -84,7 +89,7 @@ export function mount({ container }) {
     return `<div class="tv-slot"></div><div class="tv-pass"><div class="tv-photo">${art}</div>
 <div class="tv-main"><div class="tv-air"><span>FRED AIR · BOARDING PASS</span><span>Nº ${String(trip.number).padStart(3, "0")}</span></div>
 <div class="tv-route">${trip.from}<span aria-label="飞往">✈</span>${trip.code}</div><p class="tv-to">${esc(trip.to)}</p>
-<div class="tv-fields">${fields.map(([k, v]) => `<span>${k}<b>${esc(v)}</b></span>`).join('')}</div>${trip.line ? `<p class="tv-line">${esc(trip.line)}</p>` : ''}</div>
+<div class="tv-fields">${fields.map(([k, v]) => `<span>${k}<b>${esc(v)}</b></span>`).join('')}</div>${trip.line ? `<p class="tv-line">${esc(trip.line)}</p>` : ''}${log(trip)}</div>
 <div class="tv-stub"><span>FLIGHT</span><b>${flight(trip.number)}</b><span>TO</span><b>${trip.code}</b><i class="tv-bars"></i></div></div>`;
   }
 
@@ -131,5 +136,17 @@ export function mount({ container }) {
 
   hall.dataset.mode = mode; writeMeta(); fill(true);
   title.set(MODES[mode].title, { stagger: 40 }); later(tick, reduced() ? 0 : 200);
-  return () => { events.abort(); timers.forEach(clearTimeout); timers.clear(); hall.getAnimations({ subtree: true }).forEach(animation => animation.cancel()); };
+  // #/collection/travel/FH 006 → that flight's pass is printed (links from 手记).
+  function goFlight(sub) {
+    const n = Number(String(sub ?? '').match(/\d+/)?.[0]); if (!n) return;
+    const arrival = travel.arrivals.find(t => t.number === n), trip = arrival ?? travel.departures.find(t => t.number === n);
+    if (!trip) return;
+    if ((arrival ? 'arr' : 'dep') !== mode) switchTo(arrival ? 'arr' : 'dep');
+    const item = rows.children[travel[MODES[mode].list].indexOf(trip)];
+    if (item) later(() => { open(item, trip); item.scrollIntoView({ block: 'center', behavior: reduced() ? 'auto' : 'smooth' }); }, reduced() ? 0 : 1100);
+  }
+  if (route) goFlight(route);
+  const cleanup = () => { events.abort(); timers.forEach(clearTimeout); timers.clear(); hall.getAnimations({ subtree: true }).forEach(animation => animation.cancel()); };
+  cleanup.route = goFlight;
+  return cleanup;
 }

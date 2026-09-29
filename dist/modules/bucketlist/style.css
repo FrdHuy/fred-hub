@@ -155,3 +155,4 @@
   [data-module="bucketlist"] :is(.lamp,.deck-lamp):before,[data-module="bucketlist"] :is(.lamp,.deck-lamp):after{transition:none;animation:none!important}
   [data-module="bucketlist"] :is(.panel-lever,.deck-knob-skirt,.deck-knob-mark,.deck-strip){transition:none}
 }
+[data-module="bucketlist"] .deck-read{margin-left:1.2em;color:var(--lcd);text-decoration:none;border-bottom:1px solid #c5d1b066;padding-bottom:1px}[data-module="bucketlist"] .deck-read:hover{border-color:var(--lcd)}

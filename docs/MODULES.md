@@ -8,7 +8,8 @@
 - `dist/modules/index.js`: maps IDs to renderers; shared integrator edits it.
 - `dist/modules/travel/`: 旅行翻牌屏。`data.js` 静态数据（home/arrivals/departures），`trips.js` 校验与排序规则，`flap.js` 翻牌引擎，`fonts/` 自托管字牌字体，`photos/` 照片；检查 `scripts/check-travel.mjs`；设计 `docs/design/travel.md`。
 - `dist/modules/cinema/`: 影院片单。`data.js` 静态数据（只有作者编辑），`films.js` 校验规则，`posters/` 海报；添加脚本 `scripts/add-movie.mjs`，检查 `scripts/check-cinema.mjs`。
-- `dist/modules/stories/index.js`: 日记与故事页面。
+- `dist/modules/stories/`: 手记（打字机）。`data.js` 由 `scripts/publish-notes.mjs` 从 notes/ 生成（勿手改），`notes.js` 规则，`seal.js` 暗号加密，`typewriter.js` 打字机标记（首页/菜单/暗号页共用），`typewriter-home.js` 首页 RET 手势，`media/` 发布后的照片；检查 `scripts/check-stories.mjs`。
+- Sub-routes: `#/collection/<id>/<sub>` → `mount({ route })`；同模块内切换时 main.js 调用 `cleanup.route(sub)`（模块给返回的 cleanup 函数挂一个 `route` 属性即可）。
 - `dist/modules/bucketlist/`: 人生清单，含手稿样式、条目 UI 和 localStorage 数据边界。
 - `dist/modules/wheel/index.js`: 罗盘已暂停，源码保留，未注册。
 - `dist/modules/empty.js`: current common placeholder; do not change it for one module’s new feature.

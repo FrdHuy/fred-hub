@@ -3,8 +3,8 @@
 > Claude Code 与 Codex 共用的进度总览。**开始工作前先读本文件和 `AGENTS.md`**，再读 `docs/DESIGN.md`（统一设计语言，任何视觉/交互改动必读）、`docs/HANDOFF.md`（逐版本交接、所有权表）和 `docs/MODULES.md`（模块接口）。
 > 本文件管“全局现状 + 待办 + 约定”；每轮的详细改动与验证继续写在 `docs/HANDOFF.md` 和 `docs/开发进度-vX.md`。
 
-最近更新：2026-09-29 · Claude Code（v0.32 全站打磨）
-上一次代码改动：v0.32 · 2026-09-29 · Claude Code
+最近更新：2026-09-29 · Claude Code（v0.33 手记打字机）
+上一次代码改动：v0.33 · 2026-09-29 · Claude Code
 
 ---
 
@@ -25,24 +25,24 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 | 横向收藏轨道：拖动/惯性/方向键/菜单跳转，停稳前禁止抓取 | ✅ v0.14 |
 | 电影（cinema）：俯视光驱，光盘按住拖入、松手吸入，可撤回 | ✅ 交互获用户认可 |
 | 旅行（travel）：机票吸附入槽 READING → 左→右刷卡 SUCCESS，拔出 ERROR 可重试 | ✅ 交互获用户认可 |
-| 日记（stories）：日记本翻开展开 | ✅ 交互获用户认可 |
+| 手记（stories）：首页打字机按 RET 进门；内页桌上稿子 → 阅读页；私密篇在打字机上敲暗号解锁；notes/*.md + `node scripts/publish-notes.mjs` 发布；与旅行、人生清单互链 | ✅ v0.33（占位文章） |
 | 旅行翻牌屏（travel）：深色候机大厅，平面 Solari 翻牌（ARRIVALS 去过 / DEPARTURES 想去），点一行打印登机牌；data.js 静态数据 + photos/；设计 docs/design/travel.md | ✅ v0.31（占位数据） |
 | 人生清单（bucketlist）：百灯控制面板（v0.28）——首页拨杆通电自检；内页读数屏 + 100 灯 + 年份里程表回看 + 选择旋钮 + PRINT 出纸；数据 data.js（text/done/year），所有访客看到同一份 | ✅ v0.28 |
 | 影院片单（cinema）：深色 3D CD 盒 cover-flow（中间正面、两侧渐收为书脊），原版语言海报，详情飞出，精简筛选/排序（v0.21）；静态 `data.js`；`scripts/add-movie.mjs` 从 TMDB 自动补全与下载海报 | ✅ v0.18 |
 | 模块化接口 `mount(context) → cleanup()`、模块注册表、路由 `#/collection/<id>` | ✅ |
-| 检查脚本：`check` / `check-cinema` / `check-bucketlist` / `check-travel` / `check-contact` / `check-gallery` / `check-swipe` | ✅ 2026-09-28 全部通过 |
+| 检查脚本：`check` / `check-cinema` / `check-bucketlist` / `check-travel` / `check-stories` / `check-contact` / `check-gallery` / `check-swipe` | ✅ 2026-09-28 全部通过 |
 
 ## 3. 进行中
 
 - travel 翻牌屏：已完成（v0.31），等 Fred 的真实行程数据替换占位（Claude Code）。
-- stories → 「手记」打字机（Claude Code）：设计图待 Fred 确认。内容以游记、阶段感想为主；密码篇在打字机上敲暗号解锁（轻量加密，像彩蛋）；游记 ↔ 旅行登机牌、阶段 ↔ 人生清单大事件联动。
+- 手记：已完成（v0.33），等 Fred 写第一篇真实文章（见 notes/README.md）。
 
 ## 4. 待办清单（按优先级）
 
 **P1 — 模块内容**
 1. 片单：Fred 用真实片单替换 5 部示例（`docs/片单使用说明.md`）。
 2. 旅行 travel：翻牌屏已上线（占位数据）。Fred 填 `docs/旅行行程-填写.md` → `node scripts/import-travel.mjs`（见 `docs/填写真实数据.md`）。
-3. 故事与日记 stories：同上。
+3. 手记：notes/ 里是 4 篇占位示例（私密篇暗号 fred），写真实文章后删掉示例再运行 `node scripts/publish-notes.mjs`。
 4. 人生清单已导入 66 条（v0.30）。以后改 docs/人生清单候选-200.md 后运行 `node scripts/import-lifelist.mjs --force`，或直接改 data.js。
 
 **P2 — 打磨**
