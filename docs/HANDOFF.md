@@ -20,7 +20,7 @@
 | stories → 手记（打字机；dist/modules/stories/**；共享：catalog 封面/名称、experience 分支） | Claude Code | v0.33 已完成（占位文章），无运行中编辑 |
 | bucketlist 百灯控制面板（dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画、hub.css 清单返回箭头） | Claude Code | v0.28 已合入 main，无运行中编辑 |
 | travel 翻牌屏（dist/modules/travel/**；设计见 docs/design/travel.md） | Claude Code | v0.31 已完成（占位数据），无运行中编辑 |
-| music 磁带（dist/modules/music/**、scripts/music-picker.mjs、scripts/tapedeck/、scripts/check-music.mjs；共享：catalog 封面、experience 控制器、main.js 进门起点、hub.css 返回箭头、sound.js 新声音） | Claude Code | v0.37 已完成（占位歌单），无运行中编辑 |
+| music 磁带（dist/modules/music/**、scripts/music-picker.mjs、scripts/tapedeck/、scripts/check-music.mjs；共享：catalog 封面、experience 控制器、main.js 进门起点、hub.css 返回箭头、sound.js 新声音） | 搁置 | v0.37.1 Fred：效果太差，从首页和菜单撤下；源码保留、未注册（catalog / modules/index.js / index.html 样式链接已去掉） |
 | wheel | 已删除（v0.35.2，Fred 决定） | 源码、compass.png 与相关 CSS 已移除 |
 
 开始任务前填写自己的范围；结束更新状态。表格不是程序锁，也不会自动通知另一个 agent。
@@ -190,3 +190,4 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - v0.35.2 Fred 的决定（见 docs/待决定.md）：片单货架保持居中、TMDB 声明保持、手机首页不加位置点、不做首访演示、打字机节奏保持、READ → 保持；「关于 Fred」等数据齐了再做；fredhu.top 已绑定。删除转盘：dist/wheel.js、dist/modules/wheel/、assets/compass.png、hub.css/styles.css 中全部 wheel/compass/tool-intro/spin-button 规则（逐条核对，未改动其他规则）；check.mjs 改为断言它们不存在。资源 v38。下一轮：手记整体视觉打磨（12B）。
 - v0.36 手记打磨（Fred 决定 12B）：① 桌上稿子统一为打字机纸上那样的一行打字头 `Nº 004 · CHAPTER`（去掉各式方框印章），倾斜收敛到 ±0.9°、下沉 0–8px；稿纸加细纸纹（内联 SVG 噪点，--grain，无外部文件）；底部改为日期 / 地点两端，去掉卡片上的 MIN。② 私密稿：模糊条 + 大印章 → 一条横过稿纸的纸封条（锁形图标 + CONFIDENTIAL），标题仍可见。③ 打开：点哪张稿子，阅读页就从那张稿子的位置和角度长出来、摆正（560ms，内容稍后淡入），配新声音 `paper`（sound.js，纸张掀起的沙声）。④ 阅读页：顶部同样的打字头；照片一行等高、按各自比例分宽（加载后设置 --r），每张用一条胶带贴住，图注统一为居中等宽小字。⑤ 暗号页：底部 TYPE THE PASSWORD · RETURN / CLOSE 文字去掉，改为右上角 ×（与片单一致）。资源 v39；全部 check 通过；CDP 走查：打开、Esc、错/对暗号、× 关闭均正常。
 - v0.37 磁带（随身听）新模块：首页是灰绿外壳的随身听（一处砖红：PLAY 键），按住 PLAY 往下按过阈值 → 键锁住、磁带轮转、指示灯亮、VU 指针动 → 磁带窗长成房间（与打字机/面板同一控制器 hold/release/auto/reset）。房间：大随身听 + J 卡曲目表 + 桌上的磁带。拖磁带进仓门（或轻点）→ 飞入、咔哒；PLAY 真放歌（dist/modules/music/deck.js：<audio> → Web Audio 磁带链：140Hz 暖、7kHz 高架 -4dB、12.5kHz 低通、wow & flutter 调速且不保音高、底噪、启动变调 0.55→1、停止降速；AnalyserNode 驱动 VU）；STOP 停，停着再按 = EJECT；◀◀ ▶▶ 点一下换一首，按住连续卷带；在磁带轮上画圈 = 铅笔倒带（顺时针前进，一圈 6 秒）；点仓里的磁带 = 翻面；一面放完 PLAY 弹起（halt）。三位机械计数器、带盘随进度一边变小一边变大。数据 tapes.js 纯函数（runtime/locate/counter，已测）。曲目有 audio（Fred 自己的整首文件）就放整首，否则放苹果官方 30 秒试听（CORS *，可接 Web Audio）。录入工具：`node scripts/music-picker.mjs` 录音台（iTunes 搜索、A/B 面、排序、拖入音频文件、保存写 data.js；scripts/lib/music-list.mjs 已测）。sound.js 新增 play / clack / wind / halt。占位歌单 3 盒 19 首（标（占位））。资源 v40。说明 docs/磁带-填写.md。
+- v0.37.1 磁带搁置（Fred：效果太差，原因是没有先讨论设计）。从注册表、首页、菜单撤下，源码与录音台保留。今后新模块：先和 Fred 讨论设计（内容、物件、交互、视觉稿）并确认，再写代码。

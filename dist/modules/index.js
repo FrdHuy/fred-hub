@@ -2,8 +2,7 @@ import { mount as travel } from './travel/index.js?v=40';
 import { mount as cinema } from './cinema/index.js?v=40';
 import { mount as stories } from './stories/index.js?v=40';
 import { mount as bucketlist } from './bucketlist/index.js?v=40';
-import { mount as music } from './music/index.js?v=40';
-const renderers = { travel, cinema, stories, bucketlist, music };
+const renderers = { travel, cinema, stories, bucketlist };
 export function mountModule(context) {
   const mount = renderers[context.item.id];
   if (!mount) throw new Error(`Missing module renderer: ${context.item.id}`);
