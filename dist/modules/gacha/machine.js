@@ -56,7 +56,7 @@ export function machineMarkup({ seed = 1, mode = 0, sign = 0 } = {}) {
 <div class="gc-zod">${ring}<div class="gc-knob"></div></div>
 <div class="gc-crank"><div class="gc-face"></div><div class="gc-bar"><i class="gc-grip"></i></div><div class="gc-hub"></div></div>
 <div class="gc-chute"><div class="gc-drop"></div><div class="gc-flap"></div></div>
-<div class="gc-thumb"></div>
+<div class="gc-thumb"></div><i class="gc-switch"></i>
 <svg class="gc-mark sign" viewBox="0 0 10 10"><path d="M3 1.5h4v7H3zM3 4h4"/></svg>
 <svg class="gc-mark game" viewBox="0 0 10 10"><rect x="1.5" y="1.5" width="7" height="7" rx="1.5"/><circle cx="3.7" cy="3.7" r=".5"/><circle cx="6.3" cy="6.3" r=".5"/></svg>
 <span class="gc-word">Fred.</span>

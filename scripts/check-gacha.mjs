@@ -27,3 +27,22 @@ assert.ok(eggMarkup('frost').includes('gc-core') && eggMarkup('clear').includes(
 assert.equal(unwrap(350), -10); assert.equal(unwrap(-350), 10); assert.equal(unwrap(90), 90); assert.equal(unwrap(180), 180);
 assert.equal(FULL / STEP, 12);
 console.log('PASS: 扭蛋机 — pile, markup, crank rules');
+
+// Step 2: the slip and the games
+const { todaySlip, slipIndex, dayGanzhi, lunar, cnNumber } = await import('../dist/modules/gacha/fortune.js');
+const { BANK, parseBank, createDeck } = await import('../dist/modules/gacha/games.js');
+assert.equal(dayGanzhi({ y: 2000, m: 1, d: 7 }), '甲子');
+assert.equal(dayGanzhi({ y: 2026, m: 9, d: 30 }), '丁未');
+assert.deepEqual(lunar({ y: 2026, m: 2, d: 17 }), { year: '丙午', month: '正月', day: '初一' });
+assert.equal([1, 10, 11, 20, 23, 100].map(cnNumber).join(' '), '一 十 十一 二十 二十三 一百');
+for (let s = 0; s < 12; s++) assert.equal(slipIndex({ y: 2026, m: 9, d: 30 }, s, 100), slipIndex({ y: 2026, m: 9, d: 30 }, s, 100), 'same day, same sign → same slip');
+const spread = new Set(Array.from({ length: 12 }, (_, s) => slipIndex({ y: 2026, m: 9, d: 30 }, s, 100)));
+assert.ok(spread.size >= 8, 'different signs usually get different slips');
+const slip = todaySlip({ y: 2026, m: 9, d: 30 }, 4);
+assert.equal(slip.head, '二〇二六年九月三十日 · 丙午年八月二十 · 丁未日'); assert.equal(slip.signName, '狮子');
+const questions = parseBank(BANK);
+assert.ok(questions.length >= 20 && questions.every(q => q.kind === 'truth' || q.kind === 'dare'));
+assert.deepEqual(parseBank('真：a\n\n冒:b\nnot a question'), [{ kind: 'truth', text: 'a', no: 1 }, { kind: 'dare', text: 'b', no: 2 }]);
+const next = createDeck(questions), seen = new Set(); for (let i = 0; i < questions.length; i++) seen.add(next().no);
+assert.equal(seen.size, questions.length, 'no repeats until the bank is used up');
+console.log('PASS: 扭蛋机 — slips, almanac dates, question deck');

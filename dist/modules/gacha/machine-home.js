@@ -1,5 +1,5 @@
-import { play as sound } from '../../sound.js?v=41';
-import { eggMarkup, random, VARIETIES, VARIETY_ODDS, SPECIAL_ODDS } from './machine.js?v=41';
+import { play as sound } from '../../sound.js?v=42';
+import { eggMarkup, random, VARIETIES, VARIETY_ODDS, SPECIAL_ODDS } from './machine.js?v=42';
 
 // Home controller for the gacha machine: hold anywhere on it and draw a circle round the crank, clockwise.
 // The crank follows your hand; the ratchet clicks every 30°. One full turn and a capsule drops into the chute —
