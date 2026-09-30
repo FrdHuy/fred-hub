@@ -46,7 +46,8 @@ const VOICES = {
   clack() { click(1500, .02, .14); click(520, .05, .2, .03); tone(140, .05, .06, { at: .03 }); },  // the cassette seated, the door shut
   wind() { for (let i = 0; i < 16; i++) click(2600 + i * 70, .012, .035, i * .03); tone(90, .5, .02, { type: 'sawtooth', to: 240 }); }, // fast wind
   halt() { click(420, .06, .22); tone(70, .12, .1); },               // the key springs up at the end of the side
-  paper() {                                                        // a sheet lifted off the desk: a soft rising swish
+  roll() { click(900, .05, .16); for (let i = 0; i < 5; i++) click(2200 - i * 260, .018, .07 - i * .01, .09 + i * .07 * (1 - i * .08)); tone(120, .08, .08, { at: .02 }); }, // a capsule falls, bounces, rolls to the flap
+  paper() {                                                      // a sheet lifted off the desk: a soft rising swish
     const t = ctx.currentTime, source = ctx.createBufferSource(), filter = ctx.createBiquadFilter(), amp = ctx.createGain();
     source.buffer = noise; filter.type = 'bandpass'; filter.Q.value = .7;
     filter.frequency.setValueAtTime(1400, t); filter.frequency.exponentialRampToValueAtTime(4200, t + .28);

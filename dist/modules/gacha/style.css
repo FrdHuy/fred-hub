@@ -1,0 +1,91 @@
+/* 扭蛋机 (docs/design/gashapon.md). Seen straight on, like every object on the home rail. Matte warm-white plastics,
+   a pale-sage acrylic chamber; satin aluminium only on the crank; the one brick-red is the crank's grip.
+   Depth comes from the chamber's side walls (the acrylic's thickness) and three layers of capsules tinted by it. */
+
+/* ——— The machine: 1u = 1px at 300 wide, 440 tall ——— */
+.gc{--u:1px;--tint:185 196 177;--turn:0deg;--mode:0;--sign:0;position:relative;width:calc(300*var(--u));height:calc(440*var(--u));flex:none}
+.gc *{box-sizing:border-box}
+.gc-shadow{position:absolute;left:4%;right:4%;bottom:calc(-8*var(--u));height:calc(30*var(--u));border-radius:50%;background:radial-gradient(closest-side,#3d3f2a33,#3d3f2a00);filter:blur(calc(4*var(--u)))}
+.gc-lid,.gc-base{position:absolute;left:0;right:0;z-index:3;background:linear-gradient(172deg,#fbf9f3,var(--shell-warm-hi) 30%,var(--shell-warm) 78%,#e4dfd1);box-shadow:inset 0 calc(1.5*var(--u)) 0 #fff,inset calc(1.2*var(--u)) 0 0 #fffc,inset calc(-1.5*var(--u)) 0 0 #d6d0c0,inset 0 calc(-2*var(--u)) calc(3*var(--u)) #3d3f2a1a,0 calc(2*var(--u)) calc(3*var(--u)) #3d3f2a1f}
+.gc-lid{top:0;height:calc(40*var(--u));border-radius:calc(22*var(--u)) calc(22*var(--u)) calc(9*var(--u)) calc(9*var(--u))}
+.gc-base{top:calc(262*var(--u));bottom:calc(10*var(--u));border-radius:calc(9*var(--u)) calc(9*var(--u)) calc(26*var(--u)) calc(26*var(--u))}
+.gc-foot{position:absolute;bottom:0;width:calc(46*var(--u));height:calc(14*var(--u));border-radius:0 0 calc(7*var(--u)) calc(7*var(--u));background:linear-gradient(#cfc8b6,#bdb5a1);z-index:2}
+.gc-foot.l{left:calc(34*var(--u))}.gc-foot.r{right:calc(34*var(--u))}
+/* The chamber */
+.gc-chamber{position:absolute;left:calc(12*var(--u));right:calc(12*var(--u));top:calc(34*var(--u));height:calc(234*var(--u));overflow:hidden;z-index:1;border-radius:calc(4*var(--u))}
+.gc-wall{position:absolute;inset:0;background:linear-gradient(rgb(var(--tint) / .95),rgb(var(--tint) / .7) 60%,rgb(var(--tint) / .85)),linear-gradient(#e9ece6,#d6dbd2)}
+.gc-table{position:absolute;left:4%;right:4%;bottom:calc(4*var(--u));height:calc(22*var(--u));border-radius:50%;background:radial-gradient(ellipse at 40% 30%,#f2f0ea,#d7d4cb 60%,#b9b6ac);box-shadow:0 calc(2*var(--u)) 0 #a9a69c}
+.gc-layer{position:absolute;inset:0}
+.gc-layer.l0{filter:saturate(.7) brightness(.86)}.gc-layer.l1{filter:saturate(.85) brightness(.94)}
+.gc-fog{position:absolute;inset:0;background:rgb(var(--tint) / .22)}
+.gc-glass{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,#ffffff38,#fff0 22%,#fff0 70%,#ffffff1a),rgb(var(--tint) / .16);box-shadow:inset 0 calc(1.5*var(--u)) 0 #ffffffcc,inset 0 calc(-1.5*var(--u)) 0 #ffffff80}
+.gc-side{position:absolute;top:0;bottom:0;width:calc(11*var(--u));background:linear-gradient(90deg,rgb(var(--tint) / .9),rgb(var(--tint) / .55));box-shadow:inset calc(1.2*var(--u)) 0 0 #ffffffb3}
+.gc-side.l{left:0}.gc-side.r{right:0;transform:scaleX(-1)}
+/* Controls on the base */
+.gc-zod{position:absolute;z-index:4;left:calc(26*var(--u));top:calc(296*var(--u));width:calc(40*var(--u));height:calc(40*var(--u))}
+.gc-zod i{position:absolute;font:normal calc(6*var(--u))/1 "Apple Symbols","Segoe UI Symbol",sans-serif;font-style:normal;color:#6b7263;translate:-50% -50%}
+.gc-knob{position:absolute;inset:28%;border-radius:50%;rotate:calc(var(--sign) * 30deg);transition:rotate .18s var(--ease,ease);background:radial-gradient(circle at 40% 32%,#fbf9f3,#ece8dc 60%,#d8d2c2);box-shadow:0 calc(1.5*var(--u)) calc(2*var(--u)) #3d3f2a40,0 0 0 .5px #3d3f2a26,inset 0 .6px 0 #fff}
+.gc-knob:after{content:'';position:absolute;left:50%;top:10%;width:calc(1.3*var(--u));height:32%;margin-left:calc(-.65*var(--u));border-radius:1px;background:#3d4239}
+.gc-crank{position:absolute;z-index:4;left:calc(112*var(--u));top:calc(280*var(--u));width:calc(76*var(--u));height:calc(76*var(--u));border-radius:50%;background:repeating-conic-gradient(#3d3f2a0f 0 .8deg,#fff0 .8deg 1.6deg),radial-gradient(circle at 38% 32%,#f6f4ee,#e0ddd4 46%,#cac7bd 76%,#b8b5ab);box-shadow:0 calc(3*var(--u)) calc(5*var(--u)) #3d3f2a38,0 0 0 .6px #8f8b7c80,inset 0 .8px 0 #fff}
+.gc-face{position:absolute;inset:15%;border-radius:50%;background:repeating-radial-gradient(circle,#fff0 0 1.2px,#3d3f2a08 1.2px 1.8px),radial-gradient(circle at 40% 34%,#f2f0ea,#d7d4cb 70%,#c3c0b6);box-shadow:inset 0 .6px 0 #fff,0 0 0 .5px #7d7b7459}
+/* The bar turns with --turn; its highlight stays put (satin, lit from the upper left), so only the shape moves. */
+.gc-bar{position:absolute;left:50%;top:50%;width:118%;height:19%;translate:-50% -50%;rotate:calc(var(--turn) - 18deg);border-radius:calc(6*var(--u));background:linear-gradient(90deg,#b9b6ad,#e9e7e1 30%,#f4f3ef 48%,#dcdad3 62%,#b4b1a8);box-shadow:0 calc(2.5*var(--u)) calc(4*var(--u)) #3d3f2a40,inset 0 .6px 0 #fff,0 0 0 .5px #8f8b7c99}
+.gc-grip{position:absolute;right:-3%;top:50%;height:150%;aspect-ratio:1;translate:0 -50%;border-radius:50%;background:radial-gradient(circle at 40% 36%,#c65a43,#b34934 58%,#9e3d2b);box-shadow:0 calc(2.4*var(--u)) 0 #85321f,0 calc(4*var(--u)) calc(5*var(--u)) #3d3f2a59,inset 0 .6px 0 #ffffff2e}
+.gc-hub{position:absolute;inset:41%;border-radius:50%;background:radial-gradient(circle at 38% 32%,#f4f3ef,#c8c6bf 45%,#8d8b84 80%,#6f6d67);box-shadow:0 .5px 1px #0006}
+.gc-chute{position:absolute;z-index:4;left:calc(104*var(--u));top:calc(366*var(--u));width:calc(92*var(--u));height:calc(44*var(--u));border-radius:calc(12*var(--u)) calc(12*var(--u)) calc(8*var(--u)) calc(8*var(--u));background:linear-gradient(#e1dccf,#f1ede3);box-shadow:inset 0 calc(1.2*var(--u)) calc(1.5*var(--u)) #3d3f2a33,0 .8px 0 #fffc}
+.gc-chute:before{content:'';position:absolute;inset:calc(4*var(--u));border-radius:calc(9*var(--u)) calc(9*var(--u)) calc(5*var(--u)) calc(5*var(--u));background:linear-gradient(#1b1d19,#2c2f29 55%,#4a4d44 82%,#8b8a7d);box-shadow:inset 0 calc(3*var(--u)) calc(4*var(--u)) #000b}
+.gc-drop{position:absolute;inset:calc(4*var(--u));overflow:hidden;border-radius:calc(9*var(--u)) calc(9*var(--u)) calc(5*var(--u)) calc(5*var(--u))}
+.gc-flap{position:absolute;left:calc(7*var(--u));right:calc(7*var(--u));top:calc(5*var(--u));height:60%;transform-origin:50% 0;border-radius:calc(7*var(--u)) calc(7*var(--u)) calc(2*var(--u)) calc(2*var(--u));background:linear-gradient(rgb(var(--tint) / .55),rgb(var(--tint) / .7));box-shadow:inset 0 calc(.8*var(--u)) 0 #ffffff40,0 calc(1.2*var(--u)) 0 #ffffff26}
+/* The slider: the thumb peeks out of the right edge; two marks say what the positions are. */
+.gc-thumb{position:absolute;z-index:2;right:calc(-5*var(--u));top:calc(var(--mode) * 18 * var(--u) + 292 * var(--u));width:calc(12*var(--u));height:calc(26*var(--u));border-radius:calc(4*var(--u));transition:top .16s;background:repeating-linear-gradient(#fff0 0 calc(2*var(--u)),#3d3f2a1f calc(2*var(--u)) calc(3*var(--u))),linear-gradient(90deg,#f7f4ec,#dcd6c6);box-shadow:0 calc(1.5*var(--u)) calc(2*var(--u)) #3d3f2a38}
+.gc-mark{position:absolute;z-index:4;right:calc(12*var(--u));width:calc(9*var(--u));height:calc(9*var(--u));fill:none;stroke:#8a8e82;stroke-width:1.1}
+.gc-mark circle{fill:#8a8e82;stroke:none}
+.gc-mark.sign{top:calc(290*var(--u))}.gc-mark.game{top:calc(322*var(--u))}
+.gc-word{position:absolute;z-index:4;left:calc(22*var(--u));bottom:calc(26*var(--u));font:600 calc(12*var(--u)) var(--font-wordmark);letter-spacing:-.04em;color:#5b6353}
+
+/* ——— Capsules: a clear dome, the shaded opening of the cup with the folded slip in it, the matte cup ——— */
+.gc-egg{--s:40px;--body:#efe9dc;--body-lo:#cfc6b2;--inner:#d8cfbc;position:absolute;width:var(--s);height:var(--s);border-radius:50%;transform:translate(-50%,-50%) rotate(var(--r,0deg));
+  background:radial-gradient(circle at 34% 26%,#fffffff2,#f7f5ef66 34%,#e9e6dc40 62%,#c9c5b866 100%);
+  box-shadow:inset 0 0 0 .6px #3d3f2a2e,inset calc(var(--s)*-.04) calc(var(--s)*-.05) calc(var(--s)*.1) #3d3f2a1f,0 calc(var(--s)*.07) calc(var(--s)*.1) #3d3f2a33}
+.gc-in{position:absolute;left:3%;right:3%;top:40%;height:20%;border-radius:50%;background:radial-gradient(ellipse at 50% 20%,color-mix(in srgb,var(--inner) 70%,#3d3f2a),var(--inner) 70%)}
+.gc-in:before{content:'';position:absolute;left:38%;width:22%;bottom:40%;height:130%;opacity:.85;border-radius:1px;background:linear-gradient(#fdfbf5,#efe9da);box-shadow:0 0 0 .5px #3d3f2a26;transform:rotate(-6deg)}
+.gc-out{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 36% 34%,color-mix(in srgb,var(--body) 70%,#fff),var(--body) 42%,var(--body-lo) 86%,color-mix(in srgb,var(--body-lo) 80%,#3d3f2a));
+  -webkit-mask:radial-gradient(ellipse 47% 10% at 50% 50%,#0000 97%,#000 100%),linear-gradient(#0000 50%,#000 50%);-webkit-mask-composite:source-in;mask:radial-gradient(ellipse 47% 10% at 50% 50%,#0000 97%,#000 100%),linear-gradient(#0000 50%,#000 50%);mask-composite:intersect}
+.gc-lip{position:absolute;left:3%;right:3%;top:40%;height:20%;border-radius:50%;border-bottom:calc(var(--s)*.018) solid #ffffffb3}
+.gc-egg:after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse 46% 30% at 38% 22%,#ffffff8c,#fff0 70%);pointer-events:none}
+/* varieties */
+.gc-egg.sage{--body:#b3bcab;--body-lo:#8a9581;--inner:#9da896}
+.gc-egg.stone{--body:#d2cec2;--body-lo:#aca799;--inner:#bdb8aa}
+.gc-egg.ink{--body:#555a52;--body-lo:#393d36;--inner:#4a4f47}.gc-egg.ink .gc-lip{border-bottom-color:#ffffff59}
+.gc-egg.tint{background:radial-gradient(circle at 34% 26%,#f4f7f2f0,#c9d2c2aa 40%,#9fac98bb 100%)}
+.gc-egg.clear .gc-out{background:radial-gradient(circle at 36% 34%,#ffffff99,#e9ece6aa 50%,#c9cfc4cc);opacity:.75}
+.gc-egg.clear .gc-in{background:radial-gradient(ellipse at 50% 20%,#c9cfc466,#e3e7df55 70%)}.gc-egg.clear .gc-in:before{display:none}
+.gc-gem{position:absolute;left:34%;top:34%;width:32%;height:32%;border-radius:calc(var(--s)*.03);transform:rotate(45deg);background:linear-gradient(135deg,#f6d77e,#e0a93c 55%,#b9812a);box-shadow:0 0 calc(var(--s)*.12) #f2c31866}
+.gc-egg.mark .gc-out:after{content:'Fred.';position:absolute;left:0;right:0;bottom:22%;text-align:center;font:600 calc(var(--s)*.15) var(--font-wordmark);letter-spacing:-.04em;color:#4f564a}
+.gc-egg.dots .gc-out{background:radial-gradient(circle,#4f564a 0 16%,#0000 20%) 0 0/calc(var(--s)*.12) calc(var(--s)*.12),radial-gradient(circle at 36% 34%,#fbf9f3,var(--body) 42%,var(--body-lo) 86%)}
+.gc-egg.stripe .gc-out{background:repeating-linear-gradient(90deg,#0000 0 calc(var(--s)*.06),#8e9a8666 calc(var(--s)*.06) calc(var(--s)*.09)),radial-gradient(circle at 36% 34%,#fbf9f3,var(--body) 42%,var(--body-lo) 86%)}
+/* the special egg: frosted glass with a warm lamp inside, breathing */
+.gc-egg.frost{background:radial-gradient(circle at 50% 50%,#fff2d4,#f7e6c6 28%,#efeae0 60%,#dcd7cc);box-shadow:0 0 calc(var(--s)*.18) calc(var(--s)*.02) #f6d79a55,inset 0 0 0 .6px #3d3f2a1f}
+.gc-egg.frost .gc-out{background:radial-gradient(circle at 50% 30%,#fbf3e2cc,#e9e3d6cc 70%);opacity:.75}.gc-egg.frost .gc-in{opacity:0}
+.gc-core{position:absolute;inset:30%;border-radius:50%;background:radial-gradient(closest-side,#fffaf0,#f6d18a 55%,#f6d18a00);filter:blur(calc(var(--s)*.03));animation:gc-breathe 3.2s ease-in-out infinite}
+@keyframes gc-breathe{0%,100%{opacity:.55}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.gc-core{animation:none}}
+
+/* ——— Home rail and menu: the machine fills its slot, centred from its own middle ——— */
+.collectible--gacha{background:none!important;display:grid;place-items:center;container-type:size;overflow:visible;filter:none}
+.collectible--gacha .gc{--u:calc(min(100cqw / 300, 100cqh / 440) * 1.02);position:absolute;left:50%;top:50%;translate:-50% -50%}
+.module-thumbnail-image .collectible--gacha .gc{--u:min(100cqw / 300, 100cqh / 440)}
+/* the machine you are turning: the grip is what you hold */
+.collection-stage .collectible--gacha .gc{pointer-events:auto}
+.collection-slot.is-selected .collectible--gacha .gc{cursor:grab}
+
+/* ——— Inside: the machine and the desk ——— */
+[data-module="gacha"] .gcr{position:relative;max-width:1180px;margin:0 auto;padding:10px 0 60px;display:grid;grid-template-columns:auto minmax(0,620px);justify-content:center;align-items:center;gap:clamp(40px,6vw,90px)}
+[data-module="gacha"] .gcr-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+[data-module="gacha"] .gcr-machine .gc{--u:min(1.5px,calc((100svh - 220px) / 440))}
+[data-module="gacha"] .gcr-desk{height:min(660px,calc(100svh - 240px));min-height:360px;border-radius:18px;background:linear-gradient(170deg,#f1eee6,#e9e5da);box-shadow:inset 0 1px 0 #fff,inset 0 -1px 0 #d9d4c6}
+@media (max-width:900px){
+  [data-module="gacha"] .gcr{grid-template-columns:1fr;justify-items:center;gap:26px}
+  [data-module="gacha"] .gcr-machine .gc{--u:min(.8px,calc((100vw - 60px) / 300))}
+  [data-module="gacha"] .gcr-desk{width:100%;height:360px;border-radius:24px}
+}

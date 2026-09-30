@@ -1,0 +1,247 @@
+<!doctype html><meta charset="utf-8"><title>扭蛋机 v1 · 视觉稿</title>
+<link rel="stylesheet" href="../../dist/tokens.css">
+<style>
+/* 扭蛋机视觉稿 v1（静态，只看样子）。光源统一左上；哑光塑料为主，缎面金属只在扭把；一处砖红：扭把握柄帽。 */
+:root{--paper:#f8f7f4;--ink:#343832;--accent:#b34934}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-ui)}
+.v{position:relative;width:1440px;height:900px;overflow:hidden;border-bottom:1px solid #e7e5de}
+.tag{position:absolute;left:24px;top:18px;font:11px var(--font-mono);letter-spacing:.14em;color:#9a9d92;z-index:9}
+.lbl{position:absolute;font:500 11px var(--font-mono);letter-spacing:.3em;color:#8d9186;text-align:center}
+.note{position:absolute;font:12px/1.9 var(--font-ui);color:#7c8076;width:300px}
+
+/* ——— Capsules: spheres. A clear dome on top; through it, the inside of the opaque cup (the equator seen from a little above
+   is an ellipse) and the folded slip sitting in it; the cup's outside below. Soft light from the upper left. ——— */
+.cap{--s:34px;--body:#efe9dc;--body-lo:#cfc6b2;--inner:#d8cfbc;position:absolute;width:var(--s);height:var(--s);border-radius:50%;transform:rotate(var(--r,0deg));
+  background:radial-gradient(circle at 34% 26%,#fffffff2,#f7f5ef66 34%,#e9e6dc40 62%,#c9c5b866 100%);
+  box-shadow:inset 0 0 0 .6px #3d3f2a2e,inset calc(var(--s)*-.04) calc(var(--s)*-.05) calc(var(--s)*.1) #3d3f2a1f,0 calc(var(--s)*.07) calc(var(--s)*.1) #3d3f2a2b}
+.cap.game{--body:#b3bcab;--body-lo:#8a9581;--inner:#9da896}
+/* The cup's opening (inside, in shade) with the slip standing in it. */
+.cap .in{position:absolute;left:3%;right:3%;top:40%;height:20%;border-radius:50%;background:radial-gradient(ellipse at 50% 20%,color-mix(in srgb,var(--inner) 70%,#3d3f2a),var(--inner) 70%)}
+.cap .in:before{content:'';position:absolute;left:38%;width:22%;bottom:40%;height:130%;opacity:.85;border-radius:1px;background:linear-gradient(#fdfbf5,#efe9da);box-shadow:0 0 0 .5px #3d3f2a26;transform:rotate(-6deg)}
+/* The cup's outside: below the front arc of the equator. */
+.cap .out{position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 36% 34%,color-mix(in srgb,var(--body) 70%,#fff),var(--body) 42%,var(--body-lo) 86%,color-mix(in srgb,var(--body-lo) 80%,#3d3f2a));
+  -webkit-mask:radial-gradient(ellipse 47% 10% at 50% 50%,#0000 97%,#000 100%),linear-gradient(#0000 50%,#000 50%);-webkit-mask-composite:source-in;
+  mask:radial-gradient(ellipse 47% 10% at 50% 50%,#0000 97%,#000 100%),linear-gradient(#0000 50%,#000 50%);mask-composite:intersect}
+/* The cup's lip: a thin light edge along the front arc. */
+.cap .lip{position:absolute;left:3%;right:3%;top:40%;height:20%;border-radius:50%;border-bottom:calc(var(--s)*.018) solid #ffffffb3;opacity:.9}
+/* The dome's own sheen, broad and soft, on top of everything seen through it. */
+.cap:after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse 46% 30% at 38% 22%,#ffffff8c,#fff0 70%);pointer-events:none}
+
+/* ——— Shared parts ——— */
+/* Satin aluminium crank plate: knurled rim, brushed face (lever option A family). */
+.crank{position:absolute;border-radius:50%;background:repeating-conic-gradient(#3d3f2a0f 0 .8deg,#fff0 .8deg 1.6deg),radial-gradient(circle at 38% 32%,#f6f4ee,#e0ddd4 46%,#cac7bd 76%,#b8b5ab);box-shadow:0 calc(var(--u)*3) calc(var(--u)*6) #3d3f2a33,0 0 0 .6px #8f8b7c80,inset 0 .8px 0 #fff}
+.crank .face{position:absolute;inset:14%;border-radius:50%;background:repeating-radial-gradient(circle at 50% 50%,#fff0 0 1.2px,#3d3f2a08 1.2px 1.8px),radial-gradient(circle at 40% 34%,#f2f0ea,#d7d4cb 70%,#c3c0b6);box-shadow:inset 0 .6px 0 #fff,0 0 0 .5px #7d7b7459}
+/* The T-bar across the plate, and at its end the brick-red grip cap (the machine's one red). */
+.crank .bar{position:absolute;left:50%;top:50%;width:112%;height:17%;transform:translate(-50%,-50%) rotate(var(--turn,-24deg));border-radius:calc(var(--u)*5);background:linear-gradient(#ffffff26,#fff0 45%,#3d3f2a14),linear-gradient(90deg,#b9b6ad,#e9e7e1 30%,#f4f3ef 48%,#dcdad3 62%,#b4b1a8);box-shadow:0 calc(var(--u)*2.5) calc(var(--u)*4) #3d3f2a40,inset 0 .6px 0 #fff,0 0 0 .5px #8f8b7c99}
+.crank .grip{position:absolute;right:-2%;top:50%;height:150%;aspect-ratio:1;transform:translateY(-50%) rotate(calc(-1 * var(--turn,-24deg)));border-radius:50%;background:radial-gradient(circle at 40% 36%,#c65a43,#b34934 55%,#a2402d 88%,#8f3526);box-shadow:0 calc(var(--u)*2.6) 0 #85321f,0 calc(var(--u)*4) calc(var(--u)*5) #3d3f2a59,inset 0 .6px 0 #ffffff2e}
+.crank .hub{position:absolute;inset:40%;border-radius:50%;background:radial-gradient(circle at 38% 32%,#f4f3ef,#c8c6bf 45%,#8d8b84 80%,#6f6d67);box-shadow:0 .5px 1px #0006}
+/* Zodiac dial: a small warm-white knob in a recessed ring printed with the twelve signs. */
+.zod{position:absolute;border-radius:50%;background:radial-gradient(circle,#0000 58%,#3d3f2a14 59% 60%,#0000 61%),linear-gradient(#e3dfd1,#ece8dc);box-shadow:inset 0 calc(var(--u)*1.5) calc(var(--u)*2) #3d3f2a33,0 .8px 0 #fffc}
+.zod .ring{position:absolute;inset:0}
+.zod .ring i{position:absolute;left:50%;top:50%;width:0;height:0;font:normal calc(var(--u)*6.4)/1 "Apple Symbols","Segoe UI Symbol",sans-serif;color:#6b7263}
+.zod .ring i span{position:absolute;transform:translate(-50%,-50%)}
+.zod .knob{position:absolute;inset:26%;border-radius:50%;background:radial-gradient(circle at 40% 32%,#fbf9f3,#ece8dc 60%,#dcd6c7);box-shadow:0 calc(var(--u)*2) calc(var(--u)*3) #3d3f2a38,inset 0 .6px 0 #fff,0 0 0 .5px #3d3f2a1f}
+.zod .knob:after{content:'';position:absolute;left:50%;top:9%;width:calc(var(--u)*1.6);height:30%;margin-left:calc(var(--u)*-.8);border-radius:1px;background:#3d4239}
+/* Slide switch: a slot with a ribbed thumb; two engraved marks — a folded slip (签) and a die (游戏). */
+.sw{position:absolute;border-radius:calc(var(--u)*5);background:linear-gradient(90deg,#d6d1c3,#e4dfd2);box-shadow:inset 0 calc(var(--u)*1.2) calc(var(--u)*2) #3d3f2a40,0 .8px 0 #fffc}
+.sw .thumb{position:absolute;left:12%;right:12%;height:44%;top:var(--at,6%);border-radius:calc(var(--u)*3);background:repeating-linear-gradient(#fff0 0 calc(var(--u)*1.6),#3d3f2a1c calc(var(--u)*1.6) calc(var(--u)*2.4)),linear-gradient(90deg,#f7f4ec,#e6e1d4);box-shadow:0 calc(var(--u)*1.5) calc(var(--u)*2) #3d3f2a38,inset 0 .6px 0 #fff}
+.mark{position:absolute;width:calc(var(--u)*9);height:calc(var(--u)*9);fill:none;stroke:#7a8072;stroke-width:1.1}
+/* Chute: dark mouth, a smoked flap hanging in it. */
+.chute{position:absolute;border-radius:calc(var(--u)*9) calc(var(--u)*9) calc(var(--u)*5) calc(var(--u)*5);background:linear-gradient(#e1dccf,#f1ede3);box-shadow:inset 0 calc(var(--u)*1.2) calc(var(--u)*1.5) #3d3f2a33,0 .8px 0 #fffc;padding:calc(var(--u)*4)}
+/* Inside the mouth: dark at the top, the ledge the capsule lands on lit from the front. */
+.chute:before{content:'';position:absolute;inset:calc(var(--u)*4);border-radius:calc(var(--u)*6) calc(var(--u)*6) calc(var(--u)*3) calc(var(--u)*3);background:linear-gradient(#1b1d19,#2c2f29 55%,#4a4d44 82%,#8b8a7d 100%);box-shadow:inset 0 calc(var(--u)*3) calc(var(--u)*4) #000b}
+.chute .flap{position:absolute;left:calc(var(--u)*6);right:calc(var(--u)*6);top:calc(var(--u)*5);height:62%;border-radius:calc(var(--u)*5) calc(var(--u)*5) calc(var(--u)*2) calc(var(--u)*2);background:linear-gradient(#5a5e5566,#6c706688);box-shadow:inset 0 calc(var(--u)*.8) 0 #ffffff26,0 calc(var(--u)*1.2) 0 #ffffff1f;z-index:1}
+.chute .cap{z-index:0}
+.silk{position:absolute;font:500 calc(var(--u)*6) var(--font-mono);letter-spacing:.3em;color:#8a8e82;white-space:nowrap}
+.silk b{font:600 calc(var(--u)*11) var(--font-wordmark);letter-spacing:-.04em;color:#5b6353}
+/* Acrylic window: the back wall seen through it, a soft top-to-bottom sheen (no diagonal glare), crisp inner edge. */
+.win{position:absolute;overflow:hidden;background:linear-gradient(#d9d5c8,#e6e2d6 40%,#ece8dd)}
+.win:after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(#ffffff38,#fff0 30%,#fff0 80%,#ffffff14);box-shadow:inset 0 0 0 1px #ffffff66,inset 0 calc(var(--u)*3) calc(var(--u)*6) #3d3f2a1f;pointer-events:none}
+
+/* ——— A · 扭蛋柜：一体暖白机身，T 形扭把 ——— */
+.ga{--u:1px;position:absolute;width:calc(300*var(--u));height:calc(440*var(--u));filter:drop-shadow(0 calc(16*var(--u)) calc(18*var(--u)) #3d3f2a24) drop-shadow(0 calc(2*var(--u)) calc(2*var(--u)) #3d3f2a1f)}
+.ga .lid{position:absolute;left:calc(6*var(--u));right:calc(6*var(--u));top:0;height:calc(28*var(--u));border-radius:calc(14*var(--u)) calc(14*var(--u)) calc(4*var(--u)) calc(4*var(--u));background:linear-gradient(#f6f3ea,var(--shell-warm-lo));box-shadow:inset 0 1.5px 0 #fff,inset 0 -1px 0 #c9c3b1}
+.ga .body{position:absolute;left:0;right:0;top:calc(24*var(--u));bottom:calc(16*var(--u));border-radius:calc(10*var(--u));background:linear-gradient(172deg,#fbf9f3,var(--shell-warm-hi) 25%,var(--shell-warm) 70%,#e6e1d3);box-shadow:inset 0 1.5px 0 #fff,inset 1px 0 0 #fffc,inset -1px 0 0 #d9d4c6,inset 0 -2px 3px #3d3f2a14}
+.ga .seam{position:absolute;left:0;right:0;top:calc(212*var(--u));height:1px;background:#3d3f2a1f;box-shadow:0 1px 0 #fff}
+.ga .win{left:calc(16*var(--u));right:calc(16*var(--u));top:calc(38*var(--u));height:calc(162*var(--u));border-radius:calc(7*var(--u))}
+.ga .base{position:absolute;left:calc(8*var(--u));right:calc(8*var(--u));bottom:0;height:calc(22*var(--u));border-radius:calc(3*var(--u)) calc(3*var(--u)) calc(9*var(--u)) calc(9*var(--u));background:linear-gradient(#dcd6c6,#cfc8b6);box-shadow:inset 0 1px 0 #3d3f2a26,0 2px 0 #bfb7a3}
+
+/* ——— B · 双色：灰绿上盖 + 暖白下身，圆形扭把 ——— */
+.gb{--u:1px;position:absolute;width:calc(300*var(--u));height:calc(440*var(--u));filter:drop-shadow(0 calc(16*var(--u)) calc(18*var(--u)) #3d3f2a24) drop-shadow(0 calc(2*var(--u)) calc(2*var(--u)) #3d3f2a1f)}
+.gb .top{position:absolute;left:0;right:0;top:0;height:calc(222*var(--u));border-radius:calc(26*var(--u)) calc(26*var(--u)) calc(6*var(--u)) calc(6*var(--u));background:linear-gradient(172deg,#e8eae3,var(--shell-sage-hi) 30%,#cfd4c8 85%,#c6ccbe);box-shadow:inset 0 1.5px 0 #fff,inset 1px 0 0 #fffb,inset -1px 0 0 #b3baa9}
+.gb .body{position:absolute;left:0;right:0;top:calc(218*var(--u));bottom:calc(10*var(--u));border-radius:calc(6*var(--u)) calc(6*var(--u)) calc(22*var(--u)) calc(22*var(--u));background:linear-gradient(172deg,#fbf9f3,var(--shell-warm-hi) 30%,var(--shell-warm) 75%,#e6e1d3);box-shadow:inset 0 1.5px 0 #fff,inset 0 -2px 3px #3d3f2a14,0 -1px 0 #3d3f2a24}
+.gb .win{left:calc(18*var(--u));right:calc(18*var(--u));top:calc(20*var(--u));height:calc(184*var(--u));border-radius:calc(16*var(--u)) calc(16*var(--u)) calc(6*var(--u)) calc(6*var(--u))}
+.gb .foot{position:absolute;bottom:0;width:calc(40*var(--u));height:calc(12*var(--u));border-radius:0 0 calc(4*var(--u)) calc(4*var(--u));background:linear-gradient(#c9c3b1,#bdb6a2)}
+/* Round crank: a satin disc with a finger post; the post's cap is the red. */
+.knobcrank{position:absolute;border-radius:50%;background:repeating-conic-gradient(#3d3f2a0d 0 2deg,#fff0 2deg 4deg),radial-gradient(circle at 38% 32%,#f6f4ee,#e0ddd4 46%,#cac7bd 76%,#b8b5ab);box-shadow:0 calc(var(--u)*4) calc(var(--u)*7) #3d3f2a38,0 0 0 .6px #8f8b7c80,inset 0 .8px 0 #fff}
+.knobcrank .face{position:absolute;inset:9%;border-radius:50%;background:repeating-radial-gradient(circle at 50% 50%,#fff0 0 1.2px,#3d3f2a08 1.2px 1.8px),radial-gradient(circle at 40% 34%,#f2f0ea,#d7d4cb 70%,#c3c0b6);box-shadow:inset 0 .6px 0 #fff}
+.knobcrank .post{position:absolute;left:66%;top:22%;width:20%;height:20%;border-radius:50%;background:radial-gradient(circle at 38% 30%,#d8745c,#b34934 55%,#8f3526);box-shadow:0 calc(var(--u)*3) calc(var(--u)*4) #3d3f2a59,inset 0 .6px 0 #ffffff40}
+
+/* ——— C · 圆窗：石灰机身，一只大圆窗 ——— */
+.gc{--u:1px;position:absolute;width:calc(300*var(--u));height:calc(420*var(--u));filter:drop-shadow(0 calc(16*var(--u)) calc(18*var(--u)) #3d3f2a24) drop-shadow(0 calc(2*var(--u)) calc(2*var(--u)) #3d3f2a1f)}
+.gc .body{position:absolute;inset:0 0 calc(12*var(--u));border-radius:calc(34*var(--u)) calc(34*var(--u)) calc(14*var(--u)) calc(14*var(--u));background:linear-gradient(170deg,#ebe8df,var(--shell-stone-hi) 28%,#d3cfc3 78%,var(--shell-stone));box-shadow:inset 0 1.5px 0 #fff9,inset 1px 0 0 #fff8,inset -1px 0 0 #aba797,inset 0 -2px 3px #3d3f2a1a}
+.gc .porthole{position:absolute;left:50%;top:calc(24*var(--u));width:calc(214*var(--u));height:calc(214*var(--u));margin-left:calc(-107*var(--u));border-radius:50%;background:linear-gradient(#c9c5b8,#dcd8cc);box-shadow:inset 0 calc(2*var(--u)) calc(3*var(--u)) #3d3f2a38,0 1px 0 #fffc}
+.gc .win{left:calc(10*var(--u));top:calc(10*var(--u));right:calc(10*var(--u));bottom:calc(10*var(--u));border-radius:50%}
+.gc .base{position:absolute;left:calc(10*var(--u));right:calc(10*var(--u));bottom:0;height:calc(16*var(--u));border-radius:0 0 calc(8*var(--u)) calc(8*var(--u));background:linear-gradient(#bdb8aa,#b0ab9c)}
+
+/* ——— The slip (签纸) and the game card ——— */
+.slip{position:absolute;width:470px;height:560px;padding:40px 34px;background:linear-gradient(#fcfaf4,#f4efe2);box-shadow:0 0 0 .5px #3d3f2a1f,0 2px 3px #3d3f2a14,0 24px 40px -10px #3d3f2a33;writing-mode:vertical-rl;font-family:var(--font-literary);color:#2c322b}
+.slip>*{margin:0 0 0 22px}
+.slip:before,.slip:after{content:'';position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,#3d3f2a0d,#3d3f2a1f,#3d3f2a0d);box-shadow:0 1px 0 #ffffffb3}
+.slip:before{top:33.3%}.slip:after{top:66.6%}
+.slip .head{font:400 12px/1.6 var(--font-literary);letter-spacing:.32em;color:#6b7263;margin-left:26px}
+.slip .rank{font-size:30px;line-height:1.1;letter-spacing:.24em;margin-left:30px}
+.slip .rank small{display:block;margin-top:14px;font-size:17px;letter-spacing:.4em;color:#4b5549}
+.slip .poem{font-size:19px;line-height:1.95;letter-spacing:.36em;margin-left:26px}
+.slip .jie{font-size:13px;line-height:1.8;letter-spacing:.26em;color:#4b5549;padding-right:14px;border-right:1px solid #3d3f2a26}
+.slip .yi{font-size:13px;line-height:1.9;letter-spacing:.3em;color:#4b5549}
+.slip .yi b{display:inline-block;margin-bottom:8px;padding:3px 5px;border:1px solid #4b5549;font-weight:400}
+/* Seal: pressed in ink, not red (the machine's one red is its crank). */
+.seal{position:absolute;left:30px;bottom:30px;width:46px;height:46px;border:1.5px solid #4b5549;border-radius:3px;display:grid;place-items:center;writing-mode:horizontal-tb;font:400 13px/1.1 var(--font-literary);color:#4b5549;text-align:center;opacity:.8;transform:rotate(-3deg)}
+.card{position:absolute;width:300px;height:190px;padding:26px 28px;border-radius:6px;background:linear-gradient(170deg,#f3f5f0,#e6eae2);box-shadow:0 0 0 .5px #3d3f2a1f,0 2px 3px #3d3f2a14,0 22px 36px -10px #3d3f2a33}
+.card small{font:500 10px var(--font-mono);letter-spacing:.3em;color:#7c8576}
+.card b{display:block;margin:14px 0 12px;font:400 26px var(--font-literary);letter-spacing:.2em}
+.card p{margin:0;font:400 15px/1.8 var(--font-ui);color:#3f463e}
+.card i{position:absolute;right:22px;top:22px;width:22px;height:22px}
+/* An opened capsule: two halves. */
+.half{position:absolute;width:64px;height:32px;overflow:hidden}
+.half .cap{--s:64px;position:absolute;left:0}
+</style>
+<body>
+
+<!-- ===================== 1. 首页物件：三个方案 ===================== -->
+<section class="v">
+<span class="tag">扭蛋机 v1 · ① 首页物件三个方案（实际首页尺寸）· 光从左上来 · 一处砖红 = 扭把握柄帽 · 签仓 = 暖白蛋，游戏仓 = 灰绿蛋</span>
+
+<!-- A -->
+<div class="ga" style="left:130px;top:170px" id="A">
+  <div class="lid"></div>
+  <div class="body">
+    <div class="win" data-pile="sign"></div>
+    <div class="seam"></div>
+    <div class="zod" style="left:calc(24*var(--u));top:calc(224*var(--u));width:calc(58*var(--u));height:calc(58*var(--u))"><div class="ring"></div><div class="knob" style="rotate:-60deg"></div></div>
+    <div class="crank" style="left:calc(96*var(--u));top:calc(222*var(--u));width:calc(108*var(--u));height:calc(108*var(--u))"><div class="face"></div><div class="bar"><i class="grip"></i></div><div class="hub"></div></div>
+    <div class="sw" style="left:calc(248*var(--u));top:calc(226*var(--u));width:calc(22*var(--u));height:calc(56*var(--u))"><div class="thumb"></div></div>
+    <svg class="mark" viewBox="0 0 10 10" style="left:calc(272*var(--u));top:calc(230*var(--u))"><path d="M3 1.5h4v7H3zM3 4h4"/></svg>
+    <svg class="mark" viewBox="0 0 10 10" style="left:calc(272*var(--u));top:calc(266*var(--u))"><rect x="1.5" y="1.5" width="7" height="7" rx="1.5"/><circle cx="3.7" cy="3.7" r=".5" fill="#7a8072"/><circle cx="6.3" cy="6.3" r=".5" fill="#7a8072"/></svg>
+    <div class="chute" style="left:calc(96*var(--u));top:calc(340*var(--u));width:calc(108*var(--u));height:calc(46*var(--u))"><div class="flap"></div></div>
+    <span class="silk" style="left:calc(22*var(--u));top:calc(352*var(--u))"><b>Fred.</b></span>
+    <span class="silk" style="right:calc(18*var(--u));top:calc(356*var(--u))">Nº 07</span>
+  </div>
+  <div class="base"></div>
+</div>
+<div class="lbl" style="left:130px;top:640px;width:300px">A · 扭蛋柜</div>
+<p class="note" style="left:130px;top:670px">一体暖白机身，上面一片方正的亚克力窗，下面一块控制面板：左边星座转盘、中间 T 形扭把、右边滑块。最像「设备」，和光驱、闸机是一家。</p>
+
+<!-- B -->
+<div class="gb" style="left:570px;top:170px" id="B">
+  <div class="top"><div class="win" data-pile="sign"></div></div>
+  <div class="body">
+    <div class="knobcrank" style="left:calc(90*var(--u));top:calc(18*var(--u));width:calc(120*var(--u));height:calc(120*var(--u))"><div class="face"></div><div class="post"></div></div>
+    <div class="zod" style="left:calc(20*var(--u));top:calc(40*var(--u));width:calc(54*var(--u));height:calc(54*var(--u))"><div class="ring"></div><div class="knob" style="rotate:-60deg"></div></div>
+    <div class="sw" style="left:calc(244*var(--u));top:calc(36*var(--u));width:calc(22*var(--u));height:calc(56*var(--u))"><div class="thumb"></div></div>
+    <div class="chute" style="left:calc(100*var(--u));top:calc(150*var(--u));width:calc(100*var(--u));height:calc(40*var(--u))"><div class="flap"></div></div>
+    <span class="silk" style="left:calc(22*var(--u));top:calc(162*var(--u))"><b>Fred.</b></span>
+  </div>
+  <div class="foot" style="left:calc(30*var(--u))"></div><div class="foot" style="right:calc(30*var(--u))"></div>
+</div>
+<div class="lbl" style="left:570px;top:640px;width:300px">B · 双色</div>
+<p class="note" style="left:570px;top:670px">灰绿上盖 + 暖白下身，圆角更大（八十年代索尼的柔和）。扭把是一只大缎面圆盘，握柄帽是盘边的一颗红色指柱，转起来像拨老式电话。</p>
+
+<!-- C -->
+<div class="gc" style="left:1010px;top:190px" id="C">
+  <div class="body">
+    <div class="porthole"><div class="win" data-pile="sign" data-round></div></div>
+    <div class="zod" style="left:calc(22*var(--u));top:calc(262*var(--u));width:calc(56*var(--u));height:calc(56*var(--u))"><div class="ring"></div><div class="knob" style="rotate:-60deg"></div></div>
+    <div class="crank" style="left:calc(98*var(--u));top:calc(252*var(--u));width:calc(104*var(--u));height:calc(104*var(--u))"><div class="face"></div><div class="bar"><i class="grip"></i></div><div class="hub"></div></div>
+    <div class="sw" style="left:calc(246*var(--u));top:calc(262*var(--u));width:calc(22*var(--u));height:calc(56*var(--u))"><div class="thumb"></div></div>
+    <div class="chute" style="left:calc(110*var(--u));top:calc(364*var(--u));width:calc(80*var(--u));height:calc(34*var(--u))"><div class="flap"></div></div>
+  </div>
+  <div class="base"></div>
+</div>
+<div class="lbl" style="left:1010px;top:640px;width:300px">C · 圆窗</div>
+<p class="note" style="left:1010px;top:670px">石灰机身，上面一只大圆窗（像博朗收音机的圆形喇叭网那样的几何感），扭蛋堆在圆里。最有个性，但也最不像日式扭蛋柜。</p>
+</section>
+
+<!-- ===================== 2. 材质近看 ===================== -->
+<section class="v">
+<span class="tag">扭蛋机 v1 · ② 材质近看（放大 3 倍）· 扭蛋：上半透明、下半哑光，中缝一圈；缎面扭把 + 砖红握柄帽；星座转盘；滑块两档（签 / 游戏）</span>
+<div class="cap" style="--s:190px;left:120px;top:160px;--r:-14deg"><b class="in"></b><b class="out"></b><b class="lip"></b></div>
+<div class="cap game" style="--s:190px;left:360px;top:160px;--r:18deg"><b class="in"></b><b class="out"></b><b class="lip"></b></div>
+<div class="lbl" style="left:120px;top:380px;width:190px">签 · 暖白</div><div class="lbl" style="left:360px;top:380px;width:190px">游戏 · 灰绿</div>
+<div style="--u:3px;position:absolute;left:640px;top:120px;width:calc(108*var(--u));height:calc(108*var(--u))"><div class="crank" style="inset:0"><div class="face"></div><div class="bar"><i class="grip"></i></div><div class="hub"></div></div></div>
+<div class="lbl" style="left:640px;top:460px;width:324px">扭把 · 缎面铝 + 砖红握柄帽</div>
+<div style="--u:3px;position:absolute;left:1050px;top:140px;width:calc(58*var(--u));height:calc(58*var(--u))"><div class="zod" style="inset:0;width:100%;height:100%"><div class="ring"></div><div class="knob" style="rotate:-60deg"></div></div></div>
+<div class="lbl" style="left:1050px;top:360px;width:174px">星座转盘</div>
+<div style="--u:3px;position:absolute;left:180px;top:520px">
+  <div class="sw" style="left:0;top:0;width:calc(22*var(--u));height:calc(56*var(--u))"><div class="thumb"></div></div>
+  <div class="sw" style="left:calc(60*var(--u));top:0;width:calc(22*var(--u));height:calc(56*var(--u))"><div class="thumb" style="--at:50%"></div></div>
+</div>
+<div class="lbl" style="left:130px;top:710px;width:300px">滑块 · 签 ／ 游戏</div>
+<div style="--u:2.6px;position:absolute;left:620px;top:560px;width:calc(108*var(--u));height:calc(46*var(--u))"><div class="chute" style="inset:0;width:100%;height:100%"><i class="cap" style="--s:calc(34*var(--u));left:calc(58*var(--u));top:calc(8*var(--u));--r:20deg"><b class="in"></b><b class="out"></b><b class="lip"></b></i><div class="flap"></div></div></div>
+<div class="lbl" style="left:620px;top:700px;width:281px">出蛋口 · 烟色翻板</div>
+<p class="note" style="left:1000px;top:520px;width:340px">质感原则：外壳全是哑光塑料，高光小而柔；金属只在扭把，做缎面（和人生清单拨杆 A 版同一种处理）；亚克力窗只有上下方向的柔光，不做斜向玻璃反光；扭蛋的透明上半能隐约看到里面折起来的签纸。</p>
+</section>
+
+<!-- ===================== 3. 房间构图 ===================== -->
+<section class="v">
+<span class="tag">扭蛋机 v1 · ③ 房间构图（示意 · 以 A 为例）· 左：签档，签纸展开在机器右边 · 右下：游戏档题卡</span>
+<div class="ga" style="--u:1.25px;left:170px;top:150px" id="A2">
+  <div class="lid"></div>
+  <div class="body">
+    <div class="win" data-pile="sign"></div>
+    <div class="seam"></div>
+    <div class="zod" style="left:calc(24*var(--u));top:calc(224*var(--u));width:calc(58*var(--u));height:calc(58*var(--u))"><div class="ring"></div><div class="knob" style="rotate:-60deg"></div></div>
+    <div class="crank" style="left:calc(96*var(--u));top:calc(222*var(--u));width:calc(108*var(--u));height:calc(108*var(--u))"><div class="face"></div><div class="bar" style="--turn:30deg"><i class="grip"></i></div><div class="hub"></div></div>
+    <div class="sw" style="left:calc(248*var(--u));top:calc(226*var(--u));width:calc(22*var(--u));height:calc(56*var(--u))"><div class="thumb"></div></div>
+    <div class="chute" style="left:calc(96*var(--u));top:calc(340*var(--u));width:calc(108*var(--u));height:calc(46*var(--u))"><div class="flap"></div></div>
+    <span class="silk" style="left:calc(22*var(--u));top:calc(352*var(--u))"><b>Fred.</b></span>
+  </div>
+  <div class="base"></div>
+</div>
+<!-- the opened capsule on the desk -->
+<div class="half" style="left:560px;top:720px;transform:rotate(-8deg)"><div class="cap" style="top:0;--r:0deg"><b class="in"></b><b class="out"></b><b class="lip"></b></div></div>
+<div class="half" style="left:520px;top:762px;transform:rotate(172deg)"><div class="cap" style="top:-32px;--r:0deg"><b class="in"></b><b class="out"></b><b class="lip"></b></div></div>
+<!-- the slip -->
+<div class="slip" style="left:700px;top:150px">
+  <div class="head">二〇二六年九月三十日 · 丙午年八月二十 · 丁未日</div>
+  <div class="rank">第一签<small>上上</small></div>
+  <div class="poem">开天辟地作良缘<br>吉日良时万物全<br>若得此签非小可<br>人行忠正帝王宣</div>
+  <div class="jie">解曰　事事顺遂，守正则吉</div>
+  <div class="yi"><b>宜</b>　祭祀　祈福　出行　开市</div><div class="yi"><b>忌</b>　安葬　动土</div>
+  <div class="seal">♈︎<br>今日</div>
+</div>
+<p class="note" style="left:1210px;top:150px;width:200px">签纸：竖排、三折痕（刚从扭蛋里展开）。从右往左读：日期与干支 → 签等 → 四句签诗 → 解曰 → 黄历宜忌。左下角一方墨色小印，印着你拨的星座。<br><br>文字为示意：签诗用观音灵签第一签；宜忌按今天「开日」示意，正式版按规则计算并逐首核对原文。</p>
+<!-- the game card -->
+<div class="card" style="left:1110px;top:600px;transform:rotate(2deg)">
+  <small>Nº 014 · TRUTH</small><b>真心话</b><p>（示意）你手机相册里最近一张截图是什么？</p>
+  <svg viewBox="0 0 22 22" style="position:absolute;right:22px;top:22px;width:22px;height:22px" fill="none" stroke="#7c8576" stroke-width="1.2"><rect x="3" y="3" width="16" height="16" rx="3.5"/><circle cx="8" cy="8" r="1" fill="#7c8576"/><circle cx="14" cy="14" r="1" fill="#7c8576"/><circle cx="14" cy="8" r="1" fill="#7c8576"/><circle cx="8" cy="14" r="1" fill="#7c8576"/></svg>
+</div>
+<div class="lbl" style="left:1110px;top:815px;width:300px">游戏档 · 题卡（灰绿蛋里）</div>
+</section>
+
+<script>
+// Fill each window with a pile of capsules: deterministic positions, the pile settles at the bottom.
+const ZODIAC = '♈♉♊♋♌♍♎♏♐♑♒♓';
+for (const zod of document.querySelectorAll('.zod .ring')) {
+  zod.innerHTML = [...ZODIAC].map((s, i) => { const a = i / 12 * 2 * Math.PI; return `<i style="transform:translate(${Math.sin(a) * 40}%,${-Math.cos(a) * 40}%)"><span style="position:absolute">${s}︎</span></i>`; }).join('');
+  // position relative to ring size
+  const r = zod.getBoundingClientRect().width / 2 * .78;
+  zod.querySelectorAll('i').forEach((el, i) => { const a = i / 12 * 2 * Math.PI; el.style.transform = `translate(${Math.sin(a) * r}px,${-Math.cos(a) * r}px)`; });
+}
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+for (const win of document.querySelectorAll('.win[data-pile]')) {
+  const w = win.clientWidth, h = win.clientHeight, s = Math.round(w / 5.4), round = win.hasAttribute('data-round');
+  const caps = [];
+  for (let row = 0; row < 3; row++) for (let col = 0; col < 7; col++) {
+    const x = col * s * .92 + (row % 2) * s * .46 - s * .2 + rnd() * s * .18, y = h - s * (1 + row * .78) - rnd() * s * .12;
+    if (round) { const cx = w / 2, cy = h / 2, dx = x + s / 2 - cx, dy = y + s / 2 - cy; if (Math.hypot(dx, dy) > w / 2 - s * .45) continue; }
+    if (x > w - s * .6) continue;
+    caps.push(`<i class="cap" style="--s:${s}px;left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;--r:${Math.round((rnd() - .5) * 70)}deg;z-index:${10 - row};filter:brightness(${(1 - row * .05).toFixed(3)})"><b class="in"></b><b class="out"></b><b class="lip"></b></i>`);
+  }
+  win.insertAdjacentHTML('afterbegin', caps.join(''));
+}
+</script>
+</body>

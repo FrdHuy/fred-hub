@@ -1,0 +1,158 @@
+<!doctype html><meta charset="utf-8"><title>扭蛋机 v3 · 透明机芯 × 印刷图形</title>
+<link rel="stylesheet" href="../../dist/tokens.css">
+<style>
+/* v3：斜轴测（正面平视，顶面与侧面向右上退去，没有透视）。③ 透明机芯 × ⑤ 印刷图形。所有扭蛋一个样，少数是彩蛋。 */
+*{box-sizing:border-box}
+body{margin:0;background:#f8f7f4;color:#343832;font-family:var(--font-ui)}
+.row{position:relative;display:flex;width:1440px;height:900px;border-bottom:1px solid #e7e5de}
+.cell{position:relative;flex:1}
+.cell+.cell{border-left:1px solid #eeece6}
+.tag{position:absolute;left:24px;top:18px;font:11px var(--font-mono);letter-spacing:.14em;color:#9a9d92;z-index:9}
+.name{position:absolute;left:36px;bottom:118px;font:500 13px var(--font-mono);letter-spacing:.3em;color:#5d6258}
+.desc{position:absolute;left:36px;right:30px;bottom:24px;font:12.5px/1.85 var(--font-ui);color:#7c8076}
+.stage{position:absolute;left:50%;top:70px;width:330px;height:470px;margin-left:-175px;transform:scale(1.42);transform-origin:50% 0}
+.stage>*{position:absolute;inset:0;overflow:visible}
+.stage svg{width:100%;height:100%;overflow:visible}
+/* Capsules (all alike; the easter egg is the odd one). */
+.cap{--s:40px;--body:#efe9dc;--body-lo:#cfc6b2;--inner:#d8cfbc;position:absolute;width:var(--s);height:var(--s);border-radius:50%;transform:translate(-50%,-50%) rotate(var(--r,0deg));
+  background:radial-gradient(circle at 34% 26%,#fffffff2,#f7f5ef66 34%,#e9e6dc40 62%,#c9c5b866 100%);
+  box-shadow:inset 0 0 0 .6px #3d3f2a2e,inset calc(var(--s)*-.04) calc(var(--s)*-.05) calc(var(--s)*.1) #3d3f2a1f,0 calc(var(--s)*.07) calc(var(--s)*.1) #3d3f2a33}
+.cap .in{position:absolute;left:3%;right:3%;top:40%;height:20%;border-radius:50%;background:radial-gradient(ellipse at 50% 20%,color-mix(in srgb,var(--inner) 70%,#3d3f2a),var(--inner) 70%)}
+.cap .in:before{content:'';position:absolute;left:38%;width:22%;bottom:40%;height:130%;opacity:.85;border-radius:1px;background:linear-gradient(#fdfbf5,#efe9da);box-shadow:0 0 0 .5px #3d3f2a26;transform:rotate(-6deg)}
+.cap .out{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 36% 34%,color-mix(in srgb,var(--body) 70%,#fff),var(--body) 42%,var(--body-lo) 86%,color-mix(in srgb,var(--body-lo) 80%,#3d3f2a));
+  -webkit-mask:radial-gradient(ellipse 47% 10% at 50% 50%,#0000 97%,#000 100%),linear-gradient(#0000 50%,#000 50%);-webkit-mask-composite:source-in;mask:radial-gradient(ellipse 47% 10% at 50% 50%,#0000 97%,#000 100%),linear-gradient(#0000 50%,#000 50%);mask-composite:intersect}
+.cap .lip{position:absolute;left:3%;right:3%;top:40%;height:20%;border-radius:50%;border-bottom:calc(var(--s)*.018) solid #ffffffb3}
+.cap:after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse 46% 30% at 38% 22%,#ffffff8c,#fff0 70%)}
+/* Easter egg candidates */
+.cap.clear .out{background:radial-gradient(circle at 36% 34%,#ffffff99,#e9ece6aa 50%,#c9cfc4cc);opacity:.75}
+.cap.clear .in{background:radial-gradient(ellipse at 50% 20%,#c9cfc466,#e3e7df55 70%)}
+.cap.clear .in:before{display:none}
+.cap.clear .gem{position:absolute;left:34%;top:34%;width:32%;height:32%;border-radius:4px;transform:rotate(45deg);background:linear-gradient(135deg,#f6d77e,#e0a93c 55%,#b9812a);box-shadow:0 0 calc(var(--s)*.12) #f2c31866}
+.cap.sage{--body:#b3bcab;--body-lo:#8a9581;--inner:#9da896}
+.cap.mark .out:after{content:'Fred.';position:absolute;left:0;right:0;bottom:22%;text-align:center;font:600 calc(var(--s)*.15) var(--font-wordmark);letter-spacing:-.04em;color:#4f564a}
+.lab{font:500 7px var(--font-mono);letter-spacing:.24em;fill:#6b7065}
+</style>
+<body>
+<div class="row"><div class="cell" id="a"></div><div class="cell" id="b"></div><div class="cell" id="c"></div></div>
+<div class="row" id="eggs"></div>
+<script>
+// ——— Oblique drawing: the front is seen flat; depth z (0 = front) recedes up and to the right. ———
+const KX = .3, KY = -.2;
+const pr = (x, y, z = 0) => [x + z * KX, y + z * KY];
+const pts = a => a.map(p => p.map(n => n.toFixed(1)).join(',')).join(' ');
+const poly = (a, fill, extra = '') => `<polygon points="${pts(a)}" fill="${fill}" ${extra}/>`;
+let gid = 0; const defs = [];
+const lin = (stops, x2 = 0, y2 = 1) => { const id = 'g' + gid++; defs.push(`<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stops.map(([o, c, a = 1]) => `<stop offset="${o}" stop-color="${c}" stop-opacity="${a}"/>`).join('')}</linearGradient>`); return `url(#${id})`; };
+const rad = (stops, cx = .38, cy = .32) => { const id = 'g' + gid++; defs.push(`<radialGradient id="${id}" cx="${cx}" cy="${cy}" r=".75">${stops.map(([o, c, a = 1]) => `<stop offset="${o}" stop-color="${c}" stop-opacity="${a}"/>`).join('')}</radialGradient>`); return `url(#${id})`; };
+// An opaque block: its front, and the top and right faces receding. Soft studio light from the upper left.
+function block(x, y, w, h, d, { front, top, right, z = 0 }) {
+  const F = [pr(x, y, z), pr(x + w, y, z), pr(x + w, y + h, z), pr(x, y + h, z)];
+  const T = [pr(x, y, z), pr(x, y, z + d), pr(x + w, y, z + d), pr(x + w, y, z)];
+  const R = [pr(x + w, y, z), pr(x + w, y, z + d), pr(x + w, y + h, z + d), pr(x + w, y + h, z)];
+  return poly(T, top) + poly(R, right) + poly(F, front) + `<polyline points="${pts([F[3], F[0], F[1]])}" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1"/>` + `<polyline points="${pts([T[1], T[2]])}" fill="none" stroke="#fff" stroke-opacity=".6"/>`;
+}
+// A cylinder standing out of a front face toward you (z from z0 back to z0 - len).
+function cyl(cx, cy, r, len, { side, cap, z0 = 0 }) {
+  const a = pr(cx, cy, z0), b = pr(cx, cy, z0 - len), vx = b[0] - a[0], vy = b[1] - a[1], l = Math.hypot(vx, vy) || 1, nx = -vy / l * r, ny = vx / l * r;
+  return `<circle cx="${a[0]}" cy="${a[1]}" r="${r}" fill="${side}"/>` + poly([[a[0] + nx, a[1] + ny], [b[0] + nx, b[1] + ny], [b[0] - nx, b[1] - ny], [a[0] - nx, a[1] - ny]], side) + `<circle cx="${b[0]}" cy="${b[1]}" r="${r}" fill="${cap}"/>`;
+}
+// A flat ring lying in the horizontal plane (a turntable), as a skewed ellipse.
+function disc(cx, y, cz, r, fill, n = 64) { const a = []; for (let i = 0; i < n; i++) { const t = i / n * 2 * Math.PI; a.push(pr(cx + r * Math.cos(t), y, cz + r * Math.sin(t))); } return poly(a, fill); }
+function gear(cx, cy, z, r, teeth = 16) { const c = pr(cx, cy, z); let d = ''; for (let i = 0; i < teeth * 2; i++) { const t = i / (teeth * 2) * 2 * Math.PI, rr = i % 2 ? r * .86 : r; d += (i ? 'L' : 'M') + (c[0] + rr * Math.cos(t)).toFixed(1) + ' ' + (c[1] + rr * Math.sin(t)).toFixed(1); } return `<path d="${d}Z" fill="${SATIN_FACE}" stroke="#9c998f" stroke-width=".6"/><circle cx="${c[0]}" cy="${c[1]}" r="${r * .3}" fill="#c3c0b6" stroke="#8f8b7c" stroke-width=".5"/><circle cx="${c[0]}" cy="${c[1]}" r="${r * .1}" fill="#6f6d67"/>`; }
+const SATIN_FACE = 'url(#satin)', RED_SIDE = '#94382a', RED_CAP = 'url(#red)';
+const ZOD = [...'♈♉♊♋♌♍♎♏♐♑♒♓'].map(s => s + '︎');
+let seed = 5; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+function capsHTML(list) { return list.map(({ x, y, z, s, r, kind = '' }) => { const [px, py] = pr(x, y, z); return `<i class="cap ${kind}" style="left:${px}px;top:${py}px;--s:${s}px;--r:${r}deg"><b class="in"></b><b class="out"></b><b class="lip"></b>${kind.includes('clear') ? '<b class="gem"></b>' : ''}</i>`; }).join(''); }
+// A pile on the turntable: back rows first. One or two are easter eggs.
+function pile(x0, x1, yBase, zMin, zMax, s, n, eggs = []) {
+  const list = [];
+  for (let i = 0; i < n; i++) { const z = zMin + (zMax - zMin) * (1 - i / n) , x = x0 + rnd() * (x1 - x0), y = yBase - s / 2 - rnd() * s * 1.6 * (1 - Math.abs((x - (x0 + x1) / 2) / ((x1 - x0) / 2)) * .5); list.push({ x, y, z, s, r: Math.round((rnd() - .5) * 60) }); }
+  eggs.forEach(([i, kind]) => { if (list[i]) list[i].kind = kind; });
+  return list.sort((a, b) => b.z - a.z || a.y - b.y);
+}
+function text(x, y, z, str, { size = 7, fill = '#6b7065', weight = 500, family = 'var(--font-mono)', spacing = '.24em', side = false } = {}) {
+  const [px, py] = pr(x, y, z);
+  const t = side ? `transform="matrix(${KX} ${KY} 0 1 ${px} ${py})"` : `x="${px}" y="${py}"`;
+  return `<text ${t} style="font:${weight} ${size}px ${family};letter-spacing:${spacing}" fill="${fill}">${str}</text>`;
+}
+const common = `<defs>
+<linearGradient id="satin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6f4ee"/><stop offset=".5" stop-color="#dedbd2"/><stop offset="1" stop-color="#bcb9af"/></linearGradient>
+<radialGradient id="red" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#c65a43"/><stop offset=".6" stop-color="#b34934"/><stop offset="1" stop-color="#9e3d2b"/></radialGradient>
+<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter></defs>`;
+
+// One machine: a transparent core between a top cap and a base; options change the tint, the base and what is printed.
+function machine(id, o) {
+  defs.length = 0; seed = o.seed;
+  const W = 240, H = 404, D = 140, capH = 26, baseY = 272, Z = D;
+  const warm = { front: lin([[0, '#faf8f2'], [1, '#e9e4d6']]), top: lin([[0, '#fbfaf6'], [1, '#f1ede3']]), right: lin([[0, '#d6d0c0'], [1, '#c9c2b0']]) };
+  const baseCol = o.base === 'sage' ? { front: lin([[0, '#d5dace'], [1, '#bcc3b3']]), top: lin([[0, '#e2e6dd'], [1, '#d3d8cc']]), right: lin([[0, '#a9b19f'], [1, '#98a08e']]) } : warm;
+  let back = '', mid = '', front = '';
+  // floor shadow
+  back += `<ellipse cx="${W / 2 + 30}" cy="${H + 6}" rx="${W * .72}" ry="26" fill="#3d3f2a" opacity=".16" filter="url(#soft)"/>`;
+  // inside, back to front: the back acrylic edges, the base's top seen through the glass, the turntable, the gear
+  const tint = o.tint ? o.tint : '#eef2ee';
+  back += poly([pr(0, capH, Z), pr(W, capH, Z), pr(W, baseY, Z), pr(0, baseY, Z)], tint, `fill-opacity="${o.tint ? .5 : .25}" stroke="#ffffff" stroke-opacity=".9" stroke-width="1"`);
+  back += poly([pr(0, baseY, 0), pr(0, baseY, Z), pr(W, baseY, Z), pr(W, baseY, 0)], o.base === 'sage' ? '#d3d8cc' : '#f1ede3');
+  if (o.clearBase) {
+    back += gear(120, 330, 70, 40, 18) + gear(170, 300, 70, 22, 12);
+    back += poly([pr(70, 372, 20), pr(170, 372, 20), pr(180, 392, 0), pr(60, 392, 0)], lin([[0, '#e6e1d4'], [1, '#cfc9ba']]));
+  }
+  back += disc(120, baseY - 4, 70, 104, 'url(#satin)') + disc(120, baseY - 8, 70, 104, lin([[0, '#f3f1ec'], [1, '#d4d1c8']], 1, 1));
+  back += gear(120, baseY - 20, 60, 30, 14);
+  const caps = pile(26, 196, baseY - 10, 18, 110, 44, 24, o.eggs);
+  // the front glass (and the right glass), bright edges; the tint colours them
+  mid += poly([pr(W, capH, 0), pr(W, capH, Z), pr(W, baseY, Z), pr(W, baseY, 0)], tint, `fill-opacity="${o.tint ? .42 : .14}" stroke="#fff" stroke-opacity=".9"`);
+  mid += poly([pr(0, capH, 0), pr(W, capH, 0), pr(W, baseY, 0), pr(0, baseY, 0)], lin([[0, '#ffffff', .28], [.35, tint, o.tint ? .3 : .06], [1, '#ffffff', .12]]), `stroke="#ffffff" stroke-width="1.5" stroke-opacity=".95"`);
+  mid += `<line x1="${pr(3, capH + 4)[0]}" y1="${pr(3, capH + 4)[1]}" x2="${pr(3, baseY - 4)[0]}" y2="${pr(3, baseY - 4)[1]}" stroke="#fff" stroke-opacity=".7" stroke-width="1"/>`;
+  if (o.sideNumber === 'glass') mid += text(26, 214, 0, '07', { size: 128, fill: 'none', weight: 700, family: 'var(--font-wordmark)', spacing: '-.06em', side: true }).replace('fill="none"', 'fill="none" stroke="#ffffff" stroke-width="1.6"').replace(/matrix\(([^ ]+) ([^ ]+) 0 1 ([^ ]+) ([^ )]+)\)/, (m, a, b, px, py) => `matrix(${a} ${b} 0 1 ${pr(W, 214)[0]} ${pr(W, 214, 26)[1]})`);
+  // top cap and base
+  front += block(0, 0, W, capH, D, warm);
+  if (o.clearBase) {
+    front += poly([pr(0, baseY), pr(W, baseY), pr(W, H - 14), pr(0, H - 14)], lin([[0, '#ffffff', .3], [1, '#eef2ee', .12]]), `stroke="#fff" stroke-width="1.5" stroke-opacity=".95"`);
+    front += poly([pr(W, baseY, 0), pr(W, baseY, Z), pr(W, H - 14, Z), pr(W, H - 14, 0)], '#eef2ee', 'fill-opacity=".14" stroke="#fff" stroke-opacity=".9"');
+    front += block(0, H - 14, W, 14, D, warm);
+  } else {
+    front += block(0, baseY, W, H - baseY, D, baseCol);
+    // chute
+    const c0 = pr(82, 356), c1 = pr(158, 392);
+    front += `<rect x="${c0[0]}" y="${c0[1]}" width="${c1[0] - c0[0]}" height="${c1[1] - c0[1]}" rx="7" fill="${lin([[0, '#1d1f1a'], [.7, '#3a3c35'], [1, '#77766b']])}"/>`;
+    front += `<rect x="${c0[0] + 4}" y="${c0[1] + 3}" width="${c1[0] - c0[0] - 8}" height="20" rx="4" fill="#6c7066" fill-opacity=".55"/>`;
+  }
+  if (o.sideNumber === 'base') front += `<text transform="matrix(${KX} ${KY} 0 1 ${pr(W, 382)[0] + 4} ${pr(W, 382)[1]})" style="font:700 96px var(--font-wordmark);letter-spacing:-.06em" fill="none" stroke="#6f786a" stroke-width="1.4">07</text>`;
+  // controls on the base: zodiac knob with printed signs, the crank (satin plate, bar, red knob), the slider on the side
+  const zc = [44, 314];
+  ZOD.forEach((g, i) => { const a = i / 12 * 2 * Math.PI; front += `<text x="${zc[0] + Math.sin(a) * 27}" y="${zc[1] - Math.cos(a) * 27 + 3}" text-anchor="middle" style="font:9px 'Apple Symbols',sans-serif" fill="#565c52">${g}</text>`; });
+  front += cyl(zc[0], zc[1], 15, 10, { side: '#d9d4c6', cap: rad([[0, '#fbf9f3'], [.7, '#ece8dc'], [1, '#d8d2c2']]) });
+  const zt = pr(zc[0], zc[1], -10); front += `<rect x="${zt[0] - 1}" y="${zt[1] - 13}" width="2" height="9" fill="#3d4239" rx="1"/>`;
+  front += cyl(120, 314, 34, 5, { side: '#b9b6ad', cap: 'url(#satin)' });
+  const b0 = pr(78, 306, -5); front += `<rect x="${b0[0]}" y="${b0[1] + 4}" width="84" height="16" rx="5" fill="#b5b2a9"/><rect x="${b0[0] - 3}" y="${b0[1]}" width="84" height="16" rx="5" fill="${lin([[0, '#f3f2ee'], [1, '#d3d1ca']])}" stroke="#9c998f" stroke-width=".5"/>`;
+  front += cyl(152, 314, 10, 24, { side: RED_SIDE, cap: RED_CAP, z0: -8 });
+  // slider on the right face
+  const s0 = pr(W, 300, 30), s1 = pr(W, 300, 100), s2 = pr(W, 316, 100), s3 = pr(W, 316, 30);
+  front += poly([s0, s1, s2, s3], '#8f887a', 'fill-opacity=".45"');
+  const t0 = pr(W, 294, 38); front += poly([t0, pr(W, 294, 60), pr(W + 8, 298, 60), pr(W + 8, 298, 38)], '#fbf9f3') + poly([pr(W + 8, 298, 38), pr(W + 8, 298, 60), pr(W + 8, 322, 60), pr(W + 8, 322, 38)], '#e6e1d4') + poly([t0, pr(W + 8, 298, 38), pr(W + 8, 322, 38), pr(W, 318, 38)], '#f1ede3');
+  front += text(W, 334, 30, '签 · · · 游戏', { side: true, size: 8 });
+  // printing: the wordmark and the three steps
+  front += text(12, 17, 0, '<tspan style="font:600 12px var(--font-wordmark);letter-spacing:-.04em" fill="#4f564a">Fred.</tspan>', {});
+  front += text(118, 17, 0, '① 拨星座 → ② 转一圈 → ③ 拧开', { size: 7, spacing: '.12em' });
+  if (o.stamp) front += text(170, 290, 0, 'Nº 07', {});
+  const el = document.getElementById(id);
+  el.insertAdjacentHTML('beforeend', `<div class="stage"><svg viewBox="0 0 330 470">${common}<defs>${defs.join('')}</defs><g transform="translate(20,40)">${back}</g></svg><div style="left:20px;top:40px">${capsHTML(caps)}</div><svg viewBox="0 0 330 470"><defs>${defs.join('')}</defs><g transform="translate(20,40)">${mid}${front}</g></svg></div>
+<span class="tag">${o.tag}</span><span class="name">${o.name}</span><p class="desc">${o.desc}</p>`);
+}
+machine('a', { seed: 5, base: 'sage', sideNumber: 'base', eggs: [[20, 'clear']], tag: 'v3 · A', name: 'A · 透明芯 · 灰绿底座', desc: '③ 的透明机芯 + ⑤ 的色块：暖白顶盖、透明亚克力、灰绿底座。底座侧面一个巨大的镂空「07」，顶盖正面印三步说明。扭蛋全部一个样；里面藏着一颗彩蛋（这里用的是「全透明蛋」，见下一行）。' });
+machine('b', { seed: 9, base: 'warm', tint: '#b9c4b1', sideNumber: 'glass', eggs: [[18, 'sage']], stamp: true, tag: 'v3 · B', name: 'B · 灰绿色亚克力', desc: '把 ⑤ 的色块做进亚克力里：扭蛋仓是一整块淡灰绿的半透明亚克力（像 TE 的彩色透明件），「07」白色丝印在仓的侧面；底座暖白。颜色有了，机芯仍然看得见。彩蛋是一颗灰绿蛋。' });
+machine('c', { seed: 13, base: 'warm', clearBase: true, sideNumber: 'none', eggs: [[22, 'mark']], tag: 'v3 · C', name: 'C · 全透明', desc: '只留上下两片暖白端板，其余全透明：连底座里的齿轮组、出蛋滑道都看得见，转一圈扭把就能看到整套机械在动。印刷只在端板上。彩蛋是一颗印着「Fred.」的蛋。' });
+
+// ——— Easter egg candidates ———
+{
+  const row = document.getElementById('eggs');
+  const big = (kind, x, label, note) => `<div style="position:absolute;left:${x}px;top:250px"><i class="cap ${kind}" style="left:0;top:0;--s:180px;--r:-12deg"><b class="in"></b><b class="out"></b><b class="lip"></b>${kind.includes('clear') ? '<b class="gem"></b>' : ''}</i></div><div style="position:absolute;left:${x - 140}px;top:380px;width:280px;text-align:center;font:500 11px var(--font-mono);letter-spacing:.3em;color:#8d9186">${label}</div><p style="position:absolute;left:${x - 140}px;top:410px;width:280px;margin:0;font:12.5px/1.85 var(--font-ui);color:#7c8076;text-align:center">${note}</p>`;
+  row.innerHTML = `<span class="tag">v3 · 彩蛋候选（放大）· 普通蛋全部一个样，彩蛋混在里面</span>` +
+    big('', 200, '普通蛋', '暖白底 + 透明顶。签和题都装在这种蛋里，拧开之前谁也不知道。') +
+    big('clear', 520, '① 全透明蛋', '上下都是透明的，里面能看到一件小东西在发光。在仓里一眼就能认出来——看得见、扭不扭得到，是期待感。') +
+    big('sage', 840, '② 异色蛋', '颜色不同的一颗（灰绿）。和普通蛋同样的做工，只是颜色不一样，低调。') +
+    big('mark', 1160, '③ 印字蛋', '外观和普通蛋几乎一样，只在杯底印一个小小的「Fred.」。只有拧出来的人才会发现——最像真正的「彩蛋」。');
+}
+</script>
+</body>

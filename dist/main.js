@@ -1,10 +1,10 @@
-import { createInteraction } from './experience.js?v=40';
-import { soundOn, setSound } from './sound.js?v=40';
-import { mountModule } from './modules/index.js?v=40';
-import { modules, getModule, createCover } from './catalog.js?v=40';
-import { CollectionGallery } from './gallery.js?v=40';
+import { createInteraction } from './experience.js?v=41';
+import { soundOn, setSound } from './sound.js?v=41';
+import { mountModule } from './modules/index.js?v=41';
+import { modules, getModule, createCover } from './catalog.js?v=41';
+import { CollectionGallery } from './gallery.js?v=41';
 import { readRoute, navigate } from './router.js';
-import { attachSheen } from './sheen.js?v=40';
+import { attachSheen } from './sheen.js?v=41';
 
 const $ = selector => document.querySelector(selector);
 // Focus rings are for keyboard users. Script-moved focus after a click or tap stays invisible.
@@ -82,7 +82,7 @@ async function showRoute(initial = false) {
   // The Life List opens out of the powered-up panel on the home page.
   const listOrigin = openingList ? gallery.currentElement?.querySelector('.panel')?.getBoundingClientRect() : null;
   // Other objects open through their screen: the reader's display grows into the room.
-  const screen = !initial && previousRoute.type==='home' && item && !openingList ? (item.id === 'stories' ? gallery.currentElement?.querySelector('.tw-paper') : item.id === 'music' ? gallery.currentElement?.querySelector('.wm-glass') : $(`.stage-receiver[data-module="${item.id}"] :is(.gate-display,.drive-display)`))?.getBoundingClientRect() : null;
+  const screen = !initial && previousRoute.type==='home' && item && !openingList ? (item.id === 'stories' ? gallery.currentElement?.querySelector('.tw-paper') : item.id === 'gacha' ? gallery.currentElement?.querySelector('.gc-chamber') : $(`.stage-receiver[data-module="${item.id}"] :is(.gate-display,.drive-display)`))?.getBoundingClientRect() : null;
   const screenOrigin = screen && screen.width && screen.right > 0 && screen.left < innerWidth ? screen : null;
   interaction.reset(); cancelRouteAnimation();
   if (!initial && nextRoute.type === 'home' && previousRoute.type === 'collection') {

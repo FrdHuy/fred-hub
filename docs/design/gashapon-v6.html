@@ -1,0 +1,166 @@
+<!doctype html><meta charset="utf-8"><title>扭蛋机 v6 · 特殊彩蛋 S1 + 光</title>
+<link rel="stylesheet" href="../../dist/tokens.css">
+<style>
+/* v4：B（灰绿亚克力仓）的正面版。圆角顶盖 / 底座夹住亚克力仓；深度靠仓的侧壁厚度与扭蛋的前中后三层。没有操作提示。 */
+*{box-sizing:border-box}
+body{margin:0;background:#f8f7f4;color:#343832;font-family:var(--font-ui)}
+.row{position:relative;display:flex;width:1440px;height:900px;border-bottom:1px solid #e7e5de}
+.cell{position:relative;flex:1}
+.cell+.cell{border-left:1px solid #eeece6}
+.tag{position:absolute;left:24px;top:18px;font:11px var(--font-mono);letter-spacing:.14em;color:#9a9d92;z-index:9}
+.name{position:absolute;left:40px;bottom:112px;font:500 13px var(--font-mono);letter-spacing:.3em;color:#5d6258}
+.desc{position:absolute;left:40px;right:40px;bottom:30px;font:12.5px/1.85 var(--font-ui);color:#7c8076}
+
+/* ——— The machine (u = 1px at 300 wide) ——— */
+.gm{--u:1px;--tint:185 196 177;position:absolute;width:calc(300*var(--u));height:calc(440*var(--u))}
+.gm *{box-sizing:border-box}
+.gm .shadow{position:absolute;left:4%;right:4%;bottom:calc(-8*var(--u));height:calc(30*var(--u));border-radius:50%;background:radial-gradient(closest-side,#3d3f2a33,#3d3f2a00);filter:blur(calc(4*var(--u)))}
+/* Warm-white matte plastic: soft light from the upper left, rounded edges catching it. */
+.gm .lid,.gm .base{position:absolute;left:0;right:0;background:linear-gradient(172deg,#fbf9f3,var(--shell-warm-hi) 30%,var(--shell-warm) 78%,#e4dfd1);box-shadow:inset 0 calc(1.5*var(--u)) 0 #fff,inset calc(1.2*var(--u)) 0 0 #fffc,inset calc(-1.5*var(--u)) 0 0 #d6d0c0,inset 0 calc(-2*var(--u)) calc(3*var(--u)) #3d3f2a1a,0 calc(2*var(--u)) calc(3*var(--u)) #3d3f2a1f}
+.gm .lid{top:0;height:calc(40*var(--u));border-radius:calc(22*var(--u)) calc(22*var(--u)) calc(9*var(--u)) calc(9*var(--u));z-index:3}
+.gm .base{top:calc(262*var(--u));bottom:calc(10*var(--u));border-radius:calc(9*var(--u)) calc(9*var(--u)) calc(26*var(--u)) calc(26*var(--u));z-index:3}
+.gm .foot{position:absolute;bottom:0;width:calc(46*var(--u));height:calc(14*var(--u));border-radius:0 0 calc(7*var(--u)) calc(7*var(--u));background:linear-gradient(#cfc8b6,#bdb5a1);z-index:2}
+/* The sage acrylic chamber: back wall, turntable, three layers of capsules, the tinted front, the edge-on side walls. */
+.gm .chamber{position:absolute;left:calc(12*var(--u));right:calc(12*var(--u));top:calc(34*var(--u));height:calc(234*var(--u));overflow:hidden;z-index:1;border-radius:calc(4*var(--u))}
+.gm .wall{position:absolute;inset:0;background:linear-gradient(rgb(var(--tint) / .95),rgb(var(--tint) / .7) 60%,rgb(var(--tint) / .85)),linear-gradient(#e9ece6,#d6dbd2)}
+.gm .table{position:absolute;left:4%;right:4%;bottom:calc(4*var(--u));height:calc(22*var(--u));border-radius:50%;background:radial-gradient(ellipse at 40% 30%,#f2f0ea,#d7d4cb 60%,#b9b6ac);box-shadow:0 calc(2*var(--u)) 0 #a9a69c}
+.gm .layer{position:absolute;inset:0}
+.gm .layer.back{filter:saturate(.7) brightness(.86)}.gm .layer.mid{filter:saturate(.85) brightness(.94)}
+/* the tint of the acrylic over what is inside: stronger toward the back layers (drawn between layers) */
+.gm .fog{position:absolute;inset:0;background:rgb(var(--tint) / .22)}
+.gm .front{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,#ffffff38,#fff0 22%,#fff0 70%,#ffffff1a),rgb(var(--tint) / .16);box-shadow:inset 0 calc(1.5*var(--u)) 0 #ffffffcc,inset 0 calc(-1.5*var(--u)) 0 #ffffff80}
+/* side walls seen edge-on: a band of denser tint with a bright polished edge — the chamber's thickness */
+.gm .side{position:absolute;top:0;bottom:0;width:calc(11*var(--u));background:linear-gradient(90deg,rgb(var(--tint) / .9),rgb(var(--tint) / .55));box-shadow:inset calc(1.2*var(--u)) 0 0 #ffffffb3}
+.gm .side.l{left:0}.gm .side.r{right:0;transform:scaleX(-1)}
+/* silk-screened 07 on the acrylic, white */
+.gm .num{position:absolute;right:calc(20*var(--u));top:calc(12*var(--u));font:700 calc(64*var(--u))/1 var(--font-wordmark);letter-spacing:-.06em;color:transparent;-webkit-text-stroke:calc(1*var(--u)) #ffffffbf}
+/* Controls on the base */
+.gm .zod{position:absolute;left:calc(26*var(--u));top:calc(296*var(--u));width:calc(40*var(--u));height:calc(40*var(--u))}
+.gm .zod i{position:absolute;left:50%;top:50%;font:normal calc(6*var(--u))/1 "Apple Symbols","Segoe UI Symbol",sans-serif;color:#6b7263;translate:-50% -50%}
+.gm .zod .k{position:absolute;inset:28%;border-radius:50%;background:radial-gradient(circle at 40% 32%,#fbf9f3,#ece8dc 60%,#d8d2c2);box-shadow:0 calc(1.5*var(--u)) calc(2*var(--u)) #3d3f2a40,0 0 0 .5px #3d3f2a26,inset 0 .6px 0 #fff}
+.gm .zod .k:after{content:'';position:absolute;left:50%;top:10%;width:calc(1.3*var(--u));height:32%;margin-left:calc(-.65*var(--u));border-radius:1px;background:#3d4239}
+.gm .crank{position:absolute;left:calc(112*var(--u));top:calc(280*var(--u));width:calc(76*var(--u));height:calc(76*var(--u));border-radius:50%;background:repeating-conic-gradient(#3d3f2a0f 0 .8deg,#fff0 .8deg 1.6deg),radial-gradient(circle at 38% 32%,#f6f4ee,#e0ddd4 46%,#cac7bd 76%,#b8b5ab);box-shadow:0 calc(3*var(--u)) calc(5*var(--u)) #3d3f2a38,0 0 0 .6px #8f8b7c80,inset 0 .8px 0 #fff}
+.gm .crank .face{position:absolute;inset:15%;border-radius:50%;background:repeating-radial-gradient(circle,#fff0 0 1.2px,#3d3f2a08 1.2px 1.8px),radial-gradient(circle at 40% 34%,#f2f0ea,#d7d4cb 70%,#c3c0b6);box-shadow:inset 0 .6px 0 #fff,0 0 0 .5px #7d7b7459}
+.gm .crank .bar{position:absolute;left:50%;top:50%;width:118%;height:19%;translate:-50% -50%;rotate:-18deg;border-radius:calc(6*var(--u));background:linear-gradient(#ffffff2e,#fff0 45%,#3d3f2a14),linear-gradient(90deg,#b9b6ad,#e9e7e1 30%,#f4f3ef 48%,#dcdad3 62%,#b4b1a8);box-shadow:0 calc(2.5*var(--u)) calc(4*var(--u)) #3d3f2a40,inset 0 .6px 0 #fff,0 0 0 .5px #8f8b7c99}
+.gm .crank .grip{position:absolute;right:-3%;top:50%;height:150%;aspect-ratio:1;translate:0 -50%;rotate:18deg;border-radius:50%;background:radial-gradient(circle at 40% 36%,#c65a43,#b34934 58%,#9e3d2b);box-shadow:0 calc(2.4*var(--u)) 0 #85321f,0 calc(4*var(--u)) calc(5*var(--u)) #3d3f2a59,inset 0 .6px 0 #ffffff2e}
+.gm .crank .hub{position:absolute;inset:41%;border-radius:50%;background:radial-gradient(circle at 38% 32%,#f4f3ef,#c8c6bf 45%,#8d8b84 80%,#6f6d67);box-shadow:0 .5px 1px #0006}
+.gm .chute{position:absolute;left:calc(104*var(--u));top:calc(366*var(--u));width:calc(92*var(--u));height:calc(44*var(--u));border-radius:calc(12*var(--u)) calc(12*var(--u)) calc(8*var(--u)) calc(8*var(--u));background:linear-gradient(#e1dccf,#f1ede3);box-shadow:inset 0 calc(1.2*var(--u)) calc(1.5*var(--u)) #3d3f2a33,0 .8px 0 #fffc}
+.gm .chute:before{content:'';position:absolute;inset:calc(4*var(--u));border-radius:calc(9*var(--u)) calc(9*var(--u)) calc(5*var(--u)) calc(5*var(--u));background:linear-gradient(#1b1d19,#2c2f29 55%,#4a4d44 82%,#8b8a7d);box-shadow:inset 0 calc(3*var(--u)) calc(4*var(--u)) #000b}
+.gm .chute .flap{position:absolute;left:calc(7*var(--u));right:calc(7*var(--u));top:calc(5*var(--u));height:60%;border-radius:calc(7*var(--u)) calc(7*var(--u)) calc(2*var(--u)) calc(2*var(--u));background:linear-gradient(rgb(var(--tint) / .55),rgb(var(--tint) / .7));box-shadow:inset 0 calc(.8*var(--u)) 0 #ffffff40,0 calc(1.2*var(--u)) 0 #ffffff26}
+/* the slider: its thumb peeks out of the right edge; two tiny marks on the front say what the two positions are */
+.gm .thumb{position:absolute;right:calc(-5*var(--u));top:calc(var(--mode,0) * 18 * var(--u) + 292 * var(--u));width:calc(12*var(--u));height:calc(26*var(--u));border-radius:calc(4*var(--u));background:repeating-linear-gradient(#fff0 0 calc(2*var(--u)),#3d3f2a1f calc(2*var(--u)) calc(3*var(--u))),linear-gradient(90deg,#f7f4ec,#dcd6c6);box-shadow:0 calc(1.5*var(--u)) calc(2*var(--u)) #3d3f2a38;z-index:2}
+.gm .mark{position:absolute;right:calc(12*var(--u));width:calc(9*var(--u));height:calc(9*var(--u));fill:none;stroke:#8a8e82;stroke-width:1.1;z-index:4}
+.gm .word{position:absolute;left:calc(22*var(--u));bottom:calc(26*var(--u));font:600 calc(12*var(--u)) var(--font-wordmark);letter-spacing:-.04em;color:#5b6353;z-index:4}
+/* B2: no cap — a rounded acrylic hood */
+.gm.hood .lid{display:none}
+.gm.hood .chamber{top:0;height:calc(270*var(--u));border-radius:calc(44*var(--u)) calc(44*var(--u)) calc(4*var(--u)) calc(4*var(--u))}
+.gm.hood .side{display:none}
+.gm.hood .front{box-shadow:inset 0 0 0 calc(10*var(--u)) rgb(var(--tint) / .45),inset 0 0 0 calc(11.2*var(--u)) #ffffffb3,inset 0 calc(1.5*var(--u)) 0 #ffffffcc}
+
+/* Capsules (all alike, one is the easter egg) */
+.cap{--s:40px;--body:#efe9dc;--body-lo:#cfc6b2;--inner:#d8cfbc;position:absolute;width:var(--s);height:var(--s);border-radius:50%;transform:translate(-50%,-50%) rotate(var(--r,0deg));
+  background:radial-gradient(circle at 34% 26%,#fffffff2,#f7f5ef66 34%,#e9e6dc40 62%,#c9c5b866 100%);
+  box-shadow:inset 0 0 0 .6px #3d3f2a2e,inset calc(var(--s)*-.04) calc(var(--s)*-.05) calc(var(--s)*.1) #3d3f2a1f,0 calc(var(--s)*.07) calc(var(--s)*.1) #3d3f2a33}
+.cap .in{position:absolute;left:3%;right:3%;top:40%;height:20%;border-radius:50%;background:radial-gradient(ellipse at 50% 20%,color-mix(in srgb,var(--inner) 70%,#3d3f2a),var(--inner) 70%)}
+.cap .in:before{content:'';position:absolute;left:38%;width:22%;bottom:40%;height:130%;opacity:.85;border-radius:1px;background:linear-gradient(#fdfbf5,#efe9da);box-shadow:0 0 0 .5px #3d3f2a26;transform:rotate(-6deg)}
+.cap .out{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 36% 34%,color-mix(in srgb,var(--body) 70%,#fff),var(--body) 42%,var(--body-lo) 86%,color-mix(in srgb,var(--body-lo) 80%,#3d3f2a));
+  -webkit-mask:radial-gradient(ellipse 47% 10% at 50% 50%,#0000 97%,#000 100%),linear-gradient(#0000 50%,#000 50%);-webkit-mask-composite:source-in;mask:radial-gradient(ellipse 47% 10% at 50% 50%,#0000 97%,#000 100%),linear-gradient(#0000 50%,#000 50%);mask-composite:intersect}
+.cap .lip{position:absolute;left:3%;right:3%;top:40%;height:20%;border-radius:50%;border-bottom:calc(var(--s)*.018) solid #ffffffb3}
+.cap:after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse 46% 30% at 38% 22%,#ffffff8c,#fff0 70%)}
+.cap.clear .out{background:radial-gradient(circle at 36% 34%,#ffffff99,#e9ece6aa 50%,#c9cfc4cc);opacity:.75}
+.cap.clear .in{background:radial-gradient(ellipse at 50% 20%,#c9cfc466,#e3e7df55 70%)}.cap.clear .in:before{display:none}
+.cap.clear .gem{position:absolute;left:34%;top:34%;width:32%;height:32%;border-radius:4px;transform:rotate(45deg);background:linear-gradient(135deg,#f6d77e,#e0a93c 55%,#b9812a);box-shadow:0 0 calc(var(--s)*.12) #f2c31866}
+/* ——— Egg varieties (occasional, mixed in at random) ——— */
+.cap.sage{--body:#b3bcab;--body-lo:#8a9581;--inner:#9da896}
+.cap.stone{--body:#d2cec2;--body-lo:#aca799;--inner:#bdb8aa}
+.cap.ink{--body:#555a52;--body-lo:#393d36;--inner:#4a4f47}
+.cap.ink .lip{border-bottom-color:#ffffff59}
+/* tinted dome: the top half is sage acrylic instead of clear */
+.cap.tint{background:radial-gradient(circle at 34% 26%,#f4f7f2f0,#c9d2c2aa 40%,#9fac98bb 100%)}
+/* two-tone: sage cup with a warm band at the seam */
+.cap.dots .out{background:radial-gradient(circle,#4f564a 0 16%,#0000 20%) 0 0/calc(var(--s)*.12) calc(var(--s)*.12),radial-gradient(circle at 36% 34%,#fbf9f3,var(--body) 42%,var(--body-lo) 86%)}
+.cap.stripe .out{background:repeating-linear-gradient(90deg,#0000 0 calc(var(--s)*.06),#8e9a8666 calc(var(--s)*.06) calc(var(--s)*.09)),radial-gradient(circle at 36% 34%,#fbf9f3,var(--body) 42%,var(--body-lo) 86%)}
+.cap.mark .out:after{content:'Fred.';position:absolute;left:0;right:0;bottom:22%;text-align:center;font:600 calc(var(--s)*.15) var(--font-wordmark);letter-spacing:-.04em;color:#4f564a}
+.cap.clear .gem.star{border-radius:1px;clip-path:polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%);transform:none;background:linear-gradient(135deg,#f6d77e,#e0a93c 55%,#b9812a)}
+/* ——— Special eggs ——— */
+/* S1 satin aluminium: brushed metal cup, engraved wordmark */
+.cap.metal{--body:#e2e0da;--body-lo:#a9a69e;--inner:#b9b6ae}
+.cap.metal .out{background:repeating-conic-gradient(from 10deg at 50% 50%,#ffffff14 0 1deg,#0000 1deg 2deg),linear-gradient(90deg,#9d9a92,#d3d1ca 20%,#f3f2ee 42%,#dcdad3 58%,#b1aea6 80%,#8f8c85)}
+.cap.metal .out:after{content:'Fred.';position:absolute;left:0;right:0;bottom:21%;text-align:center;font:600 calc(var(--s)*.15) var(--font-wordmark);letter-spacing:-.04em;color:#8a877f;text-shadow:0 .5px 0 #fff}
+/* S2 amber lamp: the whole egg is warm translucent amber and glows softly, like the Life List lamps */
+.cap.glow{background:radial-gradient(circle at 40% 36%,#fff4cf,#f6cf72 40%,#e2a43c 78%,#b97d2a);box-shadow:0 0 calc(var(--s)*.25) calc(var(--s)*.06) #f2b84a66,0 0 calc(var(--s)*.6) calc(var(--s)*.1) #f2c31833,inset 0 0 0 .6px #b97d2a66;animation:glow 2.6s ease-in-out infinite}
+.cap.glow .out,.cap.glow .in{opacity:0}.cap.glow .lip{border-bottom-color:#fff3d0cc}
+@keyframes glow{50%{box-shadow:0 0 calc(var(--s)*.34) calc(var(--s)*.09) #f2b84a80,0 0 calc(var(--s)*.8) calc(var(--s)*.14) #f2c3183d,inset 0 0 0 .6px #b97d2a66}}
+/* S3 the machine inside: a clear egg with a tiny gashapon machine in it */
+.cap.mini .out{background:radial-gradient(circle at 36% 34%,#ffffff99,#e9ece6aa 50%,#c9cfc4cc);opacity:.7}
+.cap.mini .in{opacity:0}
+.cap.mini .toy{position:absolute;left:50%;top:52%;translate:-50% -50%}
+/* Home-size context: the rail's neighbours, faded like on the home page */
+.ghost{position:absolute;opacity:.35;filter:saturate(.6)}
+/* ——— S1 + light: three places the light can come from ——— */
+@keyframes breathe{0%,100%{opacity:.55}50%{opacity:1}}
+/* a · the seam glows: warm light leaks out of the gap between dome and cup */
+.cap.metal.seam .lip{border-bottom:calc(var(--s)*.03) solid #ffd98a;filter:drop-shadow(0 0 calc(var(--s)*.03) #ffc85a) drop-shadow(0 0 calc(var(--s)*.08) #f2b84a);animation:breathe 2.8s ease-in-out infinite}
+/* b · the engraving is lit from inside */
+.cap.metal.lit .out:after{color:#ffe3a3;text-shadow:0 0 calc(var(--s)*.02) #fff3d6,0 0 calc(var(--s)*.06) #f2b84a,0 0 calc(var(--s)*.12) #f2b84acc;animation:breathe 2.8s ease-in-out infinite}
+/* c · a light inside: the clear dome is filled with a soft amber glow over the slip */
+.cap.metal.core .in{background:radial-gradient(ellipse at 50% 30%,#fff0c4,#f2b84a 60%,#c9892f)}
+.cap.metal.core:before{content:'';position:absolute;left:18%;right:18%;top:12%;height:42%;border-radius:50%;background:radial-gradient(closest-side,#ffe7a8cc,#f2b84a55 60%,#f2b84a00);filter:blur(calc(var(--s)*.02));animation:breathe 2.8s ease-in-out infinite;z-index:1}
+.cap.metal.core .in:before{background:linear-gradient(#fffaf0,#f7e6bf)}
+</style>
+<body>
+<div class="row" id="s1"></div>
+<div class="row" id="pile"></div>
+<div class="row" id="home" style="display:none"></div><div class="cell" id="b1" style="display:none"></div><div class="cell" id="b2" style="display:none"></div>
+<script>
+const ZOD = [...'♈♉♊♋♌♍♎♏♐♑♒♓'].map(s => s + '︎');
+const VARIETY = ['sage', 'stone', 'ink', 'tint', 'clear', 'mark', 'dots', 'stripe'];
+let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const capHTML = (x, y, s, r, kind = '') => `<i class="cap ${kind}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;--s:${s}px;--r:${r}deg"><b class="in"></b><b class="out"></b><b class="lip"></b>${kind.startsWith('clear') ? `<b class="gem${kind.includes('star') ? ' star' : ''}"></b>` : ''}${kind === 'mini' ? `<b class="toy" style="width:${s * .52}px;height:${s * .76}px">${machine({ u: s * .52 / 300, toy: true })}</b>` : ''}</i>`;
+// Three layers: back capsules smaller and higher, front ones larger and lower — the pile has depth even seen straight on.
+function layers(width, floor, egg) {
+  // Each layer is packed in rows up to a mound; the back layer is piled highest, the front one lowest.
+  const L = [{ s: 36, h: 150 }, { s: 42, h: 118 }, { s: 48, h: 78 }];
+  let count = 0;
+  return L.map((l, li) => {
+    let html = '';
+    for (let row = 0; ; row++) {
+      const y = floor - l.s / 2 - row * l.s * .78;
+      let any = false;
+      for (let col = 0; ; col++) {
+        const x = 10 + l.s / 2 + col * l.s * .92 + (row % 2) * l.s * .46 + (rnd() - .5) * 6;
+        if (x > width - 10 - l.s / 2) break;
+        const mound = l.h * (1 - Math.pow(Math.abs(x - width / 2) / (width / 2), 2) * .55);
+        if (floor - y > mound) continue;
+        any = true;
+        const k = count++; const kind = k === egg ? 'glow' : (li === 2 && row === 1 && col === 3) ? 'SPECIAL' : rnd() < .13 ? VARIETY[Math.floor(rnd() * VARIETY.length)] : '';
+        html += capHTML(x, y + (rnd() - .5) * 5, l.s, Math.round((rnd() - .5) * 60), kind);
+      }
+      if (!any) break;
+    }
+    return `<div class="layer ${['back', 'mid', 'front'][li]}">${html}</div>${li < 2 ? '<div class="fog"></div>' : ''}`;
+  }).join('');
+}
+function machine({ hood = false, u = 1, egg = 3, mode = 0, toy = false } = {}) {
+  const W = 276, floor = hood ? 250 : 218;
+  const zod = ZOD.map((g, i) => { const a = i / 12 * 2 * Math.PI; return `<i style="left:calc(50% + ${Math.sin(a) * 16.5}*var(--u));top:calc(50% + ${-Math.cos(a) * 16.5}*var(--u))">${g}</i>`; }).join('');
+  return `<div class="gm${hood ? ' hood' : ''}" style="--u:${u}px;--mode:${mode}">
+<div class="shadow"></div><div class="foot" style="left:calc(34*var(--u))"></div><div class="foot" style="right:calc(34*var(--u))"></div>
+<div class="chamber"><div class="wall"></div><div class="table"></div><div style="position:absolute;inset:0;transform:scale(${u});transform-origin:0 0;width:${W}px;height:${hood ? 270 : 234}px">${toy ? '' : layers(W, floor, egg)}</div><div class="front"></div><div class="side l"></div><div class="side r"></div></div>
+<div class="lid"></div>
+<div class="base"></div>
+<div class="zod" style="z-index:4">${zod}<div class="k" style="rotate:-60deg"></div></div>
+<div class="crank" style="z-index:4"><div class="face"></div><div class="bar"><i class="grip"></i></div><div class="hub"></div></div>
+<div class="chute" style="z-index:4"><div class="flap"></div></div>
+<div class="thumb"></div>
+<svg class="mark" viewBox="0 0 10 10" style="top:calc(290*var(--u))"><path d="M3 1.5h4v7H3zM3 4h4"/></svg>
+<svg class="mark" viewBox="0 0 10 10" style="top:calc(322*var(--u))"><rect x="1.5" y="1.5" width="7" height="7" rx="1.5"/><circle cx="3.7" cy="3.7" r=".5" fill="#8a8e82"/><circle cx="6.3" cy="6.3" r=".5" fill="#8a8e82"/></svg>
+<span class="word">Fred.</span>
+</div>`;
+}
+const opts = [['metal seam', 'S1 · a · 中缝透光', '铝杯和透明顶之间那一圈缝里透出暖光，像蛋里有东西在发亮。最含蓄，也最像「里面装着特别的东西」。'], ['metal lit', 'S1 · b · 刻字发光', '刻着的「Fred.」从里面被照亮，像背光的铭牌。光集中在字上，识别度最高。'], ['metal core', 'S1 · c · 蛋里一盏灯', '透明的上半里有一团柔和的琥珀光，照亮了折起来的纸条。从仓外看，是一颗「亮着的」蛋。']];
+document.getElementById('s1').innerHTML = `<span class="tag">v6 · 特殊彩蛋 S1 + 光（三选一，光会慢慢呼吸）</span>` + opts.map(([k, n, d], i) => { const x = 260 + i * 460; return `<div style="position:absolute;left:${x}px;top:330px">${capHTML(0, 0, 220, -10, k)}</div><div style="position:absolute;left:${x - 160}px;top:470px;width:320px;text-align:center;font:500 12px var(--font-mono);letter-spacing:.28em;color:#5d6258">${n}</div><div style="position:absolute;left:${x - 160}px;top:500px;width:320px;text-align:center;font:12.5px/1.85 var(--font-ui);color:#7c8076">${d}</div>`; }).join('');
+// how each one reads at real size, in the pile
+document.getElementById('pile').innerHTML = `<span class="tag">v6 · 放在仓里的样子（实际大小）</span>` + opts.map(([k, n], i) => { seed = 3; const html = machine({ u: .9, egg: -1 }).replace('cap SPECIAL', `cap ${k}`); return `<div style="position:absolute;left:${130 + i * 440}px;top:150px">${html}</div><div style="position:absolute;left:${130 + i * 440}px;top:590px;width:270px;text-align:center;font:500 11px var(--font-mono);letter-spacing:.24em;color:#6b7065">${n}</div>`; }).join('');
+</script>
+</body>

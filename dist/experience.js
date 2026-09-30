@@ -1,8 +1,8 @@
 import { ticketContact, discContact } from './contact.js';
-import { createPanel } from './modules/bucketlist/panel-home.js?v=40';
-import { createTypewriter } from './modules/stories/typewriter-home.js?v=40';
-import { createWalkman } from './modules/music/walkman-home.js?v=40';
-import { play as sound } from './sound.js?v=40';
+import { createPanel } from './modules/bucketlist/panel-home.js?v=41';
+import { createTypewriter } from './modules/stories/typewriter-home.js?v=41';
+import { createGacha } from './modules/gacha/machine-home.js?v=41';
+import { play as sound } from './sound.js?v=41';
 
 export function createInteraction(gallery, enter) {
   const shell=document.querySelector('.gallery-shell'), hint=shell.querySelector('.interaction-hint');
@@ -40,7 +40,7 @@ export function createInteraction(gallery, enter) {
     if(item?.id==='cinema'&&(inserted||busy||drive.dataset.state!=='ready')){reset();const display=drive.querySelector('.drive-display');display.textContent='EJECT';setTimeout(()=>{if(drive.dataset.state==='ready')display.textContent='NO DISC';},700);}
     if(!reduced.matches)drive.querySelector('.drive-light').animate([{opacity:1},{opacity:.2},{opacity:1},{opacity:.2},{opacity:1}],{duration:500});
   });
-  const prompts={travel:'将机票下缘插入槽口，再从左向右刷过。Enter 可完成刷卡。',cinema:'按住光盘可推进或抽回；插入后松手读取。',stories:'按下打字机的红色回车键，纸会卷出来',music:'按下随身听的红色 PLAY 键，磁带转起来',bucketlist:'把人生清单面板的拨杆往上拨到 ON，面板通电后进入。回车可直接开机。'};
+  const prompts={travel:'将机票下缘插入槽口，再从左向右刷过。Enter 可完成刷卡。',cinema:'按住光盘可推进或抽回；插入后松手读取。',stories:'按下打字机的红色回车键，纸会卷出来',gacha:'抓住扭蛋机，绕着扭把画一圈，扭出一颗蛋。回车可直接扭。',bucketlist:'把人生清单面板的拨杆往上拨到 ON，面板通电后进入。回车可直接开机。'};
   function status(value) {
     // Each reader has its voice: the gate beeps, the drive takes the disc and spins up.
     if(receiver.dataset.state!==value){const drive=receiver.dataset.module==='cinema';sound(value==='reading'?(drive?'drive':'reading'):value==='success'?(drive?'tick':'ok'):value==='error'?'error':'');}
@@ -65,8 +65,8 @@ export function createInteraction(gallery, enter) {
     reset();item=next;source=gallery.currentElement.firstElementChild;shell.dataset.object=item.id;
     receiver=receivers.get(item.id)||document.createElement('div');status('ready');drawReceivers();
     hint.textContent=prompts[item.id];
-    // The Life List panel, the typewriter and the walkman share one controller shape: hold / release / auto / reset.
-    const controllers={bucketlist:['.panel',createPanel],stories:['.tw',createTypewriter],music:['.wm',createWalkman]},control=controllers[item.id];
+    // The Life List panel, the typewriter and the gacha machine share one controller shape: hold / release / auto / reset.
+    const controllers={bucketlist:['.panel',createPanel],stories:['.tw',createTypewriter],gacha:['.gc',createGacha]},control=controllers[item.id];
     panel=control&&source.querySelector(control[0])?control[1](source,{reduced:()=>reduced.matches}):null;
   }
   function geometry(px=x,py=y){
@@ -108,7 +108,7 @@ export function createInteraction(gallery, enter) {
   }
   async function activate(next=item){
     if(busy)return;setItem(next);
-    if(item.id==='bucketlist'||item.id==='stories'||item.id==='music'){
+    if(item.id==='bucketlist'||item.id==='stories'||item.id==='gacha'){
       // The panel powers up (lever thrown for you) / the typewriter's RETURN is pressed for you, then the page opens.
       if(!panel||panel.on){enter(item);return;}
       busy=true;const token=++sequence;const ok=await panel.auto();if(token!==sequence)return;busy=false;if(ok)enter(item);return;
@@ -128,7 +128,7 @@ export function createInteraction(gallery, enter) {
   }
   function move(e){
     if(!drag||drag.id!==e.pointerId)return;e.stopImmediatePropagation();
-    if(drag.lever){panel?.hold(e.clientY-drag.py);return;}
+    if(drag.lever){panel?.hold(e.clientY-drag.py,e);return;}
     let px=drag.ox+e.clientX-drag.px,py=drag.oy+e.clientY-drag.py;
     drag.moved ||= Math.hypot(e.clientX-drag.px,e.clientY-drag.py)>4;
     const g=geometry(px,py);
@@ -150,14 +150,14 @@ export function createInteraction(gallery, enter) {
   // mostly up/down (disc into the drive, ticket into the slot, lever, RETURN key) → the object is picked up.
   gallery.stage.addEventListener('pointerdown',e=>{
     pending=null;
-    if(!e.target.closest('.ticket-paper,.silver-disc,.panel,.tw,.wm')||!gallery.settled||e.button!==0||!['travel','cinema','bucketlist','stories','music'].includes(item?.id)||e.target.closest('.collection-slot')!==gallery.currentElement)return;
+    if(!e.target.closest('.ticket-paper,.silver-disc,.panel,.tw,.gc')||!gallery.settled||e.button!==0||!['travel','cinema','bucketlist','stories','gacha'].includes(item?.id)||e.target.closest('.collection-slot')!==gallery.currentElement)return;
     e.preventDefault();if(busy){e.stopImmediatePropagation();return;}
     pending={id:e.pointerId,x:e.clientX,y:e.clientY,mouse:e.pointerType==='mouse'};
     if(pending.mouse)e.stopImmediatePropagation();
   },true);
   function pickUp(e){
     gallery.freeze();clearTimeout(idleTimer);returning=false;
-    drag={id:e.pointerId,px:pending.x,py:pending.y,ox:x,oy:y,moved:true,lever:item.id==='bucketlist'||item.id==='stories'||item.id==='music'};pending=null;
+    drag={id:e.pointerId,px:pending.x,py:pending.y,ox:x,oy:y,moved:true,lever:item.id==='bucketlist'||item.id==='stories'||item.id==='gacha'};pending=null;
     gallery.stage.setPointerCapture(e.pointerId);shell.classList.add('is-handling');
   }
   gallery.stage.addEventListener('pointermove',e=>{
@@ -174,7 +174,7 @@ export function createInteraction(gallery, enter) {
     if(pending?.id===e.pointerId){
       pending=null;if(cancelled)return;
       e.stopImmediatePropagation();gallery.freeze();gallery.suppressUntil=performance.now()+450;
-      if(item.id==='cinema'||item.id==='bucketlist'||item.id==='stories'||item.id==='music')activate();
+      if(item.id==='cinema'||item.id==='bucketlist'||item.id==='stories'||item.id==='gacha')activate();
       return;
     }
     if(drag?.lever&&drag.id===e.pointerId){
