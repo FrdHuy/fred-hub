@@ -1,12 +1,12 @@
-import data from './data.js?v=39';
-import { TYPES, dotDate, sortNotes, years } from './notes.js?v=39';
-import { unseal } from './seal.js?v=39';
-import { typewriterMarkup } from './typewriter.js?v=39';
-import { strike as strikeKey, setCarriage, carriageReturn, feed } from './carriage.js?v=39';
-import travelData from '../travel/data.js?v=39';
-import { parseTravel, localNow, flight } from '../travel/trips.js?v=39';
+import data from './data.js?v=40';
+import { TYPES, dotDate, sortNotes, years } from './notes.js?v=40';
+import { unseal } from './seal.js?v=40';
+import { typewriterMarkup } from './typewriter.js?v=40';
+import { strike as strikeKey, setCarriage, carriageReturn, feed } from './carriage.js?v=40';
+import travelData from '../travel/data.js?v=40';
+import { parseTravel, localNow, flight } from '../travel/trips.js?v=40';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=39';
+import { play as sound } from '../../sound.js?v=40';
 
 const esc = text => String(text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const pad3 = n => String(n).padStart(3, '0');

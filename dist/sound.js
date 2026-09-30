@@ -42,7 +42,11 @@ const VOICES = {
   ret() { for (let i = 0; i < 12; i++) click(1400 - i * 45, .01, .05, i * .026); click(380, .06, .28, .33); tone(78, .1, .16, { at: .33 }); }, // carriage return: ratchet, then the stop
   bell() { tone(2637, .9, .07); tone(3951, .5, .018); tone(5274, .35, .012); },                            // the margin bell
   feed() { for (let i = 0; i < 9; i++) click(900 - i * 40, .014, .08, i * .055); tone(70, .5, .025, { type: 'triangle' }); }, // platen ratchet
-  paper() {                                                          // a sheet lifted off the desk: a soft rising swish
+  play() { click(700, .04, .2); tone(110, .08, .1, { at: .01 }); tone(58, .6, .03, { at: .06, type: 'sawtooth', to: 64 }); }, // PLAY latches, the capstan motor starts
+  clack() { click(1500, .02, .14); click(520, .05, .2, .03); tone(140, .05, .06, { at: .03 }); },  // the cassette seated, the door shut
+  wind() { for (let i = 0; i < 16; i++) click(2600 + i * 70, .012, .035, i * .03); tone(90, .5, .02, { type: 'sawtooth', to: 240 }); }, // fast wind
+  halt() { click(420, .06, .22); tone(70, .12, .1); },               // the key springs up at the end of the side
+  paper() {                                                        // a sheet lifted off the desk: a soft rising swish
     const t = ctx.currentTime, source = ctx.createBufferSource(), filter = ctx.createBiquadFilter(), amp = ctx.createGain();
     source.buffer = noise; filter.type = 'bandpass'; filter.Q.value = .7;
     filter.frequency.setValueAtTime(1400, t); filter.frequency.exponentialRampToValueAtTime(4200, t + .28);

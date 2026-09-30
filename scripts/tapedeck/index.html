@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>录音台 · Fred’s Hub</title>
+<style>
+:root{--paper:#f8f7f4;--card:#fffdf8;--ink:#2e342d;--soft:#6b6e66;--faint:#9a9d92;--line:#e4e1d6;--accent:#b34934;--sage:#8e9a86;--sand:#b39f7c;--stone:#8a8577;--inkband:#4a4f47;--mono:ui-monospace,"SF Mono",Menlo,monospace;--ui:"PingFang SC","Helvetica Neue",sans-serif;--lit:"Didot","Songti SC",serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 var(--ui);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+header{display:flex;align-items:baseline;gap:16px;padding:22px 28px 10px}
+h1{margin:0;font:600 22px/1 "Helvetica Neue",sans-serif;letter-spacing:-.04em}h1 i{color:var(--accent);font-style:normal}
+header small{font:500 10px var(--mono);letter-spacing:.3em;color:var(--faint)}
+.app{display:grid;grid-template-columns:220px minmax(0,1fr) minmax(300px,380px);gap:26px;padding:14px 28px 120px;align-items:start}
+.label{font:500 10px var(--mono);letter-spacing:.24em;color:var(--faint);margin:0 0 10px}
+/* Tapes */
+.tapes{display:grid;gap:6px}
+.tape{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:8px;text-align:left;color:var(--soft)}
+.tape i{width:4px;height:22px;border-radius:2px;flex:none}
+.tape.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #3d3f2a14}
+.tape small{margin-left:auto;font:500 10px var(--mono);color:var(--faint)}
+.new{margin-top:10px;padding:9px 12px;border:1px dashed #cfcbbd;border-radius:8px;width:100%;color:var(--soft);font-size:13px}
+/* Editor */
+.editor{background:var(--card);border-radius:12px;padding:22px 24px;box-shadow:0 1px 3px #3d3f2a14,0 12px 30px #3d3f2a0d}
+.head{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.head input.title{flex:1;min-width:160px;border:0;background:none;font:400 26px var(--lit);letter-spacing:.04em;outline:none;padding:4px 0}
+.head input.note{width:100%;border:0;border-bottom:1px solid transparent;background:none;font-size:12px;color:var(--soft);outline:none;padding:4px 0}
+.head input.note:focus{border-color:var(--line)}
+.colors{display:flex;gap:6px}.colors button{width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1px #0002}
+.colors button.on{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--ink)}
+.drop-tape{font-size:12px;color:var(--faint)}.drop-tape:hover{color:var(--accent)}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:18px}
+.side h3{display:flex;justify-content:space-between;margin:0 0 8px;font:600 11px var(--mono);letter-spacing:.24em}
+.side h3 small{font-weight:500;color:var(--faint)}
+.side.target{outline:2px dashed #cfcbbd;outline-offset:6px;border-radius:6px}
+ol{list-style:none;margin:0;padding:0;min-height:60px}
+.row{display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:8px;padding:8px 6px;border-bottom:1px solid var(--line);border-radius:6px}
+.row.drag{background:#f0ede3}
+.row .n{font:500 10px var(--mono);color:var(--faint)}
+.row b{display:block;font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row small{display:block;font:500 10px var(--mono);letter-spacing:.08em;color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row small em{font-style:normal;color:#5d7a50}
+.tools{display:flex;gap:2px}
+.tools button{width:24px;height:24px;border-radius:5px;color:var(--faint);font-size:12px}
+.tools button:hover{background:#efece2;color:var(--ink)}
+.empty-side{padding:18px 6px;font-size:12px;color:var(--faint)}
+.hint{margin-top:16px;font-size:12px;color:var(--faint)}
+/* Search */
+.search{position:sticky;top:14px}
+.search form{display:flex;gap:6px}
+.search input{flex:1;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);outline:none}
+.search select{padding:0 8px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.results{margin-top:12px;display:grid;gap:4px;max-height:calc(100vh - 200px);overflow:auto}
+.hit{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px;border-radius:8px}
+.hit:hover{background:var(--card)}
+.hit img{width:44px;height:44px;border-radius:3px;object-fit:cover;background:#e9e6dc}
+.hit b{display:block;font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hit small{display:block;font-size:11px;color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hit .add{display:flex;gap:4px}
+.hit .add button{padding:4px 8px;border:1px solid var(--line);border-radius:6px;font:600 11px var(--mono);background:var(--card)}
+.hit .add button:hover{border-color:var(--ink)}
+.msg{padding:30px 0;text-align:center;color:var(--faint);font-size:12px}
+footer{position:fixed;left:0;right:0;bottom:0;display:flex;align-items:center;gap:20px;padding:16px 28px;background:#f8f7f4f0;border-top:1px solid var(--line);backdrop-filter:blur(8px)}
+footer .status{font:500 11px var(--mono);letter-spacing:.14em;color:var(--soft)}
+footer .save{margin-left:auto;padding:11px 26px;border-radius:8px;background:var(--ink);color:#f8f7f4;font-weight:500}
+footer .save:disabled{opacity:.35;cursor:default}
+@media (max-width:980px){.app{grid-template-columns:1fr}.search{position:static}.sides{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header><h1>录音台<i>.</i></h1><small>MIXTAPE RECORDER · 只在这台电脑上运行</small></header>
+<div class="app">
+  <nav><p class="label">磁带</p><div class="tapes" id="tapes"></div><button class="new" id="new" type="button">＋ 新磁带</button></nav>
+  <section class="editor" id="editor"></section>
+  <aside class="search"><p class="label">找歌</p>
+    <form id="find"><input id="q" placeholder="歌名、歌手…… 回车搜索" autocomplete="off"><select id="country" title="在哪个地区的 Apple Music 里找"><option value="us">美国</option><option value="tw">台湾</option><option value="hk">香港</option><option value="jp">日本</option><option value="gb">英国</option></select></form>
+    <div class="results" id="results"><p class="msg">搜到的歌点「A」或「B」就放进当前磁带的那一面。<br>中文歌在「台湾」或「香港」里更容易找到。</p></div>
+  </aside>
+</div>
+<footer><span class="status" id="status"></span><button class="save" id="save" type="button" disabled>保存到网站</button></footer>
+<script>
+const COLORS = { sage: '#8e9a86', sand: '#b39f7c', stone: '#8a8577', ink: '#4a4f47' };
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const clock = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+let tapes = [], current = 0, dirty = false, player = new Audio(), playing = null;
+
+const mark = (on = true) => { dirty = on; $('save').disabled = !on; $('status').textContent = on ? '有改动，还没保存' : ''; };
+const tape = () => tapes[current];
+const slug = t => t.normalize('NFKD').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase().slice(0, 30) || 'tape';
+function newId(title) { const taken = new Set(tapes.map(t => t.id)); let base = slug(title), id = base, n = 2; while (taken.has(id)) id = `${base}-${n++}`; return id; }
+
+function drawTapes() {
+  $('tapes').innerHTML = tapes.map((t, i) => `<button class="tape${i === current ? ' on' : ''}" data-i="${i}" type="button"><i style="background:${COLORS[t.color] || COLORS.sage}"></i>${esc(t.title)}<small>${t.a.length + t.b.length}</small></button>`).join('');
+}
+function row(track, side, i) {
+  const full = track.audio ? `<em>整首 · ${esc(track.audio)}</em>` : '试听 30 秒';
+  return `<li class="row" data-side="${side}" data-i="${i}"><span class="n">${String(i + 1).padStart(2, '0')}</span><span><b>${esc(track.title)}</b><small>${esc(track.artist)} · ${full}</small></span>
+<span class="tools"><button type="button" data-act="play" title="试听">${playing === track ? '■' : '▶'}</button><button type="button" data-act="up" title="上移">↑</button><button type="button" data-act="down" title="下移">↓</button><button type="button" data-act="move" title="移到另一面">⇄</button>${track.audio ? '<button type="button" data-act="unfile" title="不用整首，改回试听">♪</button>' : ''}<button type="button" data-act="remove" title="拿掉">✕</button></span></li>`;
+}
+function drawEditor() {
+  const t = tape();
+  if (!t) { $('editor').innerHTML = '<p class="msg">还没有磁带，点左边「＋ 新磁带」。</p>'; return; }
+  const len = side => clock(t[side].reduce((s, x) => s + (x.audio ? x.seconds || 240 : 30), 0));
+  $('editor').innerHTML = `<div class="head"><input class="title" id="title" value="${esc(t.title)}" aria-label="磁带名">
+<span class="colors">${Object.entries(COLORS).map(([k, c]) => `<button type="button" data-color="${k}" class="${t.color === k ? 'on' : ''}" style="background:${c}" title="${k}"></button>`).join('')}</span>
+<button class="drop-tape" id="drop" type="button">删除这盒</button><input class="note" id="note" value="${esc(t.note || '')}" placeholder="一句话（可以不写）" aria-label="一句话"></div>
+<div class="sides">${['a', 'b'].map(s => `<div class="side" data-side="${s}"><h3>${s.toUpperCase()} 面 <small>${t[s].length} 首 · ${len(s)}</small></h3><ol>${t[s].length ? t[s].map((x, i) => row(x, s, i)).join('') : '<li class="empty-side">从右边搜歌放进来</li>'}</ol></div>`).join('')}</div>
+<p class="hint">网站上默认放 30 秒试听；想放整首，把你自己的 mp3 / m4a 拖到那一行上。</p>`;
+}
+function draw() { drawTapes(); drawEditor(); }
+
+async function load() { tapes = await (await fetch('/api/tapes')).json(); for (const t of tapes) { t.a ??= []; t.b ??= []; } draw(); }
+
+$('tapes').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) { current = +b.dataset.i; draw(); } });
+$('new').addEventListener('click', () => { const title = prompt('这盒磁带叫什么？', '新磁带'); if (!title) return; tapes.push({ id: newId(title), title, color: 'sage', a: [], b: [] }); current = tapes.length - 1; mark(); draw(); });
+$('editor').addEventListener('input', e => {
+  const t = tape(); if (e.target.id === 'title') { t.title = e.target.value; drawTapes(); } if (e.target.id === 'note') t.note = e.target.value; mark();
+});
+$('editor').addEventListener('click', e => {
+  const t = tape(); if (!t) return;
+  const color = e.target.closest('[data-color]'); if (color) { t.color = color.dataset.color; mark(); draw(); return; }
+  if (e.target.id === 'drop') { if (confirm(`删除「${t.title}」？（保存后才生效）`)) { tapes.splice(current, 1); current = 0; mark(); draw(); } return; }
+  const act = e.target.closest('[data-act]'); if (!act) return;
+  const li = act.closest('.row'), side = li.dataset.side, i = +li.dataset.i, list = t[side], track = list[i];
+  const a = act.dataset.act;
+  if (a === 'play') { if (playing === track) { player.pause(); playing = null; } else { player.src = track.audio ? `/audio/${track.audio}` : track.preview; player.play(); playing = track; } drawEditor(); return; }
+  if (a === 'up' && i > 0) [list[i - 1], list[i]] = [list[i], list[i - 1]];
+  if (a === 'down' && i < list.length - 1) [list[i + 1], list[i]] = [list[i], list[i + 1]];
+  if (a === 'move') { list.splice(i, 1); t[side === 'a' ? 'b' : 'a'].push(track); }
+  if (a === 'remove') list.splice(i, 1);
+  if (a === 'unfile') delete track.audio;
+  mark(); draw();
+});
+player.addEventListener('ended', () => { playing = null; drawEditor(); });
+
+// Your own audio file for a whole song: drop it on the row.
+$('editor').addEventListener('dragover', e => { const li = e.target.closest('.row'); if (!li || !e.dataTransfer.types.includes('Files')) return; e.preventDefault(); document.querySelectorAll('.row.drag').forEach(r => r.classList.remove('drag')); li.classList.add('drag'); });
+$('editor').addEventListener('dragleave', e => e.target.closest?.('.row')?.classList.remove('drag'));
+$('editor').addEventListener('drop', async e => {
+  const li = e.target.closest('.row'), file = e.dataTransfer.files[0]; if (!li || !file) return; e.preventDefault(); li.classList.remove('drag');
+  if (!/audio|\.(mp3|m4a|aac|ogg|wav)$/i.test(file.type + file.name)) { alert('这不是音频文件'); return; }
+  $('status').textContent = `正在放入 ${file.name}……`;
+  const seconds = await new Promise(resolve => { const a = new Audio(URL.createObjectURL(file)); a.onloadedmetadata = () => resolve(Math.round(a.duration) || 0); a.onerror = () => resolve(0); });
+  const r = await fetch(`/api/audio?name=${encodeURIComponent(file.name)}`, { method: 'POST', body: file }), out = await r.json();
+  if (!r.ok) { alert(out.error); $('status').textContent = ''; return; }
+  const track = tape()[li.dataset.side][+li.dataset.i]; track.audio = out.audio; if (seconds) track.seconds = seconds; mark(); draw();
+});
+window.addEventListener('dragover', e => e.preventDefault()); window.addEventListener('drop', e => e.preventDefault());
+
+// Search Apple's catalogue.
+let found = [];
+$('find').addEventListener('submit', async e => {
+  e.preventDefault(); const q = $('q').value.trim(); if (!q) return;
+  $('results').innerHTML = '<p class="msg">搜索中……</p>';
+  try {
+    const r = await fetch(`/api/search?q=${encodeURIComponent(q)}&country=${$('country').value}`); found = await r.json();
+    if (!r.ok) throw new Error(found.error);
+    $('results').innerHTML = found.length ? found.map((t, i) => `<div class="hit"><img src="${esc(t.art)}" alt="" loading="lazy"><span><b>${esc(t.title)}</b><small>${esc(t.artist)} · ${esc(t.album)}</small></span><span class="add"><button type="button" data-add="a" data-i="${i}">A</button><button type="button" data-add="b" data-i="${i}">B</button></span></div>`).join('') : '<p class="msg">没找到。换个写法，或换个地区试试。</p>';
+  } catch (error) { $('results').innerHTML = `<p class="msg">连不上 Apple：${esc(error.message)}</p>`; }
+});
+$('results').addEventListener('click', e => {
+  const b = e.target.closest('[data-add]'); if (!b) return;
+  if (!tape()) { tapes.push({ id: newId('mixtape'), title: '新磁带', color: 'sage', a: [], b: [] }); current = tapes.length - 1; }
+  const { art, album, ...track } = found[+b.dataset.i]; tape()[b.dataset.add].push({ ...track });
+  b.textContent = '✓'; setTimeout(() => { b.textContent = b.dataset.add.toUpperCase(); }, 900); mark(); draw();
+});
+
+$('save').addEventListener('click', async () => {
+  $('save').disabled = true; $('status').textContent = '保存中……';
+  const r = await fetch('/api/save', { method: 'POST', body: JSON.stringify(tapes) }), out = await r.json();
+  if (!r.ok) { alert(out.error); mark(); return; }
+  mark(false); $('status').textContent = `✓ 已保存：${out.tapes} 盒磁带，${out.tracks} 首歌。刷新网站就能看到。`;
+  await load();
+});
+addEventListener('beforeunload', e => { if (dirty) e.preventDefault(); });
+load();
+</script>
+</body></html>

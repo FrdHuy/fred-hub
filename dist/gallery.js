@@ -1,4 +1,4 @@
-import { modules, categories, createCover } from './catalog.js?v=39';
+import { modules, categories, createCover } from './catalog.js?v=40';
 
 export class CollectionGallery {
   constructor({ stage, nav = document.createElement("nav"), dots = document.createElement("div"), previous = document.createElement("button"), next = document.createElement("button"), onSelect, onOpen }) {

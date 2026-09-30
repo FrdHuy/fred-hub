@@ -1,0 +1,123 @@
+/* 磁带: a sage portable cassette player, the tapes on the desk, the J-card. Matte plastics; satin metal only on the wheel.
+   Sizes are in u (1u = 1px when the walkman is 440px wide), so the same object works on the home rail, in the menu and in the room. */
+
+/* ——— The walkman ——— */
+.wm{--u:1px;--spin-l:0deg;--spin-r:0deg;--pack-l:.8;--pack-r:.2;--vu:-38deg;--play:0;--stop:0;--rew:0;--ff:0;position:relative;width:calc(440*var(--u));height:calc(292*var(--u));flex:none;filter:drop-shadow(0 calc(14*var(--u)) calc(16*var(--u)) #3d3f2a24) drop-shadow(0 calc(2*var(--u)) calc(2*var(--u)) #3d3f2a1f)}
+.wm *{box-sizing:border-box}
+/* Piano keys on the top edge: only their caps show above the body. Each sinks with its own --k. */
+.wm-keys{position:absolute;left:calc(30*var(--u));top:0;display:flex;gap:calc(5*var(--u))}
+.wm-key{--k:0;width:calc(56*var(--u));height:calc(26*var(--u));border-radius:calc(4*var(--u)) calc(4*var(--u)) 0 0;display:flex;justify-content:center;padding-top:calc(4*var(--u));background:linear-gradient(#4a4e47,#363a33 40%,#2b2e28);box-shadow:inset 0 1px 0 #ffffff26,inset 1px 0 0 #ffffff0d;transform:translateY(calc(var(--k) * 8 * var(--u)));transition:transform .08s}
+.wm-key svg{width:calc(11*var(--u));height:calc(8*var(--u));fill:#c9ccc0}
+.wm-key[data-k="stop"]{--k:var(--stop)}.wm-key[data-k="rew"]{--k:var(--rew)}.wm-key[data-k="ff"]{--k:var(--ff)}
+/* PLAY: the walkman's one brick-red. */
+.wm-key.play{--k:var(--play);background:linear-gradient(#c75e47,#b34934 45%,#9e3f2c);box-shadow:inset 0 1px 0 #ffffff40}
+.wm-key.play svg{fill:#f7e2da}
+.wm-body{position:absolute;left:0;right:0;top:calc(14*var(--u));bottom:0;border-radius:calc(20*var(--u));background:linear-gradient(172deg,#e8eae3,var(--shell-sage-hi) 28%,#d1d6ca 80%,#c6ccbe);box-shadow:inset 0 1.5px 0 #fff,inset 1px 0 0 #fffb,inset -1px 0 0 #b3baa9,inset 0 calc(-3*var(--u)) calc(4*var(--u)) #8f988433}
+/* The cassette door: a recessed frame with smoked glass. */
+.wm-door{position:absolute;left:calc(22*var(--u));top:calc(22*var(--u));width:calc(292*var(--u));height:calc(198*var(--u));border-radius:calc(11*var(--u));background:linear-gradient(#b9c0b1,#cdd3c6);box-shadow:inset 0 calc(1.5*var(--u)) calc(2*var(--u)) #6f786455,0 1px 0 #fffc;padding:calc(7*var(--u))}
+.wm-glass{position:relative;width:100%;height:100%;border-radius:calc(6*var(--u));background:#2d312b;overflow:hidden;padding:calc(12*var(--u)) calc(14*var(--u)) calc(6*var(--u))}
+.wm-glass:after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(160deg,#ffffff14,#fff0 38%),linear-gradient(#2629242e,#26292408);box-shadow:inset 0 0 0 1px #0006,inset 0 calc(2*var(--u)) calc(6*var(--u)) #0008;pointer-events:none}
+.wm-empty{position:absolute;inset:calc(40*var(--u)) calc(70*var(--u));border-radius:50%;background:radial-gradient(circle at 25% 50%,#434840 0 9%,#0000 10%),radial-gradient(circle at 75% 50%,#434840 0 9%,#0000 10%)}
+/* Right-hand column: VU meter, tape counter, the running light, a speaker grille. */
+.wm-side{position:absolute;left:calc(328*var(--u));top:calc(22*var(--u));width:calc(90*var(--u));height:calc(198*var(--u))}
+.wm-vu{position:relative;height:calc(60*var(--u));border-radius:calc(5*var(--u));background:linear-gradient(#f6f2e6,#ebe6d6);box-shadow:inset 0 0 0 1px #9aa18e66,inset 0 calc(2*var(--u)) calc(4*var(--u)) #6f786433;overflow:hidden}
+.wm-scale{position:absolute;inset:0;width:100%;height:100%;stroke:#4b5549;stroke-linecap:round}
+.wm-needle{position:absolute;left:50%;bottom:calc(-6*var(--u));width:1px;height:calc(53*var(--u));margin-left:-.5px;background:#2e342d;transform-origin:50% 100%;transform:rotate(var(--vu))}
+.wm-vu span{position:absolute;left:calc(7*var(--u));bottom:calc(6*var(--u));font:600 calc(6*var(--u)) var(--font-mono);letter-spacing:.3em;color:#8e978c}
+/* Tape counter: three white drums behind a dark slot (like the Life List year drums). */
+.wm-count{display:flex;gap:1px;width:calc(42*var(--u));margin:calc(14*var(--u)) 0 0;padding:calc(2*var(--u));border-radius:calc(3*var(--u));background:#2d312b;box-shadow:inset 0 1px 2px #000a,0 1px 0 #fff9}
+.wm-count i{flex:1;height:calc(14*var(--u));display:grid;place-items:center;font:600 calc(9*var(--u)) var(--font-mono);font-style:normal;color:#2e342d;background:linear-gradient(#cfcbbd,#faf8f1 35%,#faf8f1 65%,#cfcbbd)}
+.wm-led{position:absolute;right:calc(2*var(--u));top:calc(80*var(--u));width:calc(6*var(--u));height:calc(6*var(--u));border-radius:50%;background:#8f9885;box-shadow:inset 0 1px 1px #0004}
+.wm.is-running .wm-led{background:#c4e4a0;box-shadow:0 0 calc(6*var(--u)) calc(2*var(--u)) #aac78388}
+.wm-grille{position:absolute;left:0;right:0;top:calc(110*var(--u));bottom:calc(4*var(--u));background:radial-gradient(circle,#6f786488 0 calc(1.2*var(--u)),#0000 calc(1.5*var(--u))) 0 0/calc(7.5*var(--u)) calc(7.5*var(--u))}
+.wm-silk{position:absolute;bottom:calc(20*var(--u));font:500 calc(6.5*var(--u)) var(--font-mono);letter-spacing:.34em;color:#7c8574;white-space:nowrap}
+.wm-silk.l{left:calc(30*var(--u));bottom:calc(17*var(--u))}.wm-silk.l b{font:600 calc(13*var(--u)) var(--font-wordmark);letter-spacing:-.04em;color:#55604e}
+.wm-silk.r{right:calc(24*var(--u))}
+/* Volume wheel on the right edge: knurled satin aluminium, the only metal. */
+.wm-wheel{position:absolute;right:calc(-5*var(--u));top:calc(110*var(--u));width:calc(9*var(--u));height:calc(70*var(--u));border-radius:calc(3*var(--u));background:repeating-linear-gradient(#0000 0 calc(2*var(--u)),#5f665a55 calc(2*var(--u)) calc(3*var(--u))),linear-gradient(90deg,#b8bcb2,#e9eae5 40%,#c7cbc2 70%,#9ea396);box-shadow:inset 0 0 0 .5px #7e8576}
+
+/* ——— A cassette ——— */
+.cs{--shell:#d8dcd2;--shell-lo:#bcc2b3;--band:#8e9a86;position:relative;width:100%;height:100%;border-radius:4% / 6.4%;background:linear-gradient(170deg,color-mix(in srgb,var(--shell) 70%,#fff),var(--shell) 40%,var(--shell-lo));box-shadow:inset 0 1px 0 #fff9,inset 0 -1px 0 #0002}
+.cs[data-color="sand"]{--shell:#e6ddca;--shell-lo:#cfc4ad;--band:#b39f7c}
+.cs[data-color="stone"]{--shell:#d2cec2;--shell-lo:#b7b2a5;--band:#8a8577}
+.cs[data-color="ink"]{--shell:#4a4f47;--shell-lo:#353933;--band:#9aa18e}
+.cs-label{position:absolute;left:6%;right:6%;top:7%;height:62%;border-radius:2.5% / 4%;background:linear-gradient(#f7f3e8,#eee9db);box-shadow:0 0 0 .5px #0002;overflow:hidden}
+.cs-band{position:absolute;left:0;right:0;top:0;height:14%;background:var(--band)}
+.cs-label b{position:absolute;left:5%;right:16%;top:20%;font:400 calc(var(--cs-font,15) * var(--u)) / 1.3 var(--font-literary);letter-spacing:.06em;color:#2e342d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cs-label span{position:absolute;right:4%;top:19%;width:calc(var(--cs-font,15) * 1.25 * var(--u));aspect-ratio:1;border-radius:50%;border:1px solid #2e342d;display:grid;place-items:center;font:600 calc(var(--cs-font,15) * .66 * var(--u)) var(--font-mono);color:#2e342d}
+/* The tape window: the two packs of tape (their size follows the position on the side) and the sprocket hubs. */
+.cs-window{position:absolute;left:24%;right:24%;top:46%;height:19%;border-radius:40% / 50%;background:#1c1f1b;box-shadow:inset 0 0 0 1px #0006,0 0 0 1.5px #0000001a;overflow:hidden}
+.cs-pack{position:absolute;top:50%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#0000 38%,#3b2c24 39%,#2d211b 95%,#4a3a30 97%);transform:translate(-50%,-50%)}
+.cs-pack.l{left:17%;height:calc((.95 + var(--pack-l) * 1.9) * 100%)}.cs-pack.r{left:83%;height:calc((.95 + var(--pack-r) * 1.9) * 100%)}
+.cs-hub{position:absolute;top:50%;height:74%;aspect-ratio:1;border-radius:50%;translate:-50% -50%;background:radial-gradient(circle,#1c1f1b 0 30%,#0000 31%),repeating-conic-gradient(#f2efe6 0 22deg,#0000 22deg 60deg);-webkit-mask:radial-gradient(circle,#000 62%,#0000 64%);mask:radial-gradient(circle,#000 62%,#0000 64%)}
+.cs-hub.l{left:17%;rotate:var(--spin-l)}.cs-hub.r{left:83%;rotate:var(--spin-r)}
+.cs-screw{position:absolute;width:3.2%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 35%,#f4f4ef,#aab0a3);box-shadow:inset 0 0 0 .5px #7e8576}
+.cs-screw:after{content:'';position:absolute;left:20%;right:20%;top:46%;height:1px;background:#6b7263;rotate:35deg}
+.cs-screw.tl{left:2.2%;top:3%}.cs-screw.tr{right:2.2%;top:3%}.cs-screw.bl{left:2.2%;bottom:4%}.cs-screw.br{right:2.2%;bottom:4%}
+.cs-foot{position:absolute;left:22%;right:22%;bottom:0;height:22%;clip-path:polygon(7% 0,93% 0,100% 100%,0 100%);background:linear-gradient(color-mix(in srgb,var(--shell-lo) 85%,#000),var(--shell-lo));box-shadow:inset 0 1px 0 #fff4}
+.cs[data-color="ink"] .cs-label{background:linear-gradient(#efebdf,#e4dfd0)}
+
+/* ——— Home rail and menu: the object fills its slot, centred from its own middle ——— */
+.collectible--walkman{background:none!important;display:grid;place-items:center;container-type:size;overflow:visible;filter:none}
+.collectible--walkman .wm{--u:calc(min(100cqw / 440, 100cqh / 292) * 1.08);position:absolute;left:50%;top:50%;translate:-50% -50%}
+.module-thumbnail-image .collectible--walkman .wm{--u:min(100cqw / 440, 100cqh / 292)}
+.collectible--walkman .wm-glass .cs{--cs-font:15}
+
+/* ——— Inside: the desk ——— */
+[data-module="music"] .mx{--ink:#2e342d;--soft:#6b6e66;--faint:#8e978c;position:relative;max-width:1180px;margin:0 auto;padding:10px 0 80px;color:var(--ink);user-select:none}
+[data-module="music"] .mx-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+[data-module="music"] .mx-stage{display:grid;grid-template-columns:auto minmax(260px,340px);justify-content:center;align-items:center;gap:clamp(40px,6vw,90px);min-height:min(56vh,520px)}
+[data-module="music"] .mx-deck .wm{--u:min(1.42px,calc((100vw - 520px) / 440))}
+[data-module="music"] .wm-key{cursor:pointer}
+[data-module="music"] .wm-glass{cursor:pointer;perspective:600px}
+[data-module="music"] .wm-glass .cs{--cs-font:15}
+/* Turning a reel: the pencil. */
+[data-module="music"] .wm-glass .cs-window{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M3 25l3-8L20 3l5 5L11 22z' fill='%23e8d9a8' stroke='%232e342d' stroke-width='1.2'/%3E%3Cpath d='M3 25l3-8 5 5z' fill='%23f3e6cf' stroke='%232e342d' stroke-width='1.2'/%3E%3Cpath d='M20 3l5 5' stroke='%23b34934' stroke-width='3'/%3E%3C/svg%3E") 3 25,grab}
+[data-module="music"] .wm-glass.is-winding .cs-window{cursor:grabbing}
+/* A tape held over the walkman: the door frame lightens, ready to take it. */
+[data-module="music"] .wm.is-open .wm-door{box-shadow:inset 0 calc(1.5*var(--u)) calc(2*var(--u)) #6f786455,0 1px 0 #fffc,0 0 0 calc(3*var(--u)) #fff9}
+
+/* The J-card: the paper insert of the tape inside, with the tracks. */
+[data-module="music"] .mx-jcard{align-self:center;min-height:200px}
+[data-module="music"] .mx-idle{display:grid;place-items:center;height:200px;margin:0}
+[data-module="music"] .mx-idle svg{width:54px;fill:none;stroke:#b0b2aa;stroke-width:1.2}
+[data-module="music"] .mx-jhead{--band:#8e9a86;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid #3d3f2a1f}
+[data-module="music"] .mx-jhead[data-color="sand"]{--band:#b39f7c}[data-module="music"] .mx-jhead[data-color="stone"]{--band:#8a8577}[data-module="music"] .mx-jhead[data-color="ink"]{--band:#4a4f47}
+[data-module="music"] .mx-jhead i{width:4px;height:30px;border-radius:2px;background:var(--band)}
+[data-module="music"] .mx-jhead b{font:400 24px/1.3 var(--font-literary);letter-spacing:.06em;color:var(--ink)}
+[data-module="music"] .mx-side{display:flex;gap:4px;padding:0;min-height:0;cursor:pointer}
+[data-module="music"] .mx-side span{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:600 10px var(--font-mono);color:#b0b2aa;border:1px solid #0000;transition:color .2s,border-color .2s}
+[data-module="music"] .mx-side span.on{color:var(--ink);border-color:var(--ink)}
+[data-module="music"] .mx-tracks{list-style:none;margin:8px 0 0;padding:0}
+[data-module="music"] .mx-tracks li{display:flex;align-items:center;border-bottom:1px solid #3d3f2a0f}
+[data-module="music"] .mx-tracks button{flex:1;display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;padding:11px 0;min-height:0;text-align:left;cursor:pointer;color:var(--soft);transition:color .2s}
+[data-module="music"] .mx-tracks button:hover{color:var(--ink)}
+[data-module="music"] .mx-n,[data-module="music"] .mx-len{font:500 10px var(--font-mono);letter-spacing:.14em;color:var(--faint)}
+[data-module="music"] .mx-t{font:400 14px/1.45 var(--font-ui);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[data-module="music"] .mx-t small{display:block;font:500 9px/1.7 var(--font-mono);letter-spacing:.14em;color:var(--faint);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
+[data-module="music"] .mx-tracks li.is-now .mx-t{color:var(--ink)}
+[data-module="music"] .mx-tracks li.is-now .mx-n{color:var(--ink)}
+[data-module="music"] .mx-tracks li.is-now .mx-n:before{content:'';display:inline-block;width:5px;height:5px;margin-right:6px;border-radius:50%;background:#8ca27c;vertical-align:1px}
+[data-module="music"] .mx-tracks a{display:grid;place-items:center;width:30px;height:30px;margin-left:6px;color:#b0b2aa;transition:color .2s}
+[data-module="music"] .mx-tracks a:hover{color:var(--ink)}
+[data-module="music"] .mx-tracks a svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.3}
+[data-module="music"] .mx-foot{display:flex;justify-content:space-between;margin:14px 0 0;font:500 10px var(--font-mono);letter-spacing:.2em;color:var(--faint)}
+
+/* The tapes lying on the desk. */
+[data-module="music"] .mx-shelf{list-style:none;display:flex;justify-content:center;gap:clamp(18px,3vw,40px);margin:56px 0 0;padding:0}
+[data-module="music"] .mx-tape{--u:.62px;display:block;width:calc(264*var(--u));height:calc(168*var(--u));padding:0;min-height:0;border-radius:6px;cursor:grab;touch-action:none;filter:drop-shadow(0 8px 10px #3d3f2a26) drop-shadow(0 1px 1px #3d3f2a26);transition:filter .25s,opacity .3s,translate .25s}
+[data-module="music"] .mx-tape .cs{--cs-font:17;--pack-l:.55;--pack-r:.45}
+[data-module="music"] .mx-tape:hover{translate:0 -4px}
+[data-module="music"] .mx-tape.is-lifted{position:relative;z-index:30;cursor:grabbing;filter:drop-shadow(0 22px 22px #3d3f2a38);transition:none}
+/* The one in the walkman leaves an outline where it lay. */
+[data-module="music"] .mx-tape.is-out{opacity:.16;cursor:default;filter:none;translate:none}
+.mx-ghost{position:fixed;z-index:200;pointer-events:none;transform-origin:0 0;filter:drop-shadow(0 18px 20px #3d3f2a33)}
+
+@media (max-width:900px){
+  [data-module="music"] .mx-stage{grid-template-columns:1fr;justify-items:center;gap:28px;min-height:0}
+  [data-module="music"] .mx-deck .wm{--u:min(1.2px,calc((100vw - 48px) / 440))}
+  [data-module="music"] .mx-jcard{width:100%;max-width:440px;min-height:0}
+  [data-module="music"] .mx-shelf{justify-content:flex-start;overflow-x:auto;margin:34px -16px 0;padding:10px 16px 20px;scrollbar-width:none}
+  [data-module="music"] .mx-shelf li{flex:none}
+  [data-module="music"] .mx-tape{--u:.52px}
+}

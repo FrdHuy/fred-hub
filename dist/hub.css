@@ -43,9 +43,9 @@
 .detail-view[data-module=cinema]{padding:0;display:flex;flex-direction:column}
 .detail-view[data-module=cinema] .detail-toolbar{margin:0;padding:0 5%}
 /* Cinema, the Life List and the travel board keep only a hand-drawn arrow; the link text stays for screen readers. */
-:is(.detail-view[data-module=cinema],.detail-view[data-module=bucketlist],.detail-view[data-module=travel],.detail-view[data-module=stories]) .back-link{font-size:0;width:44px;justify-content:center;opacity:.8;transition:opacity .2s,transform .3s}
-:is(.detail-view[data-module=cinema],.detail-view[data-module=bucketlist],.detail-view[data-module=travel],.detail-view[data-module=stories]) .back-link:hover{opacity:1;transform:translateX(-3px)}
-:is(.detail-view[data-module=cinema],.detail-view[data-module=bucketlist],.detail-view[data-module=travel],.detail-view[data-module=stories]) .back-link:before{content:'';width:26px;height:16px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24.2 8.4c-6.6-.5-13.4-.3-20.4.1'/%3E%3Cpath d='M9.4 2.6C7.3 4.5 5.4 6.3 3.4 8.6c2 1.8 4 3.5 6.2 5.2'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24.2 8.4c-6.6-.5-13.4-.3-20.4.1'/%3E%3Cpath d='M9.4 2.6C7.3 4.5 5.4 6.3 3.4 8.6c2 1.8 4 3.5 6.2 5.2'/%3E%3C/svg%3E") center/contain no-repeat}
+:is(.detail-view[data-module=cinema],.detail-view[data-module=bucketlist],.detail-view[data-module=travel],.detail-view[data-module=stories],.detail-view[data-module=music]) .back-link{font-size:0;width:44px;justify-content:center;opacity:.8;transition:opacity .2s,transform .3s}
+:is(.detail-view[data-module=cinema],.detail-view[data-module=bucketlist],.detail-view[data-module=travel],.detail-view[data-module=stories],.detail-view[data-module=music]) .back-link:hover{opacity:1;transform:translateX(-3px)}
+:is(.detail-view[data-module=cinema],.detail-view[data-module=bucketlist],.detail-view[data-module=travel],.detail-view[data-module=stories],.detail-view[data-module=music]) .back-link:before{content:'';width:26px;height:16px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24.2 8.4c-6.6-.5-13.4-.3-20.4.1'/%3E%3Cpath d='M9.4 2.6C7.3 4.5 5.4 6.3 3.4 8.6c2 1.8 4 3.5 6.2 5.2'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24.2 8.4c-6.6-.5-13.4-.3-20.4.1'/%3E%3Cpath d='M9.4 2.6C7.3 4.5 5.4 6.3 3.4 8.6c2 1.8 4 3.5 6.2 5.2'/%3E%3C/svg%3E") center/contain no-repeat}
 /* On dark pages the keyboard focus ring is a faint gold hairline instead of the red outline. */
 
 /* Pointer and touch users never see focus rings; keyboard users still do (see main.js). */
@@ -64,7 +64,7 @@
 .ticket-route>span{color:var(--accent)}
 .silver-disc>span b{color:inherit;font-weight:inherit}
 /* Every inner page puts the back arrow in the same spot: on the header's 5% gutter, 15px below it (the stories diary follows once rebuilt). */
-@media(min-width:701px){.detail-view:is([data-module=bucketlist],[data-module=travel],[data-module=stories]){padding-left:5%;padding-right:5%}}
+@media(min-width:701px){.detail-view:is([data-module=bucketlist],[data-module=travel],[data-module=stories],[data-module=music]){padding-left:5%;padding-right:5%}}
 .detail-view[data-module=cinema]{padding-top:15px}
 @media(max-width:700px){.detail-view[data-module=cinema]{padding-top:5px}.detail-view[data-module=cinema] .detail-toolbar{padding:0 22px}}
 .room-veil{position:fixed;inset:0;z-index:140;pointer-events:none}.room-veil>i{position:absolute;inset:0}
