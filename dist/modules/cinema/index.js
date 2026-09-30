@@ -1,6 +1,6 @@
-import { parseFilms, filmMeta, starCells, viewFilms, seriesLabel, screening, report, byYear, overlap, TYPES } from './films.js?v=42';
-import { pose } from './flow.js?v=42';
-import { play as sound } from '../../sound.js?v=42';
+import { parseFilms, filmMeta, starCells, viewFilms, seriesLabel, screening, report, byYear, overlap, TYPES } from './films.js?v=43';
+import { pose } from './flow.js?v=43';
+import { play as sound } from '../../sound.js?v=43';
 
 const poster = name => new URL(`./posters/${name}`, import.meta.url).href;
 const pad = number => String(number).padStart(2, '0');

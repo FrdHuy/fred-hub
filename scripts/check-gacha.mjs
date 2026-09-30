@@ -1,6 +1,6 @@
 // Checks for 扭蛋机 (docs/design/gashapon.md): the pile, the capsule and machine markup, the crank's angle rules.
 import assert from 'node:assert/strict';
-import { pile, random, machineMarkup, eggMarkup, VARIETIES, ZODIAC } from '../dist/modules/gacha/machine.js';
+import { pile, random, machineMarkup, eggMarkup, STYLES, EASTER, pickKind, ZODIAC } from '../dist/modules/gacha/machine.js';
 import { unwrap, STEP, FULL } from '../dist/modules/gacha/machine-home.js';
 
 // The pile: reproducible from a seed, three layers, never more than one lamp egg, varieties only from the list.
@@ -11,10 +11,14 @@ for (let seed = 1; seed <= 300; seed++) {
   const eggs = layers.flat(), frost = eggs.filter(e => e.kind === 'frost').length;
   assert.ok(frost <= 1, 'at most one lamp egg in a pile'); lamps += frost;
   assert.ok(eggs.length > 40, 'the chamber is full');
-  for (const e of eggs) assert.ok(e.kind === '' || e.kind === 'frost' || VARIETIES.includes(e.kind));
+  for (const e of eggs) assert.ok(STYLES.includes(e.kind) || EASTER.includes(e.kind), e.kind);
+  assert.ok(eggs.filter(e => e.kind === 'pearl').length <= 1);
 }
 assert.ok(lamps > 30 && lamps < 120, `the lamp egg is seen now and then (${lamps}/300)`);
 assert.equal(ZODIAC.length, 12);
+{ const r = random(11), counts = {}; for (let i = 0; i < 20000; i++) { const k = pickKind(r); counts[k] = (counts[k] || 0) + 1; }
+  assert.ok(counts.frost > 300 && counts.frost < 700, 'the lamp egg ≈ 1/40 of turns'); assert.ok(counts.pearl > 450 && counts.pearl < 900, 'the pearl egg ≈ 1/30');
+  assert.ok(STYLES.every(s => counts[s] > 300), 'every ordinary style turns up'); }
 
 // Markup
 const html = machineMarkup({ seed: 3, mode: 1, sign: 4 });

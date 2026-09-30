@@ -66,6 +66,10 @@
 .gc-egg.mark .gc-out:after{content:'Fred.';position:absolute;left:0;right:0;bottom:22%;text-align:center;font:600 calc(var(--s)*.15) var(--font-wordmark);letter-spacing:-.04em;color:#4f564a}
 .gc-egg.dots .gc-out{background:radial-gradient(circle,#4f564a 0 16%,#0000 20%) 0 0/calc(var(--s)*.12) calc(var(--s)*.12),radial-gradient(circle at 36% 34%,#fbf9f3,var(--body) 42%,var(--body-lo) 86%)}
 .gc-egg.stripe .gc-out{background:repeating-linear-gradient(90deg,#0000 0 calc(var(--s)*.06),#8e9a8666 calc(var(--s)*.06) calc(var(--s)*.09)),radial-gradient(circle at 36% 34%,#fbf9f3,var(--body) 42%,var(--body-lo) 86%)}
+/* easter egg: pearl — warm white with a thin-film sheen */
+.gc-egg.pearl{background:radial-gradient(circle at 34% 26%,#fff,#f5f0f3aa 34%,#e6eef0aa 62%,#d9d3e0aa)}
+.gc-egg.pearl .gc-out:after{content:'';position:absolute;inset:0;background:conic-gradient(from 200deg,#f3d9e2,#d8e6ef,#e3efd6,#f6e8cc,#f3d9e2);opacity:.4}
+.gc-gem.star{border-radius:1px;clip-path:polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%);transform:none}
 /* the special egg: frosted glass with a warm lamp inside, breathing */
 .gc-egg.frost{background:radial-gradient(circle at 50% 50%,#fff2d4,#f7e6c6 28%,#efeae0 60%,#dcd7cc);box-shadow:0 0 calc(var(--s)*.18) calc(var(--s)*.02) #f6d79a55,inset 0 0 0 .6px #3d3f2a1f}
 .gc-egg.frost .gc-out{background:radial-gradient(circle at 50% 30%,#fbf3e2cc,#e9e3d6cc 70%);opacity:.75}.gc-egg.frost .gc-in{opacity:0}
@@ -90,7 +94,8 @@
 [data-module="gacha"] .gc-switch{cursor:pointer}
 [data-module="gacha"] .gcr-desk{position:relative;height:min(660px,calc(100svh - 240px));min-height:380px;border-radius:18px;background:linear-gradient(170deg,#f1eee6,#e9e5da);box-shadow:inset 0 1px 0 #fff,inset 0 -1px 0 #d9d4c6;overflow:hidden}
 [data-module="gacha"] .gcr-papers,[data-module="gacha"] .gcr-shells,[data-module="gacha"] .gcr-eggs{position:absolute;inset:0}
-[data-module="gacha"] .gcr-shells,[data-module="gacha"] .gcr-papers{pointer-events:none}
+[data-module="gacha"] .gcr-shells,[data-module="gacha"] .gcr-papers,[data-module="gacha"] .gcr-eggs{pointer-events:none}
+[data-module="gacha"] .gcr-egg{pointer-events:auto}
 [data-module="gacha"] .gcr-shells{z-index:40}
 [data-module="gacha"] .gcr-papers>*{pointer-events:auto}
 /* a capsule waiting on the desk; twisting turns it and opens the seam */
@@ -108,26 +113,51 @@
 /* papers lie on the desk, the newest on top; older ones settle back */
 [data-module="gacha"] .gcr-slip,[data-module="gacha"] .gcr-card,[data-module="gacha"] .gcr-folded{position:absolute;left:50%;top:44%;transform:translate(calc(-50% + var(--ox,0px)),calc(-50% + var(--oy,0px))) rotate(var(--tilt,0deg)) scale(var(--k,1));transition:filter .4s,box-shadow .4s}
 [data-module="gacha"] .is-under{filter:brightness(.97)}
-[data-module="gacha"] .gcr-slip{width:400px;height:500px;background:linear-gradient(#fcfaf4,#f4efe2);box-shadow:0 0 0 .5px #3d3f2a1f,0 2px 3px #3d3f2a14,0 24px 40px -10px #3d3f2a33}
-.gcr-slip:before,.gcr-slip:after{content:'';position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,#3d3f2a0d,#3d3f2a1f,#3d3f2a0d);box-shadow:0 1px 0 #ffffffb3;z-index:1}
-.gcr-slip:before{top:33.3%}.gcr-slip:after{top:66.6%}
+[data-module="gacha"] .gcr-papers{perspective:1800px}
+[data-module="gacha"] .gcr-slip{width:400px;height:500px;cursor:pointer;perspective:1800px}
+/* the slip turns over inside its own box, so where it lies on the desk never changes */
+.gcr-turn{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,.1,.2,1)}
+.gcr-slip.is-flipped .gcr-turn{transform:rotateY(180deg)}
+.gcr-face{position:absolute;inset:0;backface-visibility:hidden;background:linear-gradient(#fcfaf4,#f4efe2);box-shadow:0 0 0 .5px #3d3f2a1f,0 2px 3px #3d3f2a14,0 24px 40px -10px #3d3f2a33}
+.gcr-face.back{transform:rotateY(180deg);background:linear-gradient(#f9f6ee,#f1ecdf)}
+.gcr-face:before,.gcr-face:after{content:'';position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,#3d3f2a0d,#3d3f2a1f,#3d3f2a0d);box-shadow:0 1px 0 #ffffffb3;z-index:1}
+.gcr-face:before{top:33.3%}.gcr-face:after{top:66.6%}
 .gcr-slip-in{position:absolute;inset:0;padding:30px 24px 30px 20px;writing-mode:vertical-rl;font-family:var(--font-literary);color:#2c322b;text-align:start}
 .gcr-slip-in>*{margin:0 0 0 13px}
 .gcr-slip-in .head{font:400 11px/1.6 var(--font-literary);letter-spacing:.3em;color:#6b7263;margin-left:16px}
-.gcr-slip-in .rank{font-size:26px;line-height:1.1;letter-spacing:.24em;margin-left:20px}
+.gcr-slip-in .rank{font-size:30px;line-height:1.1;letter-spacing:.3em;margin-left:22px}
 .gcr-slip-in .rank small{display:block;margin-top:12px;font-size:15px;letter-spacing:.4em;color:#4b5549}
 .gcr-slip-in .poem{font-size:17px;line-height:1.85;letter-spacing:.34em;margin-left:16px}
 .gcr-slip-in .jie{font-size:12px;line-height:1.8;letter-spacing:.24em;color:#4b5549;padding-right:12px;border-right:1px solid #3d3f2a26}
 .gcr-slip-in .yi{font-size:12px;line-height:1.9;letter-spacing:.28em;color:#4b5549}
 .gcr-slip-in .yi b{display:inline-block;margin-bottom:6px;padding:3px 4px;border:1px solid #4b5549;font-weight:400}
 .gcr-slip-in .seal{position:absolute;left:24px;bottom:24px;width:40px;height:40px;margin:0;border:1.5px solid #4b5549;border-radius:3px;display:grid;place-items:center;writing-mode:horizontal-tb;font:400 11px/1.15 var(--font-literary);color:#4b5549;text-align:center;opacity:.8;transform:rotate(-3deg)}
+/* the back: the reading, set horizontally */
+.gcr-back-in{position:absolute;inset:0;z-index:2;padding:30px 30px 26px;font:13px/1.75 var(--font-ui);color:#3f463e;text-align:left;overflow:hidden}
+.gcr-back-in p{margin:0}
+.gcr-back-in .k{margin:16px 0 6px;font:500 10px var(--font-mono);letter-spacing:.3em;color:#8e978c}
+.gcr-back-in .k:first-child{margin-top:0}
+.gcr-back-in .k b{font:400 15px var(--font-literary);letter-spacing:.3em;color:#2c322b}
+.gcr-back-in .meaning{font:400 14px/1.8 var(--font-literary);color:#2c322b}
+.gcr-back-in .day{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px}
+.gcr-back-in .day b{margin-right:6px;padding:0 3px;border:1px solid #4b5549;font:400 11px var(--font-literary)}
+.gcr-back-in .luck{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.gcr-back-in .luck li{display:grid;grid-template-columns:34px 62px 1fr;gap:8px;align-items:baseline}
+.gcr-back-in .luck .n{font:400 13px var(--font-literary);color:#2c322b}
+.gcr-back-in .luck .s{font-size:10px;letter-spacing:1px;color:#c2994a}.gcr-back-in .luck .s i{font-style:normal;color:#ddd6c4}
+.gcr-back-in .luck .t{font-size:12px;line-height:1.6;color:#4f564a}
+.gcr-back-in .mock{position:absolute;right:10px;bottom:8px;font:500 9px var(--font-mono);letter-spacing:.3em;color:#b0b2aa;font-style:normal}
 .gcr-slip-in .mock{position:absolute;right:10px;bottom:8px;margin:0;writing-mode:horizontal-tb;font:500 9px var(--font-mono);letter-spacing:.3em;color:#b0b2aa;font-style:normal}
 [data-module="gacha"] .gcr-card{width:320px;padding:28px 30px 30px;border-radius:8px;background:linear-gradient(170deg,#fbf9f3,#f0ece1);box-shadow:0 0 0 .5px #3d3f2a1f,0 2px 3px #3d3f2a14,0 22px 36px -10px #3d3f2a33;color:#2c322b;text-align:left}
 [data-module="gacha"] .gcr-card small{font:500 10px var(--font-mono);letter-spacing:.3em;color:#7c8576}
 [data-module="gacha"] .gcr-card b{display:block;margin:14px 0 12px;font:400 30px var(--font-literary);letter-spacing:.2em}
 [data-module="gacha"] .gcr-card p{margin:0;font:400 16px/1.8 var(--font-ui);color:#3f463e}
 [data-module="gacha"] .gcr-card.special{background:radial-gradient(circle at 30% 20%,#fff6df,#f6ecd6 60%,#efe5cf);box-shadow:0 0 0 .5px #3d3f2a1f,0 0 30px #f6d79a66,0 22px 36px -10px #3d3f2a33}
-[data-module="gacha"] .is-under.gcr-card,[data-module="gacha"] .is-under.gcr-slip{box-shadow:0 0 0 .5px #3d3f2a1f,0 2px 3px #3d3f2a14}
+[data-module="gacha"] .is-under.gcr-card,[data-module="gacha"] .is-under .gcr-face{box-shadow:0 0 0 .5px #3d3f2a1f,0 2px 3px #3d3f2a14}
+/* the clear-desk icon, top right of the desk */
+[data-module="gacha"] .gcr-clear{position:absolute;right:10px;top:10px;z-index:60;width:40px;height:40px;min-height:0;display:grid;place-items:center;border-radius:50%;color:#9a9d92;transition:color .2s,background .2s}
+[data-module="gacha"] .gcr-clear:hover{color:#4f564a;background:#ffffff80}
+[data-module="gacha"] .gcr-clear svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round}
 /* phones: the slip lies folded; tap to read */
 [data-module="gacha"] .gcr-folded{width:126px;height:64px;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;background:linear-gradient(#fcfaf4,#efe9da);box-shadow:0 0 0 .5px #3d3f2a1f,0 6px 14px -4px #3d3f2a38;font-family:var(--font-literary);color:#2c322b}
 [data-module="gacha"] .gcr-folded:before{content:'';position:absolute;left:33.3%;top:0;bottom:0;border-left:1px solid #3d3f2a14}

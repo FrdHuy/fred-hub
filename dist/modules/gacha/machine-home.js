@@ -1,5 +1,5 @@
-import { play as sound } from '../../sound.js?v=42';
-import { eggMarkup, random, VARIETIES, VARIETY_ODDS, SPECIAL_ODDS } from './machine.js?v=42';
+import { play as sound } from '../../sound.js?v=43';
+import { eggMarkup, random, pickKind } from './machine.js?v=43';
 
 // Home controller for the gacha machine: hold anywhere on it and draw a circle round the crank, clockwise.
 // The crank follows your hand; the ratchet clicks every 30°. One full turn and a capsule drops into the chute —
@@ -54,7 +54,7 @@ export function createGacha(cover, { reduced }) {
   // A full turn: the crank clunks home, a capsule falls into the chute behind the flap and settles.
   async function run() {
     const token = ++epoch; on = true; set(FULL); sound('reading');
-    const rnd = random(Date.now()), roll = rnd(), kind = roll < SPECIAL_ODDS ? 'frost' : roll < SPECIAL_ODDS + VARIETY_ODDS ? VARIETIES[Math.floor(rnd() * VARIETIES.length)] : '';
+    const rnd = random(Date.now()), kind = pickKind(rnd);
     drop.innerHTML = eggMarkup(kind, { x: 42, y: 20, s: 34, r: Math.round((rnd() - .5) * 50) });
     const egg = drop.firstElementChild;
     if (!reduced()) {

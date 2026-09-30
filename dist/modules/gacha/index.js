@@ -1,8 +1,8 @@
-import { machineMarkup, eggMarkup, random, VARIETIES, VARIETY_ODDS, SPECIAL_ODDS } from './machine.js?v=42';
-import { unwrap, STEP, FULL } from './machine-home.js?v=42';
-import { todaySlip, today, SIGN_GLYPHS, SIGN_NAMES } from './fortune.js?v=42';
-import { BANK, parseBank, createDeck, SPECIAL, VARIETY_NOTE } from './games.js?v=42';
-import { play as sound } from '../../sound.js?v=42';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=43';
+import { unwrap, STEP, FULL } from './machine-home.js?v=43';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=43';
+import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=43';
+import { play as sound } from '../../sound.js?v=43';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -23,7 +23,7 @@ export function mount({ container }) {
 
   const room = document.createElement('section'); room.className = 'gcr'; room.lang = 'zh-CN';
   room.innerHTML = `<h1 class="gcr-sr">扭蛋机</h1><div class="gcr-machine">${machineMarkup({ seed: Date.now() % 1e9, mode, sign })}</div>
-<div class="gcr-desk"><div class="gcr-shells" aria-hidden="true"></div><div class="gcr-papers" aria-live="polite"></div><div class="gcr-eggs"></div></div>
+<div class="gcr-desk"><button class="gcr-clear" type="button" aria-label="清空桌面"><svg viewBox="0 0 20 20"><path d="M4 15.5h12M6 12.5h9M8.5 9.5h6"/><path d="M15.5 4.5 11 9"/></svg></button><div class="gcr-shells" aria-hidden="true"></div><div class="gcr-papers" aria-live="polite"></div><div class="gcr-eggs"></div></div>
 <div class="gcr-read" hidden><div class="gcr-read-in"></div></div>`;
   container.append(room);
   const machine = room.querySelector('.gc'), desk = room.querySelector('.gcr-desk'), papers = room.querySelector('.gcr-papers'), shells = room.querySelector('.gcr-shells'), eggs = room.querySelector('.gcr-eggs');
@@ -80,7 +80,7 @@ export function mount({ container }) {
   // ——— A capsule falls into the chute and rolls out onto the desk ———
   function dispense() {
     if (eggs.children.length >= MAX_WAITING) { sound('error'); return; }
-    const roll = rnd(), kind = roll < SPECIAL_ODDS ? 'frost' : roll < SPECIAL_ODDS + VARIETY_ODDS ? VARIETIES[Math.floor(rnd() * VARIETIES.length)] : '';
+    const kind = pickKind(rnd);
     const egg = { kind, mode, sign, id: Date.now() + rnd() };
     sound('reading');
     const size = narrow.matches ? 56 : 68;
@@ -158,12 +158,17 @@ export function mount({ container }) {
   // What is inside: the lamp egg and the odd eggs carry Fred's things; otherwise a slip (签) or a question (游戏).
   function content(egg) {
     if (egg.kind === 'frost') return { type: 'note', special: true, ...SPECIAL };
-    if (egg.kind) return { type: 'note', ...VARIETY_NOTE };
+    if (egg.kind === 'pearl') return { type: 'note', ...PEARL };
     if (egg.mode === 1) return { type: 'card', ...draw() };
     return { type: 'slip', ...todaySlip(today(), egg.sign) };
   }
+  const stars = n => '★'.repeat(n) + '<i>' + '★'.repeat(5 - n) + '</i>';
+  const backHTML = r => `<div class="gcr-back-in"><p class="k">解签 · <b>${esc(r.rank)}</b></p><p class="meaning">${esc(r.meaning)}</p>
+<p class="k">今日</p><p class="day"><span><b>宜</b>${r.yi.map(esc).join(' ')}</span><span><b>忌</b>${r.ji.map(esc).join(' ')}</span>${r.clash ? `<span>${esc(r.clash)}</span>` : ''}</p>
+<p class="k">${r.glyph} ${esc(r.sign)}座</p><ul class="luck">${r.fortunes.map(f => `<li><span class="n">${esc(f.name)}</span><span class="s" aria-label="${f.stars} 星">${stars(f.stars)}</span><span class="t">${esc(f.text)}</span></li>`).join('')}</ul>${r.placeholder ? '<i class="mock">示意</i>' : ''}</div>`;
+  const twoSided = s => `<div class="gcr-turn"><div class="gcr-face front">${slipHTML(s)}</div><div class="gcr-face back">${backHTML(reading(today(), s.sign))}</div></div>`;
   const slipHTML = s => `<div class="gcr-slip-in"><div class="head">${esc(s.head)}</div>
-<div class="rank">第${esc(s.noText)}签<small>${esc(s.rank)}</small></div>
+<div class="rank">${esc(s.rank)}</div>
 <div class="poem">${s.poem.map(esc).join('<br>')}</div>
 <div class="jie">解曰　${esc(s.jie)}</div>
 <div class="yi"><b>宜</b>　${s.yi.map(esc).join('　')}</div><div class="yi"><b>忌</b>　${s.ji.map(esc).join('　')}</div>
@@ -173,10 +178,10 @@ export function mount({ container }) {
     const tilt = ((rnd() - .5) * 5).toFixed(1), ox = Math.round((rnd() - .5) * 26), oy = Math.round((rnd() - .5) * 20);
     if (item.type === 'slip' && narrow.matches) {
       // phones: a folded slip on the desk; tap to read it unfolded
-      el.className = 'gcr-folded'; el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', `打开签：第${item.noText}签 ${item.rank}`);
+      el.className = 'gcr-folded'; el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', `打开签：${item.rank}`);
       el.innerHTML = `<b>${esc(item.rank)}</b><span>${item.glyph}</span>`; el.slip = item;
     } else if (item.type === 'slip') {
-      el.className = 'gcr-slip'; el.innerHTML = slipHTML(item);
+      el.className = 'gcr-slip'; el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '翻面'); el.innerHTML = twoSided(item);
     } else if (item.type === 'card') {
       el.className = 'gcr-card'; el.innerHTML = `<small>Nº ${String(item.no).padStart(3, '0')} · ${item.kind === 'truth' ? 'TRUTH' : 'DARE'}</small><b>${item.kind === 'truth' ? '真心话' : '大冒险'}</b><p>${esc(item.text)}</p>`;
     } else {
@@ -202,17 +207,27 @@ export function mount({ container }) {
   }
   addEventListener('resize', () => papers.querySelectorAll('.gcr-slip').forEach(fit), { signal });
 
+  // ——— Clearing the desk: everything slides off the far edge ———
+  room.querySelector('.gcr-clear').addEventListener('click', () => {
+    const all = [...papers.children, ...shells.children, ...eggs.children]; if (!all.length) return;
+    sound('paper');
+    if (reduced()) { all.forEach(el => el.remove()); return; }
+    all.forEach((el, i) => el.animate([{ translate: '0 0', opacity: 1 }, { translate: `${desk.clientWidth}px 0`, opacity: 0 }], { duration: 420, delay: i * 25, easing: 'cubic-bezier(.5,0,.8,.4)', fill: 'forwards' }).finished.then(() => el.remove(), () => el.remove()));
+  }, { signal });
+
   // ——— Reading a folded slip on a phone ———
-  papers.addEventListener('click', e => { const f = e.target.closest('.gcr-folded'); if (f) read(f.slip); }, { signal });
+  const flip = el => { el.classList.toggle('is-flipped'); el.style.zIndex = ++layer; sound('paper'); };
+  papers.addEventListener('click', e => { const f = e.target.closest('.gcr-folded'); if (f) { read(f.slip); return; } const s = e.target.closest('.gcr-slip'); if (s) flip(s); }, { signal });
+  papers.addEventListener('keydown', e => { const s = e.target.closest('.gcr-slip'); if (s && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); flip(s); } }, { signal });
   papers.addEventListener('keydown', e => { const f = e.target.closest('.gcr-folded'); if (f && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); read(f.slip); } }, { signal });
   function read(slip) {
     const k = Math.min(1, (innerWidth - 32) / 400, (innerHeight - 60) / 500);
-    reader.firstElementChild.innerHTML = `<div class="gcr-slip open" style="--k:${k.toFixed(3)}">${slipHTML(slip)}</div>`;
+    reader.firstElementChild.innerHTML = `<div class="gcr-slip open" role="button" tabindex="0" aria-label="翻面" style="--k:${k.toFixed(3)}">${twoSided(slip)}</div>`;
     reader.hidden = false; sound('paper');
     if (!reduced()) reader.querySelector('.gcr-slip').animate([{ transform: `scale(${k}) scaleY(.34)`, opacity: .4 }, { transform: `scale(${k})`, opacity: 1 }], { duration: 420, easing: 'cubic-bezier(.22,.75,.2,1)' });
   }
   const closeRead = () => { reader.hidden = true; reader.firstElementChild.innerHTML = ''; };
-  reader.addEventListener('click', closeRead, { signal });
+  reader.addEventListener('click', e => { const s = e.target.closest('.gcr-slip'); if (s) flip(s); else closeRead(); }, { signal });
 
   // ——— The zodiac knob: turn it (drag round it) or tap to step one sign ———
   let knobDrag = null;

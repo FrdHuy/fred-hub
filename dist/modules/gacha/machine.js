@@ -5,16 +5,21 @@
 export const ZODIAC = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'];
 const GLYPHS = [...'♈♉♊♋♌♍♎♏♐♑♒♓'].map(g => g + '︎');
 // Occasional eggs that look different; the frosted lamp egg is the rare special one.
-export const VARIETIES = ['sage', 'stone', 'ink', 'tint', 'clear', 'mark', 'dots', 'stripe'];
-// SPECIAL_ODDS: the chance a turn gives you the lamp egg; PILE_SPECIAL: the chance one is seen somewhere in the pile.
-export const VARIETY_ODDS = 1 / 8, SPECIAL_ODDS = 1 / 40, PILE_SPECIAL = 1 / 4;
+// Ordinary capsules come in ten styles (Fred, 2026-09-30); plain warm white is the most common.
+export const STYLES = ['', 'sage', 'stone', 'ink', 'tint', 'clear', 'clear star', 'mark', 'dots', 'stripe'];
+// Easter eggs: the pearl egg, and the rarer frosted lamp egg. They carry Fred's own things.
+export const EASTER = ['pearl', 'frost'];
+export const PEARL_ODDS = 1 / 30, SPECIAL_ODDS = 1 / 40, PILE_SPECIAL = 1 / 4, PILE_PEARL = 1 / 3;
+export const styleOf = rnd => rnd() < .4 ? '' : STYLES[1 + Math.floor(rnd() * (STYLES.length - 1))];
+// What one turn of the crank gives.
+export function pickKind(rnd) { const r = rnd(); return r < SPECIAL_ODDS ? 'frost' : r < SPECIAL_ODDS + PEARL_ODDS ? 'pearl' : styleOf(rnd); }
 
 // A seeded generator, so a pile can be reproduced (checks) or drawn fresh on every visit (the page).
 export function random(seed = 1) { let s = (Math.floor(seed) % 2147483646) + 1; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
 
 // One capsule. `kind` is '' (plain), a variety, or 'frost' (the special egg).
 export function eggMarkup(kind = '', { x = 0, y = 0, s = 40, r = 0 } = {}) {
-  const inner = kind === 'clear' ? '<b class="gc-gem"></b>' : kind === 'frost' ? '<b class="gc-core"></b>' : '';
+  const inner = kind.startsWith('clear') ? `<b class="gc-gem${kind.includes('star') ? ' star' : ''}"></b>` : kind === 'frost' ? '<b class="gc-core"></b>' : '';
   return `<i class="gc-egg${kind ? ' ' + kind : ''}" style="left:calc(${x.toFixed(1)}*var(--u));top:calc(${y.toFixed(1)}*var(--u));--s:calc(${s}*var(--u));--r:${r}deg"><b class="gc-in"></b><b class="gc-out"></b><b class="gc-lip"></b>${inner}</i>`;
 }
 
@@ -33,7 +38,7 @@ export function pile(rnd, { width = 276, floor = 218 } = {}) {
         const mound = l.h * (1 - Math.pow(Math.abs(x - width / 2) / (width / 2), 2) * .55);
         if (floor - y > mound) continue;
         any = true;
-        const kind = rnd() < VARIETY_ODDS ? VARIETIES[Math.floor(rnd() * VARIETIES.length)] : '';
+        const kind = styleOf(rnd);
         eggs.push({ x, y: y + (rnd() - .5) * 5, s: l.s, r: Math.round((rnd() - .5) * 60), kind });
       }
       if (!any) break;
@@ -41,7 +46,9 @@ export function pile(rnd, { width = 276, floor = 218 } = {}) {
     return eggs;
   });
   // At most one lamp egg, and only now and then: in the front two layers, so it can be seen.
-  if (rnd() < PILE_SPECIAL) { const layer = out[1 + Math.floor(rnd() * 2)]; if (layer.length) layer[Math.floor(rnd() * layer.length)].kind = 'frost'; }
+  const place = kind => { const layer = out[1 + Math.floor(rnd() * 2)]; if (layer.length) layer[Math.floor(rnd() * layer.length)].kind = kind; };
+  if (rnd() < PILE_PEARL) place('pearl');
+  if (rnd() < PILE_SPECIAL) place('frost');
   return out;
 }
 
