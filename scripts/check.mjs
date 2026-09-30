@@ -19,7 +19,7 @@ assert.deepEqual(readRoute('#/collection/%E0%A4%A'), {type:'missing'});
 assert.equal(searchModules('  cinema ')[0].id, 'cinema');
 assert.equal(searchModules('不存在的收藏').length, 0);
 assert.equal(searchModules('').length, modules.length);
-for (const file of ['main.js','gallery.js','catalog.js','router.js','wheel.js','experience.js','swipe.js','contact.js','modules/index.js','modules/empty.js',...moduleIds.map(id => `modules/${id}/index.js`)]) {
+for (const file of ['main.js','gallery.js','catalog.js','router.js','experience.js','swipe.js','contact.js','modules/index.js','modules/empty.js',...moduleIds.map(id => `modules/${id}/index.js`)]) {
   const result = spawnSync(process.execPath, ['--check', `dist/${file}`], {encoding:'utf8'});
   assert.equal(result.status, 0, result.stderr);
 }
@@ -36,4 +36,4 @@ assert.equal(modules.find(x=>x.id==='bucketlist').cover, 'list');
 assert.ok(!modules.some(x=>x.id==='wheel'));
 console.log('PASS: module registry, search, routes, local assets and JavaScript syntax');
 
-assert.ok(existsSync('dist/assets/compass.png'), 'kept for the paused compass');
+assert.ok(!existsSync('dist/wheel.js') && !existsSync('dist/assets/compass.png'), 'the wheel was retired (Fred, 2026-09-30)');

@@ -76,8 +76,8 @@ v0.32（2026-09-29）按 Fred 的批复处理了大部分；未勾的是 Fred �
   - [x] 工程：删除本地旧分支（未合并的 fortune-sticks 保留为 tag `archive/fortune-sticks`）；清理 styles.css / hub.css 死规则（见 HANDOFF v0.32）。
 
 **P3 — 发布**
-8. 已上线 https://fred-hub.vercel.app（2026-09-28，GitHub FrdHuy/fred-hub 私有仓库 push 自动部署）；绑定 fredhu.top 进行中；之后 OG 图片、性能检查。
-9. 罗盘（wheel）暂停中，源码保留，是否恢复待定。
+8. 已上线 https://fred-hub.vercel.app（2026-09-28，GitHub FrdHuy/fred-hub 私有仓库 push 自动部署）；fredhu.top 已绑定（2026-09-30）；之后 OG 图片、性能检查。
+9. 罗盘（wheel）已删除（Fred 决定，v0.35.2）。下一轮：手记整体视觉打磨。
 
 ## 5. 风格约定（必须保持，引入新库或新设计语言前先问用户）
 

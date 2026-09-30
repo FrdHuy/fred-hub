@@ -20,7 +20,7 @@
 | stories → 手记（打字机；dist/modules/stories/**；共享：catalog 封面/名称、experience 分支） | Claude Code | v0.33 已完成（占位文章），无运行中编辑 |
 | bucketlist 百灯控制面板（dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画、hub.css 清单返回箭头） | Claude Code | v0.28 已合入 main，无运行中编辑 |
 | travel 翻牌屏（dist/modules/travel/**；设计见 docs/design/travel.md） | Claude Code | v0.31 已完成（占位数据），无运行中编辑 |
-| wheel | 暂停 | 源码保留，不在注册表和菜单中 |
+| wheel | 已删除（v0.35.2，Fred 决定） | 源码、compass.png 与相关 CSS 已移除 |
 
 开始任务前填写自己的范围；结束更新状态。表格不是程序锁，也不会自动通知另一个 agent。
 
@@ -186,3 +186,4 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - v0.34.1 旅行录入工具：`node scripts/travel-recorder.mjs`（本机 127.0.0.1）。城市搜索用 OpenStreetMap Nominatim（accept-language=en，带 User-Agent）；国家名用 Intl.DisplayNames 转中文；机场用 OurAirports 公开表（首次下载后缓存 scripts/.cache/airports.json，已 gitignore），airportChoices 优先 150 km 内的大型国际机场（雷克雅未克 → KEF 而不是 RKV），另给 2 个备选。照片拖入 → sips 1600px → dist/modules/travel/photos/。保存写回 docs/旅行行程-填写.md（formSource，与 parseTravelForm 互逆，已测）和 data.js。
 - v0.35 片单两层：默认「放映表」（pick: true 的片子，CD 货架 + 详情里显示 note；未选时用 TMDB 最高分 16 部代替）；「全部看过」= 观影报告（看过/导演/年代/最长系列/跨度，films.js report）+ 按年份的海报墙（byYear，可按电影/剧集筛选，点开是固定在屏幕上的详情）。访客「你看过几部？」：勾放映表里看过的 → 重合数、百分比、3 部推荐（overlap），只存 localStorage fred-cinema-seen。旧的筛选/排序面板移除。勾选器新增「★ 放映表」标签（pick + note，applyChanges curated）；修复切换标签时旧请求结果混入新标签的竞态（loadToken）。
 - v0.35.1 夜间巡检（Claude，Fred 睡觉时自主完成）：14 个页面状态 × 电脑 1440 / 手机 390 截图审查，无 JS 报错、无横向溢出。修复：① 片单「你看过几部？」的关闭 × 与右上角菜单重叠、标题压在 Fred. 下面 → 浮层内容下移到头部之下，背景改为不透明；② 同一浮层里海报格子是 2:3 固定比例，片名溢出被下一行海报盖住 → 格子高度随内容，图片自己保持 2:3；③ 手机「全部看过」统计格边线错位（第 3 格缩进、竖线断开）→ 两列网格，奇数列无左线、首行无上线；④ 手记手机端 CONFIDENTIAL 章超出稿纸 → 手机上缩小。资源 v37。全部 check 通过。待 Fred 决定的事项见 docs/待决定.md。
+- v0.35.2 Fred 的决定（见 docs/待决定.md）：片单货架保持居中、TMDB 声明保持、手机首页不加位置点、不做首访演示、打字机节奏保持、READ → 保持；「关于 Fred」等数据齐了再做；fredhu.top 已绑定。删除转盘：dist/wheel.js、dist/modules/wheel/、assets/compass.png、hub.css/styles.css 中全部 wheel/compass/tool-intro/spin-button 规则（逐条核对，未改动其他规则）；check.mjs 改为断言它们不存在。资源 v38。下一轮：手记整体视觉打磨（12B）。
