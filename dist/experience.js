@@ -1,7 +1,7 @@
 import { ticketContact, discContact } from './contact.js';
-import { createPanel } from './modules/bucketlist/panel-home.js?v=38';
-import { createTypewriter } from './modules/stories/typewriter-home.js?v=38';
-import { play as sound } from './sound.js?v=38';
+import { createPanel } from './modules/bucketlist/panel-home.js?v=39';
+import { createTypewriter } from './modules/stories/typewriter-home.js?v=39';
+import { play as sound } from './sound.js?v=39';
 
 export function createInteraction(gallery, enter) {
   const shell=document.querySelector('.gallery-shell'), hint=shell.querySelector('.interaction-hint');

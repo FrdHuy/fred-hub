@@ -42,6 +42,13 @@ const VOICES = {
   ret() { for (let i = 0; i < 12; i++) click(1400 - i * 45, .01, .05, i * .026); click(380, .06, .28, .33); tone(78, .1, .16, { at: .33 }); }, // carriage return: ratchet, then the stop
   bell() { tone(2637, .9, .07); tone(3951, .5, .018); tone(5274, .35, .012); },                            // the margin bell
   feed() { for (let i = 0; i < 9; i++) click(900 - i * 40, .014, .08, i * .055); tone(70, .5, .025, { type: 'triangle' }); }, // platen ratchet
+  paper() {                                                          // a sheet lifted off the desk: a soft rising swish
+    const t = ctx.currentTime, source = ctx.createBufferSource(), filter = ctx.createBiquadFilter(), amp = ctx.createGain();
+    source.buffer = noise; filter.type = 'bandpass'; filter.Q.value = .7;
+    filter.frequency.setValueAtTime(1400, t); filter.frequency.exponentialRampToValueAtTime(4200, t + .28);
+    amp.gain.setValueAtTime(.0001, t); amp.gain.exponentialRampToValueAtTime(.09, t + .08); amp.gain.exponentialRampToValueAtTime(.0001, t + .34);
+    source.connect(filter).connect(amp).connect(master); source.start(t, Math.random() * .5, .36);
+  },
 };
 
 export function play(name) {

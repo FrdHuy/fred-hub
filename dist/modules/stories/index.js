@@ -1,17 +1,17 @@
-import data from './data.js?v=38';
-import { TYPES, dotDate, sortNotes, years } from './notes.js?v=38';
-import { unseal } from './seal.js?v=38';
-import { typewriterMarkup } from './typewriter.js?v=38';
-import { strike as strikeKey, setCarriage, carriageReturn, feed } from './carriage.js?v=38';
-import travelData from '../travel/data.js?v=38';
-import { parseTravel, localNow, flight } from '../travel/trips.js?v=38';
+import data from './data.js?v=39';
+import { TYPES, dotDate, sortNotes, years } from './notes.js?v=39';
+import { unseal } from './seal.js?v=39';
+import { typewriterMarkup } from './typewriter.js?v=39';
+import { strike as strikeKey, setCarriage, carriageReturn, feed } from './carriage.js?v=39';
+import travelData from '../travel/data.js?v=39';
+import { parseTravel, localNow, flight } from '../travel/trips.js?v=39';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=38';
+import { play as sound } from '../../sound.js?v=39';
 
 const esc = text => String(text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const pad3 = n => String(n).padStart(3, '0');
 // A sheet's tilt comes from its id, so the desk looks the same on every visit.
-const tilt = id => { let h = 7; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return [(h % 29) / 10 - 1.4, (h >> 5) % 22]; };
+const tilt = id => { let h = 7; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return [((h % 19) - 9) / 10, (h >> 5) % 9]; };
 
 export function mount({ container, route }) {
   const events = new AbortController(), { signal } = events;
@@ -19,7 +19,7 @@ export function mount({ container, route }) {
   const notes = sortNotes(Array.isArray(data) ? data : []);
   const numbers = new Map([...notes].reverse().map((note, i) => [note.id, i + 1]));  // Nº in the order they were written
   const unlocked = new Map();   // id → { html, excerpt }: open only while you stay in 手记; leaving the module forgets them
-  let year = '', lockNote = null;
+  let year = '', lockNote = null, lifted = null;   // lifted: the sheet just picked up on the desk, so the page can grow out of it
 
   // Flights on the travel board, to link a travel log back to its boarding pass.
   let trips = [];
@@ -36,13 +36,15 @@ export function mount({ container, route }) {
   const setBack = toDesk => { if (back) { back.href = toDesk ? collectionPath('stories') : '#/'; back.textContent = toDesk ? '← 回到桌上' : '← 放回收藏'; } };
 
   // ——— The desk ———
+  // The typed line at the top of every sheet, the same as on the typewriter's paper.
+  const kicker = note => `<span class="nt-kicker">Nº ${pad3(numbers.get(note.id))} · ${TYPES[note.type]}</span>`;
   function sheet(note) {
     const [deg, drop] = tilt(note.id), locked = note.locked && !unlocked.has(note.id), trip = tripFor(note);
-    const where = trip ? `${flight(trip.number)} · ${trip.code}` : note.place ? esc(note.place.toUpperCase()) : '—';
+    const where = trip ? `${flight(trip.number)} · ${trip.code}` : note.place ? esc(note.place.toUpperCase()) : '';
     return `<li><button class="nt-sheet${locked ? ' is-locked' : ''}" type="button" data-id="${esc(note.id)}" style="--tilt:${deg.toFixed(1)}deg;--drop:${drop}px">
-<span class="nt-stamp">${TYPES[note.type]}</span><h3>${esc(note.title)}</h3>
-${locked ? '<span class="nt-blur" aria-hidden="true"><i></i><i></i><i></i></span><span class="nt-conf">CONFIDENTIAL</span>' : `<p>${esc(note.excerpt ?? unlocked.get(note.id)?.excerpt ?? '')}</p>`}
-<span class="nt-foot"><span>${dotDate(note.date)}<b>${where}</b></span><span>${note.minutes} MIN</span></span>
+${kicker(note)}<h3>${esc(note.title)}</h3>
+${locked ? '<span class="nt-band" aria-hidden="true"><svg viewBox="0 0 12 14"><rect x="1.5" y="6" width="9" height="7" rx="1.2"/><path d="M3.8 6V4.2a2.2 2.2 0 0 1 4.4 0V6"/></svg>CONFIDENTIAL</span>' : `<p>${esc(note.excerpt ?? unlocked.get(note.id)?.excerpt ?? '')}</p>`}
+<span class="nt-foot"><span>${dotDate(note.date)}</span><span>${where}</span></span>
 <span class="nt-sr">${locked ? '，需要暗号' : ''}</span></button></li>`;
   }
   function desk() {
@@ -64,12 +66,25 @@ ${list.length ? `<ol class="nt-sheets">${list.map(sheet).join('')}</ol>` : '<p c
     setBack(true);
     const list = notes, i = list.indexOf(note), newer = list[i - 1], older = list[i + 1];
     const link = (n, label) => n ? `<a href="${collectionPath('stories', n.id)}"><small>${label}</small>${esc(n.title)}</a>` : '<span></span>';
-    room.innerHTML = `<article class="nt-read"><div class="nt-read-top"><span class="nt-stamp">${TYPES[note.type]}</span><span>${chips(note)}</span></div>
+    room.innerHTML = `<article class="nt-read"><div class="nt-read-top">${kicker(note)}<span class="nt-chips">${chips(note)}</span></div>
 <h1>${esc(note.title)}</h1><p class="nt-meta">${[dotDate(note.date), note.place?.toUpperCase(), `${note.minutes} MIN`].filter(Boolean).map(esc).join(' · ')}</p>
 <div class="nt-body">${body.html}</div><p class="nt-fin">— FIN —</p></article>
 <nav class="nt-next" aria-label="上一篇 / 下一篇">${link(older, '← EARLIER')}${link(newer, 'LATER →')}</nav>`;
     window.scrollTo({ top: 0, behavior: 'instant' });
-    if (!reduced()) room.querySelector('.nt-read').animate([{ opacity: 0, transform: 'translateY(26px)' }, { opacity: 1, transform: 'none' }], { duration: 480, easing: 'cubic-bezier(.22,.75,.2,1)' });
+    // Prints in a row share one height: each takes a width in proportion to its own shape.
+    for (const img of room.querySelectorAll('.nt-photos img')) {
+      const fit = () => img.naturalWidth && img.closest('figure').style.setProperty('--r', (img.naturalWidth / img.naturalHeight).toFixed(3));
+      if (img.complete) fit(); else img.addEventListener('load', fit, { once: true, signal });
+    }
+    const page = room.querySelector('.nt-read'), from = lifted?.id === note.id ? lifted : null; lifted = null;
+    if (reduced()) return;
+    if (from) {
+      // The sheet you picked up becomes the page: it grows from where it lay on the desk and straightens.
+      const to = page.getBoundingClientRect(), k = from.rect.width / to.width;
+      page.animate([{ transform: `translate(${from.rect.left - to.left}px,${from.rect.top - to.top}px) scale(${k}) rotate(${from.tilt})` }, { transform: 'none' }], { duration: 560, easing: 'cubic-bezier(.22,.75,.2,1)' });
+      for (const part of page.children) part.animate([{ opacity: 0 }, { opacity: 0, offset: .45 }, { opacity: 1 }], { duration: 560 });
+      room.querySelector('.nt-next')?.animate([{ opacity: 0 }, { opacity: 0, offset: .6 }, { opacity: 1 }], { duration: 700 });
+    } else page.animate([{ opacity: 0, transform: 'translateY(26px)' }, { opacity: 1, transform: 'none' }], { duration: 480, easing: 'cubic-bezier(.22,.75,.2,1)' });
   }
 
   // ——— The password, typed on the typewriter ———
@@ -82,7 +97,7 @@ ${list.length ? `<ol class="nt-sheets">${list.map(sheet).join('')}</ol>` : '<p c
     lockNote = note; typed = '';
     lock.innerHTML = `${typewriterMarkup({ kicker: `CONFIDENTIAL · Nº ${pad3(numbers.get(note.id))}`, title: note.title, line: 'PASSWORD · <span class="nt-typed"></span><span class="tw-caret"></span>' })}
 <label class="nt-sr" for="nt-password">暗号</label><input id="nt-password" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
-<p class="nt-lock-hint"><span>TYPE THE PASSWORD · RETURN</span><button type="button" data-close>CLOSE</button></p>`;
+<button class="nt-lock-close" type="button" data-close aria-label="关闭"><svg viewBox="0 0 44 44"><path d="M13 13l18 18M31 13L13 31"/></svg></button>`;
     lock.hidden = false; typewriter = lock.querySelector('.tw'); input = lock.querySelector('input');
     lock.querySelector('.tw-sheet b .tw-caret')?.remove();
     input.focus({ preventScroll: true });
@@ -141,7 +156,9 @@ ${list.length ? `<ol class="nt-sheets">${list.map(sheet).join('')}</ol>` : '<p c
     const yearButton = e.target.closest('[data-year]');
     if (yearButton) { year = yearButton.dataset.year; desk(); return; }
     const card = e.target.closest('.nt-sheet');
-    if (card) location.hash = collectionPath('stories', card.dataset.id);
+    if (!card) return;
+    if (!card.classList.contains('is-locked')) { lifted = { id: card.dataset.id, rect: card.getBoundingClientRect(), tilt: card.style.getPropertyValue('--tilt') || '0deg' }; sound('paper'); }
+    location.hash = collectionPath('stories', card.dataset.id);
   }, { signal });
   // Esc: the password screen first, then the article back to the desk; only then (main.js) the home page.
   document.addEventListener('keydown', e => {
