@@ -133,19 +133,23 @@
 .gcr-slip-in .yi b{display:inline-block;margin-bottom:6px;padding:3px 4px;border:1px solid #4b5549;font-weight:400}
 .gcr-slip-in .seal{position:absolute;left:24px;bottom:24px;width:40px;height:40px;margin:0;border:1.5px solid #4b5549;border-radius:3px;display:grid;place-items:center;writing-mode:horizontal-tb;font:400 11px/1.15 var(--font-literary);color:#4b5549;text-align:center;opacity:.8;transform:rotate(-3deg)}
 /* the back: the reading, set horizontally */
-.gcr-back-in{position:absolute;inset:0;z-index:2;padding:30px 30px 26px;font:13px/1.75 var(--font-ui);color:#3f463e;text-align:left;overflow:hidden}
+.gcr-back-in{position:absolute;inset:0;z-index:2;padding:26px 28px 22px;font:13px/1.7 var(--font-ui);color:#3f463e;text-align:left;overflow:auto;scrollbar-width:none}
 .gcr-back-in p{margin:0}
-.gcr-back-in .k{margin:16px 0 6px;font:500 10px var(--font-mono);letter-spacing:.3em;color:#8e978c}
+.gcr-back-in .k{margin:13px 0 5px;font:500 10px var(--font-mono);letter-spacing:.3em;color:#8e978c}
 .gcr-back-in .k:first-child{margin-top:0}
 .gcr-back-in .k b{font:400 15px var(--font-literary);letter-spacing:.3em;color:#2c322b}
-.gcr-back-in .meaning{font:400 14px/1.8 var(--font-literary);color:#2c322b}
+.gcr-back-in .meaning{font:400 13.5px/1.7 var(--font-literary);color:#2c322b}
+.gcr-back-in .jie{margin-top:4px;font:400 12px/1.7 var(--font-literary);letter-spacing:.06em;color:#6b7263}
+.gcr-back-in .xj{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 10px;margin-top:8px;font-size:11.5px;line-height:1.7;color:#4f564a}
+.gcr-back-in .xj em{font-style:normal;margin-right:6px;color:#8e978c}
+.gcr-back-in .day .c{color:#8e978c}
 .gcr-back-in .day{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px}
 .gcr-back-in .day b{margin-right:6px;padding:0 3px;border:1px solid #4b5549;font:400 11px var(--font-literary)}
-.gcr-back-in .luck{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.gcr-back-in .luck{list-style:none;margin:0;padding:0;display:grid;gap:5px}
 .gcr-back-in .luck li{display:grid;grid-template-columns:34px 62px 1fr;gap:8px;align-items:baseline}
 .gcr-back-in .luck .n{font:400 13px var(--font-literary);color:#2c322b}
 .gcr-back-in .luck .s{font-size:10px;letter-spacing:1px;color:#c2994a}.gcr-back-in .luck .s i{font-style:normal;color:#ddd6c4}
-.gcr-back-in .luck .t{font-size:12px;line-height:1.6;color:#4f564a}
+.gcr-back-in .luck .t{font-size:11.5px;line-height:1.55;color:#4f564a}
 .gcr-back-in .mock{position:absolute;right:10px;bottom:8px;font:500 9px var(--font-mono);letter-spacing:.3em;color:#b0b2aa;font-style:normal}
 .gcr-slip-in .mock{position:absolute;right:10px;bottom:8px;margin:0;writing-mode:horizontal-tb;font:500 9px var(--font-mono);letter-spacing:.3em;color:#b0b2aa;font-style:normal}
 [data-module="gacha"] .gcr-card{width:320px;padding:28px 30px 30px;border-radius:8px;background:linear-gradient(170deg,#fbf9f3,#f0ece1);box-shadow:0 0 0 .5px #3d3f2a1f,0 2px 3px #3d3f2a14,0 22px 36px -10px #3d3f2a33;color:#2c322b;text-align:left}

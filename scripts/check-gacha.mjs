@@ -43,6 +43,7 @@ for (let s = 0; s < 12; s++) assert.equal(slipIndex({ y: 2026, m: 9, d: 30 }, s,
 const spread = new Set(Array.from({ length: 12 }, (_, s) => slipIndex({ y: 2026, m: 9, d: 30 }, s, 100)));
 assert.ok(spread.size >= 8, 'different signs usually get different slips');
 const slip = todaySlip({ y: 2026, m: 9, d: 30 }, 4);
+assert.ok(['上签', '中签', '下签'].includes(slip.rankText) && slip.poem.length === 4 && slip.poem.every(l => l.length === 7));
 assert.equal(slip.head, '二〇二六年九月三十日 · 丙午年八月二十 · 丁未日'); assert.equal(slip.signName, '狮子');
 const questions = parseBank(BANK);
 assert.ok(questions.length >= 20 && questions.every(q => q.kind === 'truth' || q.kind === 'dare'));
@@ -50,3 +51,28 @@ assert.deepEqual(parseBank('真：a\n\n冒:b\nnot a question'), [{ kind: 'truth'
 const next = createDeck(questions), seen = new Set(); for (let i = 0; i < questions.length; i++) seen.add(next().no);
 assert.equal(seen.size, questions.length, 'no repeats until the bank is used up');
 console.log('PASS: 扭蛋机 — slips, almanac dates, question deck');
+
+// Step 3: the real data
+const { positions, signOf } = await import('../dist/modules/gacha/astro.js');
+const { almanac } = await import('../dist/modules/gacha/almanac.js');
+const { scores, horoscope } = await import('../dist/modules/gacha/horoscope.js');
+const LINGQIAN = (await import('../dist/modules/gacha/lingqian.js')).default;
+const { readFileSync } = await import('node:fs');
+// planets against NASA JPL Horizons (fixtures): within 0.1°, and always the same sign
+const ref = JSON.parse(readFileSync(new URL('./fixtures/horizons.json', import.meta.url)));
+for (const [day, bodies] of Object.entries(ref)) {
+  const [y, m, d] = day.split('-').map(Number), p = positions({ y, m, d, h: 12 });
+  for (const [b, lon] of Object.entries(bodies)) { let e = Math.abs(p[b] - lon); if (e > 180) e = 360 - e; assert.ok(e < .1, `${day} ${b} off by ${e}`); }
+}
+// the almanac against published almanacs
+assert.deepEqual([almanac({ y: 2024, m: 2, d: 10 })].map(a => [a.ganzhi, a.officer, a.clash])[0], ['甲辰', '满', '冲狗 煞南']);
+assert.deepEqual([almanac({ y: 2026, m: 1, d: 1 })].map(a => [a.ganzhi, a.officer, a.clash])[0], ['乙亥', '闭', '冲蛇 煞西']);
+// the hundred slips
+assert.equal(LINGQIAN.length, 100);
+assert.deepEqual(LINGQIAN.reduce((c, s) => (c[s.rank] = (c[s.rank] || 0) + 1, c), {}), { 上: 22, 中: 60, 下: 18 });
+for (const s of LINGQIAN) { assert.ok(s.poem.length === 4 && s.poem.every(l => /^[\u4e00-\u9fff]{7}$/.test(l)), `slip ${s.no}`); assert.ok(s.name && s.meaning && s.jie.length); }
+assert.equal(LINGQIAN[2].poem[2], '衔得泥来成叠后');   // a recorded correction (docs/design/lingqian-sources.md)
+// fortunes: 1–5 stars, stable for a day and a sign, words never mention planets
+for (let s = 0; s < 12; s++) { const h = horoscope({ y: 2026, m: 9, d: 30 }, s); assert.equal(h.length, 5); for (const f of h) { assert.ok(f.stars >= 1 && f.stars <= 5 && f.text.length > 8); assert.ok(!/金星|木星|火星|土星|水星|月亮|宫|相位/.test(f.text), f.text); } }
+assert.deepEqual(scores({ y: 2026, m: 9, d: 30 }, 3), scores({ y: 2026, m: 9, d: 30 }, 3));
+console.log('PASS: 扭蛋机 — planets vs JPL, almanac vs published, 100 slips, fortunes');

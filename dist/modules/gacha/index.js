@@ -1,8 +1,8 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=43';
-import { unwrap, STEP, FULL } from './machine-home.js?v=43';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=43';
-import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=43';
-import { play as sound } from '../../sound.js?v=43';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=44';
+import { unwrap, STEP, FULL } from './machine-home.js?v=44';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=44';
+import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=44';
+import { play as sound } from '../../sound.js?v=44';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -163,23 +163,24 @@ export function mount({ container }) {
     return { type: 'slip', ...todaySlip(today(), egg.sign) };
   }
   const stars = n => '★'.repeat(n) + '<i>' + '★'.repeat(5 - n) + '</i>';
-  const backHTML = r => `<div class="gcr-back-in"><p class="k">解签 · <b>${esc(r.rank)}</b></p><p class="meaning">${esc(r.meaning)}</p>
-<p class="k">今日</p><p class="day"><span><b>宜</b>${r.yi.map(esc).join(' ')}</span><span><b>忌</b>${r.ji.map(esc).join(' ')}</span>${r.clash ? `<span>${esc(r.clash)}</span>` : ''}</p>
-<p class="k">${r.glyph} ${esc(r.sign)}座</p><ul class="luck">${r.fortunes.map(f => `<li><span class="n">${esc(f.name)}</span><span class="s" aria-label="${f.stars} 星">${stars(f.stars)}</span><span class="t">${esc(f.text)}</span></li>`).join('')}</ul>${r.placeholder ? '<i class="mock">示意</i>' : ''}</div>`;
+  const backHTML = r => `<div class="gcr-back-in"><p class="k">解签 · <b>${esc(r.rank)}</b> · ${esc(r.name)}</p><p class="meaning">${esc(r.meaning)}</p>
+<p class="jie">${r.jie.map(esc).join('　')}</p>
+<p class="xj">${Object.entries(r.xianji).map(([k, v]) => `<span><em>${esc(k)}</em>${esc(v)}</span>`).join('')}</p>
+<p class="k">今日 · ${esc(r.officer)}</p><p class="day"><span><b>宜</b>${r.yi.map(esc).join(' ')}</span><span><b>忌</b>${r.ji.map(esc).join(' ')}</span><span class="c">${esc(r.clash)}</span></p>
+<p class="k">${r.glyph} ${esc(r.sign)}座</p><ul class="luck">${r.fortunes.map(f => `<li><span class="n">${esc(f.name)}</span><span class="s" aria-label="${f.stars} 星">${stars(f.stars)}</span><span class="t">${esc(f.text)}</span></li>`).join('')}</ul></div>`;
   const twoSided = s => `<div class="gcr-turn"><div class="gcr-face front">${slipHTML(s)}</div><div class="gcr-face back">${backHTML(reading(today(), s.sign))}</div></div>`;
   const slipHTML = s => `<div class="gcr-slip-in"><div class="head">${esc(s.head)}</div>
-<div class="rank">${esc(s.rank)}</div>
+<div class="rank">${esc(s.rankText)}</div>
 <div class="poem">${s.poem.map(esc).join('<br>')}</div>
-<div class="jie">解曰　${esc(s.jie)}</div>
-<div class="yi"><b>宜</b>　${s.yi.map(esc).join('　')}</div><div class="yi"><b>忌</b>　${s.ji.map(esc).join('　')}</div>
-<div class="seal">${s.glyph}<br>${esc(s.signName)}</div>${s.placeholder ? '<i class="mock">示意</i>' : ''}</div>`;
+<div class="jie">解曰　${s.jie.filter(l => !l.endsWith("：")).map(esc).join("　")}</div>
+<div class="seal">${s.glyph}<br>${esc(s.signName)}</div></div>`;
   function lay(item, at) {
     const el = document.createElement('div'); el.style.zIndex = ++layer;
     const tilt = ((rnd() - .5) * 5).toFixed(1), ox = Math.round((rnd() - .5) * 26), oy = Math.round((rnd() - .5) * 20);
     if (item.type === 'slip' && narrow.matches) {
       // phones: a folded slip on the desk; tap to read it unfolded
-      el.className = 'gcr-folded'; el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', `打开签：${item.rank}`);
-      el.innerHTML = `<b>${esc(item.rank)}</b><span>${item.glyph}</span>`; el.slip = item;
+      el.className = 'gcr-folded'; el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', `打开签：${item.rankText}`);
+      el.innerHTML = `<b>${esc(item.rankText)}</b><span>${item.glyph}</span>`; el.slip = item;
     } else if (item.type === 'slip') {
       el.className = 'gcr-slip'; el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '翻面'); el.innerHTML = twoSided(item);
     } else if (item.type === 'card') {

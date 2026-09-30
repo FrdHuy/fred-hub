@@ -1,6 +1,6 @@
 // 今日签: the date (Gregorian, lunar, the day's stems and branches), a slip for the chosen sign, the almanac's 宜 / 忌.
 // Step 3 fills in the real almanac rules and the verified 观音灵签 texts; until then the slip itself is marked 示意.
-import { ZODIAC } from './machine.js?v=43';
+import { ZODIAC } from './machine.js?v=44';
 
 const GAN = '甲乙丙丁戊己庚辛壬癸', ZHI = '子丑寅卯辰巳午未申酉戌亥';
 const CN = '〇一二三四五六七八九';
@@ -27,29 +27,26 @@ export function lunar(date) {
 // Same day + same sign → the same slip, always. A small stable hash picks it.
 export function slipIndex(date, sign, count) { let h = 2166136261; for (const c of `${date.y}-${date.m}-${date.d}:${sign}`) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h % count; }
 
-// Placeholder slips (示意). Step 3 replaces this list with the 100 verified 观音灵签.
-const SLIPS = [
-  { no: 1, rank: '上上', poem: ['开天辟地作良缘', '吉日良时万物全', '若得此签非小可', '人行忠正帝王宣'], jie: '事事顺遂，守正则吉' },
-];
-const ALMANAC = { yi: ['祭祀', '祈福', '出行'], ji: ['动土'] };   // 示意
-
+import LINGQIAN from './lingqian.js?v=44';
+import { almanac } from './almanac.js?v=44';
+import { horoscope, ASPECTS } from './horoscope.js?v=44';
+export { ASPECTS };
+// Same day + same sign → the same one of the hundred slips.
 export function todaySlip(date, sign) {
-  const slip = SLIPS[slipIndex(date, sign, SLIPS.length)], moon = lunar(date);
+  const slip = LINGQIAN[slipIndex(date, sign, LINGQIAN.length)], moon = lunar(date), day = almanac(date);
   return {
-    ...slip, noText: cnNumber(slip.no), placeholder: true, sign, signName: SIGN_NAMES[sign], glyph: SIGN_GLYPHS[sign], key: ZODIAC[sign],
-    head: [`${cnYear(date.y)}年${cnNumber(date.m)}月${cnNumber(date.d)}日`, moon ? `${moon.year}年${moon.month}${moon.day}` : '', `${dayGanzhi(date)}日`].filter(Boolean).join(' · '),
-    yi: ALMANAC.yi, ji: ALMANAC.ji,
+    ...slip, rankText: `${slip.rank}签`, sign, signName: SIGN_NAMES[sign], glyph: SIGN_GLYPHS[sign], key: ZODIAC[sign],
+    head: [`${cnYear(date.y)}年${cnNumber(date.m)}月${cnNumber(date.d)}日`, moon ? `${moon.year}年${moon.month}${moon.day}` : '', `${day.ganzhi}日`].filter(Boolean).join(' · '),
+    yi: day.yi, ji: day.ji,
   };
 }
-// The back of the slip: what the slip means, today's almanac, and the sign's five fortunes (1–5 stars, a few lines each).
-// Placeholder (示意) until step 3: real almanac rules, the verified slip readings, and fortunes from real planet positions.
-export const ASPECTS = ['综合', '感情', '财运', '事业', '健康'];
+// The back of the slip: the slip's traditional reading, today's almanac, and the sign's five fortunes.
 export function reading(date, sign) {
-  const slip = todaySlip(date, sign);
+  const slip = todaySlip(date, sign), day = almanac(date);
   return {
-    placeholder: true, rank: slip.rank, meaning: '（示意）这里是这支签的解签：它讲的是什么事、对你今天意味着什么。',
-    yi: slip.yi, ji: slip.ji, clash: '', sign: slip.signName, glyph: slip.glyph,
-    fortunes: ASPECTS.map((name, i) => ({ name, stars: [4, 3, 3, 4, 3][i], text: '（示意）这里是这一项今天的解析，讲具体的事，不讲行星。' })),
+    rank: slip.rankText, name: slip.name, meaning: slip.meaning, jie: slip.jie.filter(l => !l.endsWith('：')), xianji: slip.xianji,
+    officer: `${day.officer}日`, yi: day.yi, ji: day.ji, clash: day.clash, sign: slip.signName, glyph: slip.glyph,
+    fortunes: horoscope(date, sign),
   };
 }
 export const today = (now = new Date()) => ({ y: now.getFullYear(), m: now.getMonth() + 1, d: now.getDate() });

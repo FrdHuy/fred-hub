@@ -1,9 +1,9 @@
-import data from './data.js?v=43';
-import { parseTravel, stats, pax, localNow, monthYear, passDate, flight, pad2, FIELD } from './trips.js?v=43';
-import { createWord } from './flap.js?v=43';
-import { play as sound } from '../../sound.js?v=43';
-import notes from '../stories/data.js?v=43';
-import { noteForTrip } from '../stories/notes.js?v=43';
+import data from './data.js?v=44';
+import { parseTravel, stats, pax, localNow, monthYear, passDate, flight, pad2, FIELD } from './trips.js?v=44';
+import { createWord } from './flap.js?v=44';
+import { play as sound } from '../../sound.js?v=44';
+import notes from '../stories/data.js?v=44';
+import { noteForTrip } from '../stories/notes.js?v=44';
 import { collectionPath } from '../../router.js';
 
 const esc = text => String(text).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
