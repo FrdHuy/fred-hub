@@ -17,7 +17,7 @@ const board = parseTravel({ home: { city: 'Madison', airport: 'msn' }, arrivals:
   { to: 'Someday', code: 'SOM' }, { to: 'Later', code: 'LAT', date: '2027-05' }, { to: 'Next', code: 'NXT', date: '2026-12-01' }, { to: 'Late', code: 'LTE', date: '2026-08' }, { to: 'This month', code: 'NOW', date: '2026-09' },
 ] }, today);
 assert.deepEqual(board.errors, []);
-assert.deepEqual(board.arrivals.map(t => [t.to, t.number, t.from]), [['C', 3, 'ORD'], ['B', 2, 'MSN'], ['A', 1, 'MSN']], 'latest first, numbered in the order they happened');
+assert.deepEqual(board.arrivals.map(t => [t.to, t.number, t.from]), [['C', 3, 'ORD'], ['B', 2, 'FRED'], ['A', 1, 'FRED']], 'latest first, numbered in the order they happened; flights leave from FRED unless a trip names its own airport');
 assert.deepEqual(board.arrivals.map(t => Boolean(t.live)), [true, false, false]);
 assert.deepEqual(board.departures.map(t => [t.to, t.status, t.number]), [['LATE', 'DELAYED', 4], ['THIS MONTH', 'BOARDING', 5], ['NEXT', 'SCHEDULED', 6], ['LATER', 'SCHEDULED', 7], ['SOMEDAY', 'SOMEDAY', 8]]);
 assert.deepEqual(stats(board, today), { flights: 3, countries: 2, since: 2021, plans: 5, daysAway: 9, longest: { days: 3, code: 'ABC' }, next: readDate('2026-09'), nextIn: 0 });

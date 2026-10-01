@@ -6,6 +6,8 @@ const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', '
 const ARRIVAL = ['to', 'code', 'country', 'date', 'days', 'from', 'with', 'line', 'photo'];
 const DEPARTURE = ['to', 'code', 'date', 'from', 'line'];
 const HOME = ['city', 'airport', 'timeZone'];
+// Where every flight leaves from, unless a trip names its own airport: from Fred (his choice, 2026-10-01).
+export const ORIGIN = 'FRED';
 
 // What a flap can show: upper case, no accents, anything else becomes a blank flap.
 export function flapText(text) {
@@ -60,7 +62,7 @@ export function parseTravel(data, today) {
   const arrivals = list(data.arrivals ?? [], ARRIVAL, false, 'arrivals', errors);
   const departures = list(data.departures ?? [], DEPARTURE, true, 'departures', errors);
   // Flight numbers run in the order the trips happened; the board shows the latest first.
-  arrivals.sort((a, b) => a.date.key - b.date.key || a.order - b.order).forEach((trip, index) => { trip.number = index + 1; trip.from ||= home.airport; trip.status = 'ARRIVED'; });
+  arrivals.sort((a, b) => a.date.key - b.date.key || a.order - b.order).forEach((trip, index) => { trip.number = index + 1; trip.from ||= ORIGIN; trip.status = 'ARRIVED'; });
   arrivals.reverse();
   if (arrivals[0]) arrivals[0].live = true;
   const day = today.year * 10000 + today.month * 100 + today.day;
@@ -69,7 +71,7 @@ export function parseTravel(data, today) {
   const passed = trip => trip.date && (trip.date.exact ? trip.date.key < day : trip.date.year * 100 + trip.date.month < today.year * 100 + today.month);
   let boarding = false;
   departures.forEach((trip, index) => {
-    trip.number = arrivals.length + index + 1; trip.from ||= home.airport;
+    trip.number = arrivals.length + index + 1; trip.from ||= ORIGIN;
     trip.status = !trip.date ? 'SOMEDAY' : passed(trip) ? 'DELAYED' : boarding ? 'SCHEDULED' : 'BOARDING';
     if (trip.status === 'BOARDING') boarding = trip.live = true;
   });

@@ -1,24 +1,39 @@
-// Fred 的旅行翻牌屏。⚠ 下面的行程都是占位示例，换成你自己的（填写说明见 docs/旅行行程-填写.md）。
-// home：时钟显示哪座城市的本地时间；airport 是默认出发机场。
-// arrivals（去过的）：{ to: "REYKJAVIK", code: "KEF", country: "冰岛", date: "2024-10-12", days: 7, with: "小林、阿杰", line: "一句话", photo: "kef-2024.jpg" }
-//   to 用英文，最多 12 个字母；date 可以只写到月（"2024-10"）；with / line / photo / from 选填；照片放进 photos/ 文件夹。
-// departures（想去的）：{ to: "LISBON", code: "LIS", date: "2027-03", line: "一句话" }，date 不写就是 SOMEDAY。
-// 顺序随便写，页面会按日期排好并编航班号。改完运行 node scripts/check-travel.mjs 检查格式。
+// Fred 的旅行翻牌屏。由 node scripts/import-travel.mjs 从 docs/旅行行程-填写.md 生成——改那份表，再运行一次命令。
 export default {
-  home: { city: "Madison", airport: "MSN", timeZone: "America/Chicago" },
+  home: {city: "Madison", airport: "MSN", timeZone: "America/Chicago"},
   arrivals: [
-    { to: "Kyoto", code: "KIX", country: "日本", date: "2025-04-03", days: 6, with: "独自", line: "（占位）清晨的哲学之道，樱花落了一地。" },
-    { to: "Reykjavik", code: "KEF", country: "冰岛", date: "2024-10-12", days: 7, with: "小林、阿杰", line: "（占位）在黑沙滩上等了一整晚，极光最后还是来了。" },
-    { to: "New York", code: "JFK", country: "美国", date: "2024-07-02", days: 4, with: "室友", line: "（占位）凌晨两点的时代广场比白天还亮。" },
-    { to: "Tokyo", code: "HND", country: "日本", date: "2023-12-20", days: 9, with: "家人", line: "（占位）跨年夜在涩谷十字路口被人群推着走。" },
-    { to: "Banff", code: "YYC", country: "加拿大", date: "2023-08-14", days: 5, with: "小林", line: "（占位）梦莲湖的颜色，照片拍不出来。" },
-    { to: "Chicago", code: "ORD", country: "美国", date: "2022-11", days: 3, line: "（占位）第一次一个人坐火车出门。" },
-    { to: "Shanghai", code: "PVG", country: "中国", date: "2019-08-01", days: 12, with: "爸妈", line: "（占位）出国前的最后一个夏天。" },
+    {to: "WUHAN", code: "WUH", country: "China", date: "2026-06", days: 4, photo: "wuh-2026-06.jpg"},
+    {to: "HAWAII", code: "KOA", country: "United States", date: "2026-05", days: 10, photo: "koa-2026-05-2.jpg"},
+    {to: "BUFFALO", code: "BUF", country: "United States", date: "2026-03", days: 3, photo: "buf-2026-03.jpg"},
+    {to: "CANCUN", code: "CUN", country: "Mexico", date: "2026-02", days: 5, photo: "cun-2026-02.jpg"},
+    {to: "Rapa Nui", code: "IPC", country: "Chile", date: "2026-01", days: 3, photo: "ipc-2026-01.jpg"},
+    {to: "CHILE", code: "SCL", country: "Chile", date: "2026-01", days: 10, photo: "scl-2026-01.jpg"},
+    {to: "PERU", code: "LIM", country: "Peru", date: "2026-01", days: 4, photo: "pcl-2026-01.jpg"},
+    {to: "MIAMI", code: "MIA", country: "United States", date: "2025-12", days: 7, photo: "mia-2025-12.jpg"},
+    {to: "NEW YORK", code: "EWR", country: "United States", date: "2025-11", days: 3, photo: "ewr-2025-11.jpg"},
+    {to: "QINGHAI", code: "XNN", country: "China", date: "2025-07", days: 7, photo: "goq-2025-07.jpg"},
+    {to: "SALT LAKE", code: "SLC", country: "United States", date: "2025-05", days: 7, photo: "slc-2025-05.jpg"},
+    {to: "MADISON", code: "MSN", country: "United States", date: "2025-05", days: 3, photo: "mke-2025-05.jpg"},
+    {to: "DENVER", code: "DEN", country: "United States", date: "2025-04", days: 4, photo: "den-2025-04.jpg"},
+    {to: "NEW MEXICO", code: "ABQ", country: "United States", date: "2025-04", days: 5, photo: "abq-2025-04.jpg"},
+    {to: "UTAH", code: "LAS", country: "United States", date: "2025-01", days: 10, photo: "las-2025-01.jpg"},
+    {to: "OSAKA", code: "ITM", country: "Japan", date: "2024-05", days: 5, photo: "itm-2024-05.jpg"},
+    {to: "TOKYO", code: "HND", country: "Japan", date: "2024-05", days: 5, photo: "hnd-2024-05-2.jpg"},
+    {to: "SEATTLE", code: "SEA", country: "United States", date: "2023-06", days: 7, photo: "sea-2023-06.jpg"},
+    {to: "SAN FRAN", code: "SFO", country: "United States", date: "2023-05", days: 7, photo: "sfo-2023-05.jpg"},
+    {to: "ARIZONA", code: "PHX", country: "United States", date: "2023-03", days: 7, photo: "phx-2023-03.jpg"},
+    {to: "CHENGDU", code: "CTU", country: "China", date: "2021-07", days: 4, photo: "ctu-2021-07.jpg"},
+    {to: "Chongqing", code: "CKG", country: "China", date: "2021-07", days: 3, photo: "ckg-2021-07.jpg"},
+    {to: "UTAH", code: "CDC", country: "United States", date: "2020-04", days: 2, photo: "cdc-2020-04.jpg"},
+    {to: "Las Vegas", code: "LAS", country: "United States", date: "2019-11", days: 4, photo: "las-2019-11.jpg"},
+    {to: "Los Angeles", code: "LAX", country: "United States", date: "2019-10", days: 5},
   ],
   departures: [
-    { to: "Lisbon", code: "LIS", line: "（占位）想在 28 路电车上晃一整个下午。" },
-    { to: "Patagonia", code: "FTE", date: "2027-01", line: "（占位）去看冰川崩塌的声音。" },
-    { to: "Seoul", code: "ICN", date: "2026-12-18", line: "（占位）冬天吃一顿烤肉。" },
-    { to: "Marrakech", code: "RAK" },
+    {to: "XINJIANG", code: "URC"},
+    {to: "AUSTRALIA", code: "SYD"},
+    {to: "ITALY", code: "FCO"},
+    {to: "NEW ZEALAND", code: "AKL"},
+    {to: "BALI ISLAND", code: "DPS"},
+    {to: "ICELAND", code: "KEF"},
   ],
 };

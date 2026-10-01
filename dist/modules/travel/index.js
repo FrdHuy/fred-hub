@@ -1,9 +1,9 @@
-import data from './data.js?v=44';
-import { parseTravel, stats, pax, localNow, monthYear, passDate, flight, pad2, FIELD } from './trips.js?v=44';
-import { createWord } from './flap.js?v=44';
-import { play as sound } from '../../sound.js?v=44';
-import notes from '../stories/data.js?v=44';
-import { noteForTrip } from '../stories/notes.js?v=44';
+import data from './data.js?v=45';
+import { parseTravel, stats, pax, localNow, monthYear, passDate, flight, pad2, FIELD } from './trips.js?v=45';
+import { createWord } from './flap.js?v=45';
+import { play as sound } from '../../sound.js?v=45';
+import notes from '../stories/data.js?v=45';
+import { noteForTrip } from '../stories/notes.js?v=45';
 import { collectionPath } from '../../router.js';
 
 const esc = text => String(text).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -27,13 +27,15 @@ export function mount({ container, route }) {
   let mode = 'arr', openRow = null;
 
   const hall = document.createElement('section'); hall.className = 'tv'; hall.lang = 'zh-CN';
+  // The PAX column only appears once some trip was taken with someone.
+  const company = [...travel.arrivals, ...travel.departures].some(trip => pax(trip) > 1);
   hall.innerHTML = `<h1 class="tv-sr">旅行足迹</h1>
 <div class="tv-top"><div class="tv-title"></div>
 <button class="tv-switch" type="button" role="switch" aria-checked="false" aria-label="显示想去的地方（DEPARTURES）"><span data-mode="arr"><i></i>ARR</span><span data-mode="dep"><i></i>DEP</span></button>
 <div class="tv-clock"></div><p class="tv-meta"></p><p class="tv-place">${esc(travel.home.city)} · LOCAL TIME</p></div>
 <div class="tv-band" aria-hidden="true"></div>
-<div class="tv-head" aria-hidden="true"><span>DATE / FLIGHT</span><span>DESTINATION</span><span>PAX</span><span>DAYS</span><span>LOG</span><span>REMARKS</span></div>
-<ol class="tv-rows"></ol><p class="tv-foot" aria-hidden="true">FRED AIR · ${esc(travel.home.airport)}</p>`;
+<div class="tv-head" aria-hidden="true"><span>DATE / FLIGHT</span><span>DESTINATION</span><span>${company ? 'PAX' : ''}</span><span>DAYS</span><span>LOG</span><span>REMARKS</span></div>
+<ol class="tv-rows"></ol><p class="tv-foot" aria-hidden="true">FRED AIR</p>`;
   container.append(hall);
   const $ = selector => hall.querySelector(selector);
   const rows = $('.tv-rows'), toggle = $('.tv-switch'), meta = $('.tv-meta');
@@ -66,7 +68,7 @@ export function mount({ container, route }) {
     const when = trip.date ? `${trip.date.year}年${trip.date.month}月` : '日期未定';
     button.innerHTML = `<span class="tv-sr">${esc(trip.to)}，${when}${trip.days ? `，${trip.days} 天` : ''}，${trip.status}</span>
 <span class="tv-info" aria-hidden="true"><b>${monthYear(trip.date)}</b>${flight(trip.number)} · ${trip.code}</span><span class="tv-dest"></span>
-<span class="tv-pax" aria-hidden="true">${mode === 'arr' ? `<b>${pad2(pax(trip))}</b>` : '<b>—</b>'}</span><span class="tv-days" aria-hidden="true">${days}</span><span class="tv-mark" aria-hidden="true">${log(trip) ? '<i>LOG</i>' : ''}</span><span class="tv-status" aria-hidden="true"><i></i>${trip.status}</span>`;
+<span class="tv-pax" aria-hidden="true">${!company ? '' : mode === 'arr' ? `<b>${pad2(pax(trip))}</b>` : '<b>—</b>'}</span><span class="tv-days" aria-hidden="true">${days}</span><span class="tv-mark" aria-hidden="true">${log(trip) ? '<i>LOG</i>' : ''}</span><span class="tv-status" aria-hidden="true"><i></i>${trip.status}</span>`;
     button.setAttribute('aria-expanded', 'false');
     const word = createWord(FIELD, 'm', { signal, reduced });
     button.querySelector('.tv-dest').append(word.el);
@@ -92,7 +94,7 @@ export function mount({ container, route }) {
     const sky = SKIES[hash(trip.code) % SKIES.length];
     const art = trip.photo ? `<img src="${photo(trip.photo)}" alt="" loading="lazy">` : `<span class="tv-sky" style="--a:${sky[0]};--b:${sky[1]};--c:${sky[2]}"><b>${trip.code}</b></span>`;
     const fields = mode === 'arr'
-      ? [['DATE', passDate(trip.date)], ['DAYS', pad2(trip.days)], ['WITH', trip.with || '独自'], ['SEAT', '01 A']]
+      ? [['DATE', passDate(trip.date)], ['DAYS', pad2(trip.days)], ...(trip.with ? [['WITH', trip.with]] : []), ['SEAT', '01 A']]
       : [['DATE', passDate(trip.date)], ['STATUS', trip.status], ['SEAT', '01 A']];
     return `<div class="tv-slot"></div><div class="tv-pass"><div class="tv-photo">${art}</div>
 <div class="tv-main"><div class="tv-air"><span>FRED AIR · BOARDING PASS</span><span>Nº ${String(trip.number).padStart(3, "0")}</span></div>
