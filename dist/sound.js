@@ -48,6 +48,7 @@ const VOICES = {
   halt() { click(420, .06, .22); tone(70, .12, .1); },               // the key springs up at the end of the side
   roll() { click(900, .05, .16); for (let i = 0; i < 5; i++) click(2200 - i * 260, .018, .07 - i * .01, .09 + i * .07 * (1 - i * .08)); tone(120, .08, .08, { at: .02 }); }, // a capsule falls, bounces, rolls to the flap
   pop() { click(1800, .015, .16); click(3200, .01, .08, .01); tone(420, .07, .06, { at: .005, to: 260 }); }, // a capsule's catch lets go
+  chime() { [1047, 1319, 1568, 2093].forEach((f, i) => { tone(f, .7, .06, { at: i * .11 }); tone(f * 2, .4, .014, { at: i * .11 }); }); }, // four small bells, rising: a door found
   paper() {                                                      // a sheet lifted off the desk: a soft rising swish
     const t = ctx.currentTime, source = ctx.createBufferSource(), filter = ctx.createBiquadFilter(), amp = ctx.createGain();
     source.buffer = noise; filter.type = 'bandpass'; filter.Q.value = .7;

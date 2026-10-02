@@ -66,6 +66,7 @@ export function machineMarkup({ seed = 1, mode = 0, sign = 0 } = {}) {
 <div class="gc-thumb"></div><i class="gc-switch"></i>
 <svg class="gc-mark sign" viewBox="0 0 10 10"><path d="M3 1.5h4v7H3zM3 4h4"/></svg>
 <svg class="gc-mark game" viewBox="0 0 10 10"><rect x="1.5" y="1.5" width="7" height="7" rx="1.5"/><circle cx="3.7" cy="3.7" r=".5"/><circle cx="6.3" cy="6.3" r=".5"/></svg>
+<svg class="gc-mark ours" viewBox="0 0 10 10"><path d="M5 8.3C2.2 6.4 1.3 5 1.3 3.7a1.9 1.9 0 0 1 3.7-.6 1.9 1.9 0 0 1 3.7.6C8.7 5 7.8 6.4 5 8.3z"/></svg>
 <span class="gc-word">Fred.</span>
 </div>`;
 }

@@ -1,6 +1,5 @@
 // 真心话大冒险 and the easter eggs. The question bank: one per line, 「真：」or「冒：」. Fred edits it freely.
 export const BANK = `
-真：你手机相册里最近一张截图是什么？
 真：最近一次哭是因为什么？
 真：在座的人里，你对谁的第一印象和现在差别最大？
 真：你做过最后悔的一件小事是什么？

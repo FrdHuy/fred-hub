@@ -43,6 +43,12 @@
 .gc-mark{position:absolute;z-index:4;right:calc(12*var(--u));width:calc(9*var(--u));height:calc(9*var(--u));fill:none;stroke:#8a8e82;stroke-width:1.1}
 .gc-mark circle{fill:#8a8e82;stroke:none}
 .gc-mark.sign{top:calc(290*var(--u))}.gc-mark.game{top:calc(322*var(--u))}
+/* the third mark and the warm-pink chamber: only once the hidden door is open */
+.gc-mark.ours{top:calc(344*var(--u));opacity:0;stroke:#b98a80;transition:opacity .6s}
+.gc.is-couple .gc-mark.ours{opacity:1}
+.gc.is-couple{--tint:228 200 192}
+.gc.is-blooming .gc-chamber{animation:gc-bloom 1.3s ease-in-out}
+@keyframes gc-bloom{0%{filter:none}26%{filter:brightness(1.22) saturate(.5)}100%{filter:none}}
 .gc-word{position:absolute;z-index:4;left:calc(22*var(--u));bottom:calc(26*var(--u));font:600 calc(12*var(--u)) var(--font-wordmark);letter-spacing:-.04em;color:#5b6353}
 
 /* ——— Capsules: a clear dome, the shaded opening of the cup with the folded slip in it, the matte cup ——— */

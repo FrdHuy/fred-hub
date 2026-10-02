@@ -1,8 +1,10 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=46';
-import { unwrap, STEP, FULL } from './machine-home.js?v=46';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=46';
-import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=46';
-import { play as sound } from '../../sound.js?v=46';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=47';
+import { unwrap, STEP, FULL } from './machine-home.js?v=47';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=47';
+import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=47';
+import { play as sound } from '../../sound.js?v=47';
+import SEALED from './couple.js?v=47';
+import { unseal } from '../stories/seal.js?v=47';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -17,7 +19,7 @@ export function mount({ container }) {
   const motion = matchMedia('(prefers-reduced-motion: reduce)'), reduced = () => motion.matches;
   const narrow = matchMedia('(max-width: 900px)');
   const rnd = random(Date.now() % 1e9);
-  const questions = parseBank(BANK), draw = createDeck(questions, rnd);
+  const everyone = parseBank(BANK); let draw = createDeck(everyone, rnd);
   let sign = Math.max(0, Math.min(11, Number(store.get('fred-gacha-sign')) || 0)), mode = store.get('fred-gacha-mode') === '1' ? 1 : 0;
   let layer = 0;
 
@@ -45,7 +47,7 @@ export function mount({ container }) {
     const a = angleAround(crank, e), d = unwrap(a - crankDrag.last); crankDrag.last = a; crankDrag.moved += Math.abs(d);
     let next = Math.max(0, turn + d);
     if (Math.floor(next / STEP) > Math.floor(turn / STEP)) sound('tick');
-    if (next >= FULL) { next -= FULL; dispense(); }
+    if (next >= FULL) { next -= FULL; turned(); }
     setTurn(next);
   }, { signal });
   const crankUp = e => {
@@ -66,16 +68,42 @@ export function mount({ container }) {
   let turning = false;
   function autoTurn() {
     if (turning) return; turning = true;
-    if (reduced()) { dispense(); turning = false; return; }
+    if (reduced()) { turned(); turning = false; return; }
     const from = turn, start = performance.now();
     const step = now => {
       const k = Math.min(1, (now - start) / 820), deg = from + (FULL - from) * (1 - (1 - k) ** 2);
       if (Math.floor(deg / STEP) > Math.floor(turn / STEP)) sound('tick');
       setTurn(deg);
-      if (k < 1) spring = requestAnimationFrame(step); else { setTurn(0); dispense(); turning = false; }
+      if (k < 1) spring = requestAnimationFrame(step); else { setTurn(0); turned(); turning = false; }
     };
     spring = requestAnimationFrame(step);
   }
+
+  // ——— The hidden door (for two): slider up, up, down, down · knob left, right, left, right · one turn of the crank ———
+  // The presses themselves are the key: the extra questions are sealed with them (couple.js), nothing in the site says what they are.
+  const presses = []; let couple = false;
+  const press = k => { presses.push(k); if (presses.length > 8) presses.shift(); };
+  async function turned() {
+    const tried = presses.length === 8 ? presses.join('') : ''; presses.length = 0;
+    const extra = tried ? await unseal(SEALED, tried) : null;
+    if (!extra) { dispense(); return; }
+    if (couple) { leave(); return; }
+    enter(extra, tried, true);
+  }
+  function enter(extra, key, celebrate) {
+    couple = true; store.set('fred-gacha-key', key);
+    draw = createDeck([...everyone, ...extra.map((q, i) => ({ ...q, no: everyone.length + i + 1, ours: true }))], rnd);
+    if (!celebrate || reduced()) { machine.classList.add('is-couple'); return; }
+    // the chamber blooms into warm pink, every capsule jumps, the third mark lights up, a small chime
+    sound('chime');
+    machine.classList.add('is-blooming');
+    for (const egg of machine.querySelectorAll('.gc-chamber .gc-egg')) egg.animate([{ translate: '0 0' }, { translate: `${(Math.random() - .5) * 6}px -${6 + Math.random() * 10}px` }, { translate: '0 2px' }, { translate: '0 0' }], { duration: 520 + Math.random() * 260, delay: Math.random() * 260, easing: 'cubic-bezier(.3,.7,.3,1)' });
+    setTimeout(() => machine.classList.add('is-couple'), 340);
+    setTimeout(() => machine.classList.remove('is-blooming'), 1300);
+  }
+  function leave() { couple = false; store.set('fred-gacha-key', ''); draw = createDeck(everyone, rnd); machine.classList.remove('is-couple'); sound('key'); }
+  // On this device the door stays open once found.
+  { const key = store.get('fred-gacha-key'); if (key) unseal(SEALED, key).then(extra => { if (extra) enter(extra, key, false); }); }
 
   // ——— A capsule falls into the chute and rolls out onto the desk ———
   function dispense() {
@@ -184,7 +212,7 @@ export function mount({ container }) {
     } else if (item.type === 'slip') {
       el.className = 'gcr-slip'; el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '翻面'); el.innerHTML = twoSided(item);
     } else if (item.type === 'card') {
-      el.className = 'gcr-card'; el.innerHTML = `<small>Nº ${String(item.no).padStart(3, '0')} · ${item.kind === 'truth' ? 'TRUTH' : 'DARE'}</small><b>${item.kind === 'truth' ? '真心话' : '大冒险'}</b><p>${esc(item.text)}</p>`;
+      el.className = 'gcr-card'; el.innerHTML = `<small>Nº ${String(item.no).padStart(3, '0')} · ${item.kind === 'truth' ? 'TRUTH' : 'DARE'}${item.ours ? ' · ♡' : ''}</small><b>${item.kind === 'truth' ? '真心话' : '大冒险'}</b><p>${esc(item.text)}</p>`;
     } else {
       el.className = 'gcr-card note' + (item.special ? ' special' : ''); el.innerHTML = `<small>${item.special ? '✦' : '·'}</small><b>${esc(item.title)}</b><p>${esc(item.text)}</p>`;
     }
@@ -240,14 +268,18 @@ export function mount({ container }) {
     const a = (angleAround(knob, e) + 90 + 360) % 360;   // 0° = straight up = Aries
     setSign(Math.round(a / 30) % 12);
   }, { signal });
-  const knobUp = e => { if (!knobDrag || knobDrag.id !== e.pointerId) return; const tap = knobDrag.moved < 4; knobDrag = null; if (tap) setSign(sign + 1); };
+  const knobUp = e => { if (!knobDrag || knobDrag.id !== e.pointerId) return; const tap = knobDrag.moved < 4; knobDrag = null; if (!tap) return; const r = knob.getBoundingClientRect(), left = e.clientX < r.left + r.width / 2; press(left ? 'l' : 'r'); setSign(sign + (left ? -1 : 1)); };
   knob.addEventListener('pointerup', knobUp, { signal });
   knob.addEventListener('pointercancel', knobUp, { signal });
   // ——— The slider: 签 above, 游戏 below ———
   machine.addEventListener('click', e => {
     const hit = e.target.closest('.gc-switch'); if (!hit) return;
     const r = hit.getBoundingClientRect(), want = e.clientY > r.top + r.height / 2 ? 1 : 0;
-    setMode(want === mode ? 1 - mode : want);   // tap the other half to go there; tap the same half to flip
+    press(want ? 'd' : 'u');
+    if (want !== mode) { setMode(want); return; }
+    // already there: the thumb knocks against its stop and springs back, like a real switch
+    sound('tick');
+    if (!reduced()) machine.querySelector('.gc-thumb').animate([{ translate: '0 0' }, { translate: `0 ${want ? 3 : -3}px` }, { translate: '0 0' }], { duration: 160, easing: 'ease-out' });
   }, { signal });
 
   // Keyboard: Enter turns the crank; ←/→ turn the knob; Esc closes the slip first.

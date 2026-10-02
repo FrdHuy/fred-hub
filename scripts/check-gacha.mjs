@@ -76,3 +76,19 @@ assert.equal(LINGQIAN[2].poem[2], '衔得泥来成叠后');   // a recorded corr
 for (let s = 0; s < 12; s++) { const h = horoscope({ y: 2026, m: 9, d: 30 }, s); assert.equal(h.length, 5); for (const f of h) { assert.ok(f.stars >= 1 && f.stars <= 5 && f.text.length > 8); assert.ok(!/金星|木星|火星|土星|水星|月亮|宫|相位/.test(f.text), f.text); } }
 assert.deepEqual(scores({ y: 2026, m: 9, d: 30 }, 3), scores({ y: 2026, m: 9, d: 30 }, 3));
 console.log('PASS: 扭蛋机 — planets vs JPL, almanac vs published, 100 slips, fortunes');
+
+// The hidden door: the site carries only ciphertext, and the key is not written anywhere in dist/
+{
+  const { execFileSync } = await import('node:child_process');
+  const { unseal } = await import('../dist/modules/stories/seal.js');
+  const sealed = (await import('../dist/modules/gacha/couple.js')).default;
+  const source = readFileSync(new URL('../notes/couple-bank.txt', import.meta.url), 'utf8');
+  const key = source.match(/暗号[^：:]*[：:]\s*([udlr]{4,})/i)[1];
+  const extra = await unseal(sealed, key);
+  assert.ok(Array.isArray(extra) && extra.length >= 20 && extra.every(q => (q.kind === 'truth' || q.kind === 'dare') && q.text));
+  assert.equal(await unseal(sealed, 'udududud'), null, 'a wrong sequence opens nothing');
+  const first = extra[0].text.slice(0, 8);
+  let leaked = ''; try { leaked = execFileSync('grep', ['-rl', '-e', key, '-e', first, 'dist'], { encoding: 'utf8' }); } catch {}
+  assert.equal(leaked.trim(), '', 'neither the key nor the questions appear in dist/');
+  console.log(`PASS: 扭蛋机 — hidden door (${extra.length} sealed questions, nothing readable in dist/)`);
+}

@@ -1,4 +1,4 @@
-import { play as sound } from '../../sound.js?v=46';
+import { play as sound } from '../../sound.js?v=47';
 
 // The typewriter's moving parts, shared by the home object and the password screen.
 // The carriage (platen, paper, knobs, bail) steps left one character per keystroke, so the typing point stays put while the
