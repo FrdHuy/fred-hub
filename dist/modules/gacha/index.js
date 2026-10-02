@@ -1,8 +1,8 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=45';
-import { unwrap, STEP, FULL } from './machine-home.js?v=45';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=45';
-import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=45';
-import { play as sound } from '../../sound.js?v=45';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=46';
+import { unwrap, STEP, FULL } from './machine-home.js?v=46';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=46';
+import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=46';
+import { play as sound } from '../../sound.js?v=46';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };

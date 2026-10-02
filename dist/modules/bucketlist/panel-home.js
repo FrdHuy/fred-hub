@@ -1,6 +1,6 @@
-import { parseItems } from './items.js?v=45';
-import { play as sound } from '../../sound.js?v=45';
-import { lampStates, litCount, leverPosition, LEVER_THRESHOLD, pad, SLOTS } from './panel.js?v=45';
+import { parseItems } from './items.js?v=46';
+import { play as sound } from '../../sound.js?v=46';
+import { lampStates, litCount, leverPosition, LEVER_THRESHOLD, pad, SLOTS } from './panel.js?v=46';
 
 // Home controller: drag the lever up past its threshold (or tap) → self-test → lamps settle on real progress.
 export function createPanel(cover, { reduced }) {

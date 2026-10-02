@@ -1,4 +1,4 @@
-import { play as sound } from '../../sound.js?v=45';
+import { play as sound } from '../../sound.js?v=46';
 
 // Home controller for the walkman: press the red PLAY key down (drag, or tap / Enter for an automatic press).
 // Past the threshold the key latches, the motor starts — reels turning, the running light on, the VU needle lifting —
