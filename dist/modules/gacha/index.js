@@ -1,10 +1,10 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=48';
-import { unwrap, STEP, FULL } from './machine-home.js?v=48';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=48';
-import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=48';
-import { play as sound } from '../../sound.js?v=48';
-import SEALED from './couple.js?v=48';
-import { unseal } from '../stories/seal.js?v=48';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=49';
+import { unwrap, STEP, FULL } from './machine-home.js?v=49';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=49';
+import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=49';
+import { play as sound } from '../../sound.js?v=49';
+import SEALED from './couple.js?v=49';
+import { unseal } from '../stories/seal.js?v=49';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -91,7 +91,7 @@ export function mount({ container }) {
     enter(extra, tried, true);
   }
   function enter(extra, key, celebrate) {
-    couple = true; store.set('fred-gacha-key', key);
+    couple = true;
     draw = createDeck([...everyone, ...extra.map((q, i) => ({ ...q, no: everyone.length + i + 1, ours: true }))], rnd);
     if (!celebrate || reduced()) { machine.classList.add('is-couple'); return; }
     // the chamber blooms into warm pink, every capsule jumps, the third mark lights up, a small chime
@@ -101,9 +101,9 @@ export function mount({ container }) {
     setTimeout(() => machine.classList.add('is-couple'), 340);
     setTimeout(() => machine.classList.remove('is-blooming'), 1300);
   }
-  function leave() { couple = false; store.set('fred-gacha-key', ''); draw = createDeck(everyone, rnd); machine.classList.remove('is-couple'); sound('key'); }
-  // On this device the door stays open once found.
-  { const key = store.get('fred-gacha-key'); if (key) unseal(SEALED, key).then(extra => { if (extra) enter(extra, key, false); }); }
+  function leave() { couple = false; draw = createDeck(everyone, rnd); machine.classList.remove('is-couple'); sound('key'); }
+  // The door closes behind you: leaving the room (or reloading) brings back the ordinary machine.
+  try { localStorage.removeItem('fred-gacha-key'); } catch {}   // a key remembered by an earlier version
 
   // ——— A capsule falls into the chute and rolls out onto the desk ———
   function dispense() {
