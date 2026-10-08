@@ -1,12 +1,13 @@
-import data from './data.js?v=50';
-import { TYPES, dotDate, sortNotes, years } from './notes.js?v=50';
-import { unseal } from './seal.js?v=50';
-import { typewriterMarkup } from './typewriter.js?v=50';
-import { strike as strikeKey, setCarriage, carriageReturn, feed } from './carriage.js?v=50';
-import travelData from '../travel/data.js?v=50';
-import { parseTravel, localNow, flight } from '../travel/trips.js?v=50';
+import data from './data.js?v=51';
+import { TYPES, dotDate, sortNotes, years } from './notes.js?v=51';
+import { unseal } from './seal.js?v=51';
+import { typewriterMarkup } from './typewriter.js?v=51';
+import { strike as strikeKey, setCarriage, carriageReturn, feed } from './carriage.js?v=51';
+import travelData from '../travel/data.js?v=51';
+import { parseTravel, localNow, flight } from '../travel/trips.js?v=51';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=50';
+import { play as sound } from '../../sound.js?v=51';
+import { getGuest } from './guest.js?v=51';
 
 const esc = text => String(text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const pad3 = n => String(n).padStart(3, '0');
@@ -37,7 +38,7 @@ export function mount({ container, route }) {
 
   // ——— The desk ———
   // The typed line at the top of every sheet, the same as on the typewriter's paper.
-  const kicker = note => `<span class="nt-kicker">Nº ${pad3(numbers.get(note.id))} · ${TYPES[note.type]}</span>`;
+  const kicker = note => `<span class="nt-kicker">${numbers.has(note.id) ? `Nº ${pad3(numbers.get(note.id))} · ` : ''}${TYPES[note.type]}</span>`;
   function sheet(note) {
     const [deg, drop] = tilt(note.id), locked = note.locked && !unlocked.has(note.id), trip = tripFor(note);
     const where = trip ? `${flight(trip.number)} · ${trip.code}` : note.place ? esc(note.place.toUpperCase()) : '';
@@ -64,11 +65,13 @@ ${list.length ? `<ol class="nt-sheets">${list.map(sheet).join('')}</ol>` : '<p c
   }
   function read(note, body) {
     setBack(true);
-    const list = notes, i = list.indexOf(note), newer = list[i - 1], older = list[i + 1];
+    // a letter handed over from another room goes back there, not to the desk
+    if (note.back && back) back.href = note.back;
+    const list = notes, i = list.indexOf(note), newer = i < 0 ? null : list[i - 1], older = i < 0 ? null : list[i + 1];
     const link = (n, label) => n ? `<a href="${collectionPath('stories', n.id)}"><small>${label}</small>${esc(n.title)}</a>` : '<span></span>';
     room.innerHTML = `<article class="nt-read"><div class="nt-read-top">${kicker(note)}<span class="nt-chips">${chips(note)}</span></div>
 <h1>${esc(note.title)}</h1><p class="nt-meta">${[dotDate(note.date), note.place?.toUpperCase(), `${note.minutes} MIN`].filter(Boolean).map(esc).join(' · ')}</p>
-<div class="nt-body">${body.html}</div><p class="nt-fin">— FIN —</p></article>
+<div class="nt-body">${body.html}</div>${note.sign ? `<p class="nt-sign">${esc(note.sign)}</p>` : '<p class="nt-fin">— FIN —</p>'}</article>
 <nav class="nt-next" aria-label="上一篇 / 下一篇">${link(older, '← EARLIER')}${link(newer, 'LATER →')}</nav>`;
     window.scrollTo({ top: 0, behavior: 'instant' });
     // Prints in a row share one height: each takes a width in proportion to its own shape.
@@ -146,6 +149,8 @@ ${list.length ? `<ol class="nt-sheets">${list.map(sheet).join('')}</ol>` : '<p c
   // ——— Routing inside the module ———
   const currentId = () => { const m = location.hash.match(/^#\/collection\/stories\/([^/]+)$/); return m ? decodeURIComponent(m[1]) : null; };
   async function show(sub) {
+    const guest = getGuest();
+    if (guest && sub === guest.id) { closeLock(); read(guest, guest); return; }
     const note = sub && notes.find(n => n.id === sub);
     if (!note) { closeLock(); desk(); return; }
     if (!note.locked) { closeLock(); read(note, note); return; }
@@ -164,7 +169,7 @@ ${list.length ? `<ol class="nt-sheets">${list.map(sheet).join('')}</ol>` : '<p c
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape' || document.getElementById('module-menu')?.hidden === false) return;
     if (lockNote) { e.stopPropagation(); leaveLock(); return; }
-    if (currentId()) { e.stopPropagation(); location.hash = collectionPath('stories'); }
+    if (currentId()) { e.stopPropagation(); const guest = getGuest(); location.hash = guest && currentId() === guest.id ? guest.back : collectionPath('stories'); }
   }, { signal, capture: true });
 
   show(route);

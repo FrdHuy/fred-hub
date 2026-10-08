@@ -1,5 +1,5 @@
 // Pure rules for the notes list (data.js is written by scripts/publish-notes.mjs). Shared by the page, the home cover and checks.
-export const TYPES = { travel: 'TRAVEL LOG', chapter: 'CHAPTER', essay: 'ESSAY', note: 'NOTE' };
+export const TYPES = { travel: 'TRAVEL LOG', chapter: 'CHAPTER', essay: 'ESSAY', note: 'NOTE', letter: 'LETTER' };
 // What Fred may write in a note's header: English or Chinese.
 export const TYPE_WORDS = { travel: 'travel', 游记: 'travel', chapter: 'chapter', 阶段: 'chapter', essay: 'essay', 随笔: 'essay', note: 'note', 短记: 'note' };
 export const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;

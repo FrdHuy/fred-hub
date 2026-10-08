@@ -7,3 +7,5 @@ checkpoints/
 scripts/.cache/
 *.swp
 *.swo
+# what belongs to the two of them stays on this machine (the site only carries ciphertext)
+notes/couple-*.txt

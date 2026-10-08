@@ -98,6 +98,7 @@
 [data-module="stories"] .nt-photos img{display:block;width:100%;height:auto;box-shadow:0 0 0 6px #fff,0 0 0 7px #e2ded3,0 8px 14px #3d3f2a26}
 [data-module="stories"] .nt-photos figure:nth-child(2){transform:rotate(1.2deg)}[data-module="stories"] .nt-photos figure:nth-child(3){transform:rotate(-.8deg)}
 [data-module="stories"] .nt-photos figcaption{margin-top:16px;font:500 10px/1.6 var(--font-mono);letter-spacing:.16em;color:var(--faint);text-align:center}
+[data-module="stories"] .nt-sign{margin:44px 0 0;text-align:right;font:400 20px/1.6 var(--font-literary);letter-spacing:.08em;color:#2a2f29}
 [data-module="stories"] .nt-fin{margin:40px 0 0;text-align:center;font:500 10px var(--font-mono);letter-spacing:.4em;color:var(--faint)}
 [data-module="stories"] .nt-next{display:flex;justify-content:space-between;gap:20px;max-width:700px;margin:26px auto 0}
 [data-module="stories"] .nt-next a{max-width:48%;font:13px/1.7 var(--font-ui);color:var(--soft);text-decoration:none}

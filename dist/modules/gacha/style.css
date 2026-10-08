@@ -119,6 +119,29 @@
 /* papers lie on the desk, the newest on top; older ones settle back */
 [data-module="gacha"] .gcr-slip,[data-module="gacha"] .gcr-card,[data-module="gacha"] .gcr-folded{position:absolute;left:50%;top:44%;transform:translate(calc(-50% + var(--ox,0px)),calc(-50% + var(--oy,0px))) rotate(var(--tilt,0deg)) scale(var(--k,1));transition:filter .4s,box-shadow .4s}
 [data-module="gacha"] .is-under{filter:brightness(.97)}
+/* behind the hidden door: a jewellery box (the lid lifts on its back hinge) and a sealed letter */
+[data-module="gacha"] .gcr-box,[data-module="gacha"] .gcr-letter{position:absolute;left:50%;transform:translate(calc(-50% + var(--ox,0px)),calc(-50% + var(--oy,0px))) rotate(var(--tilt,0deg));cursor:pointer}
+[data-module="gacha"] .gcr-box{top:62%;width:var(--b,240px);height:var(--b,240px);filter:none}
+.jb{position:absolute;inset:0;perspective:900px;perspective-origin:50% 30%}
+.jb-base{position:absolute;inset:0;border-radius:9%;background:linear-gradient(165deg,#56614d,#3c4537);box-shadow:0 0 0 .5px #23291f66,0 3px 4px #3d3f2a26,0 26px 40px -12px #3d3f2a66}
+.jb-pad{position:absolute;inset:6.5%;border-radius:5%;background:radial-gradient(120% 100% at 40% 25%,#fff,#f6f4ee 60%,#ebe8df);box-shadow:inset 0 2px 5px #3d3f2a33,inset 0 0 0 .5px #3d3f2a26}
+.jb-pad svg{display:block;width:100%;height:100%}
+.jb-lid{position:absolute;inset:0;transform-origin:50% 0;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.3,.85,.3,1)}
+.is-open>.jb .jb-lid{transform:rotateX(116deg)}
+.jb-out,.jb-in{position:absolute;inset:0;border-radius:9%;backface-visibility:hidden}
+.jb-out{background:linear-gradient(165deg,#5b6652,#414b3b 55%,#39422f);box-shadow:inset 0 1px 0 #ffffff26,inset 0 0 0 1px #2a302566,inset 0 0 0 5px #4a5443,inset 0 0 0 5.5px #c9c2a94d}
+.jb-out i{position:absolute;left:50%;bottom:4.5%;width:13%;height:3.6%;margin-left:-6.5%;border-radius:2px;background:linear-gradient(#f3f1ea,#bdb9ad 55%,#dcd8cc);box-shadow:0 0 0 .5px #3d3f2a66,0 1px 1px #0003}
+.jb-in{transform:rotateX(180deg);background:radial-gradient(110% 90% at 50% 40%,#fbf9f3,#ece8dd) padding-box,linear-gradient(#4b5544,#39422f) border-box;border:calc(var(--b,240px) * .065) solid transparent;box-shadow:0 0 0 .5px #23291f66}
+.jb-twinkle{opacity:0;transform-box:fill-box;transform-origin:center}
+.is-open .jb-twinkle{animation:jb-twinkle 3.2s 1s ease-in-out infinite}
+@keyframes jb-twinkle{0%,62%,100%{opacity:0;transform:scale(.3) rotate(0deg)}74%{opacity:1;transform:scale(1) rotate(20deg)}86%{opacity:0;transform:scale(.3) rotate(45deg)}}
+[data-module="gacha"] .gcr-letter{top:44%;width:280px;height:188px;border-radius:5px;background:linear-gradient(172deg,#fbf9f3,#f0ece1);box-shadow:0 0 0 .5px #3d3f2a1f,0 2px 3px #3d3f2a14,0 22px 36px -10px #3d3f2a33;overflow:hidden}
+[data-module="gacha"] .gcr-letter::before{content:"";position:absolute;inset:0;background:linear-gradient(#f6f3ea,#e9e4d6);clip-path:polygon(0 0,100% 0,50% 60%);filter:drop-shadow(0 1px 1px #3d3f2a40)}
+[data-module="gacha"] .gcr-letter::after{content:"";position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - .5px),#3d3f2a1a 50%,transparent calc(50% + .5px)) 0 100%/50% 46% no-repeat,linear-gradient(to top left,transparent calc(50% - .5px),#3d3f2a1a 50%,transparent calc(50% + .5px)) 100% 100%/50% 46% no-repeat}
+[data-module="gacha"] .gcr-letter i{position:absolute;left:50%;top:58%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;z-index:1;background:radial-gradient(circle at 36% 30%,#c65a43,#b34934 58%,#9e3d2b);box-shadow:0 1px 2px #3d3f2a59,inset 0 0 0 3px #b34934,inset 0 0 0 3.5px #ffffff33}
+/* read already: the envelope lies to one side, so the box stays in view */
+[data-module="gacha"] .gcr-letter.is-aside{left:24%;top:20%;scale:.62}
+@media (prefers-reduced-motion:reduce){.jb-lid{transition:none}.is-open .jb-twinkle{animation:none;opacity:.8}}
 [data-module="gacha"] .gcr-papers{perspective:1800px}
 [data-module="gacha"] .gcr-slip{width:400px;height:500px;cursor:pointer;perspective:1800px}
 /* the slip turns over inside its own box, so where it lies on the desk never changes */
@@ -184,4 +207,7 @@
   [data-module="gacha"] .gcr-card b{font-size:24px;margin:10px 0 8px}
   [data-module="gacha"] .gcr-card p{font-size:15px}
   [data-module="gacha"] .gcr-folded{top:50%}
+  [data-module="gacha"] .gcr-letter{top:50%;width:220px;height:148px}
+  [data-module="gacha"] .gcr-box{top:64%}
+  [data-module="gacha"] .gcr-letter.is-aside{left:22%;top:17%;scale:.5}
 }

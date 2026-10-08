@@ -1,10 +1,10 @@
-import { createInteraction } from './experience.js?v=50';
-import { soundOn, setSound } from './sound.js?v=50';
-import { mountModule } from './modules/index.js?v=50';
-import { modules, getModule, createCover } from './catalog.js?v=50';
-import { CollectionGallery } from './gallery.js?v=50';
+import { createInteraction } from './experience.js?v=51';
+import { soundOn, setSound } from './sound.js?v=51';
+import { mountModule } from './modules/index.js?v=51';
+import { modules, getModule, createCover } from './catalog.js?v=51';
+import { CollectionGallery } from './gallery.js?v=51';
 import { readRoute, navigate } from './router.js';
-import { attachSheen } from './sheen.js?v=50';
+import { attachSheen } from './sheen.js?v=51';
 
 const $ = selector => document.querySelector(selector);
 // Focus rings are for keyboard users. Script-moved focus after a click or tap stays invisible.

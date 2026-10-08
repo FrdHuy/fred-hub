@@ -7,12 +7,13 @@ const GLYPHS = [...'♈♉♊♋♌♍♎♏♐♑♒♓'].map(g => g + '︎');
 // Occasional eggs that look different; the frosted lamp egg is the rare special one.
 // Ordinary capsules come in ten styles (Fred, 2026-09-30); plain warm white is the most common.
 export const STYLES = ['', 'sage', 'stone', 'ink', 'tint', 'clear', 'clear star', 'mark', 'dots', 'stripe'];
-// Easter eggs: the pearl egg, and the rarer frosted lamp egg. They carry Fred's own things.
+// Easter eggs: the pearl egg and the frosted lamp egg. They exist only behind the hidden door (index.js):
+// the ordinary machine never shows or gives one.
 export const EASTER = ['pearl', 'frost'];
-export const PEARL_ODDS = 1 / 30, SPECIAL_ODDS = 1 / 40, PILE_SPECIAL = 1 / 4, PILE_PEARL = 1 / 3;
+export const PEARL_ODDS = 1 / 30, SPECIAL_ODDS = 1 / 40;
 export const styleOf = rnd => rnd() < .4 ? '' : STYLES[1 + Math.floor(rnd() * (STYLES.length - 1))];
-// What one turn of the crank gives.
-export function pickKind(rnd) { const r = rnd(); return r < SPECIAL_ODDS ? 'frost' : r < SPECIAL_ODDS + PEARL_ODDS ? 'pearl' : styleOf(rnd); }
+// What one turn of the crank gives. `easter` is true only behind the hidden door.
+export function pickKind(rnd, easter = false) { if (!easter) return styleOf(rnd); const r = rnd(); return r < SPECIAL_ODDS ? 'frost' : r < SPECIAL_ODDS + PEARL_ODDS ? 'pearl' : styleOf(rnd); }
 
 // A seeded generator, so a pile can be reproduced (checks) or drawn fresh on every visit (the page).
 export function random(seed = 1) { let s = (Math.floor(seed) % 2147483646) + 1; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
@@ -45,10 +46,6 @@ export function pile(rnd, { width = 276, floor = 218 } = {}) {
     }
     return eggs;
   });
-  // At most one lamp egg, and only now and then: in the front two layers, so it can be seen.
-  const place = kind => { const layer = out[1 + Math.floor(rnd() * 2)]; if (layer.length) layer[Math.floor(rnd() * layer.length)].kind = kind; };
-  if (rnd() < PILE_PEARL) place('pearl');
-  if (rnd() < PILE_SPECIAL) place('frost');
   return out;
 }
 

@@ -3,20 +3,19 @@ import assert from 'node:assert/strict';
 import { pile, random, machineMarkup, eggMarkup, STYLES, EASTER, pickKind, ZODIAC } from '../dist/modules/gacha/machine.js';
 import { unwrap, STEP, FULL } from '../dist/modules/gacha/machine-home.js';
 
-// The pile: reproducible from a seed, three layers, never more than one lamp egg, varieties only from the list.
+// The pile: reproducible from a seed, three layers, ordinary varieties only (the pearl and lamp eggs live behind the hidden door).
 assert.deepEqual(pile(random(7)), pile(random(7)));
 let lamps = 0;
 for (let seed = 1; seed <= 300; seed++) {
   const layers = pile(random(seed)); assert.equal(layers.length, 3);
-  const eggs = layers.flat(), frost = eggs.filter(e => e.kind === 'frost').length;
-  assert.ok(frost <= 1, 'at most one lamp egg in a pile'); lamps += frost;
+  const eggs = layers.flat(); lamps += eggs.filter(e => EASTER.includes(e.kind)).length;
   assert.ok(eggs.length > 40, 'the chamber is full');
-  for (const e of eggs) assert.ok(STYLES.includes(e.kind) || EASTER.includes(e.kind), e.kind);
-  assert.ok(eggs.filter(e => e.kind === 'pearl').length <= 1);
+  for (const e of eggs) assert.ok(STYLES.includes(e.kind), e.kind);
 }
-assert.ok(lamps > 30 && lamps < 120, `the lamp egg is seen now and then (${lamps}/300)`);
+assert.equal(lamps, 0, 'no pearl or lamp egg in the ordinary pile');
 assert.equal(ZODIAC.length, 12);
-{ const r = random(11), counts = {}; for (let i = 0; i < 20000; i++) { const k = pickKind(r); counts[k] = (counts[k] || 0) + 1; }
+{ const r = random(5); for (let i = 0; i < 20000; i++) assert.ok(STYLES.includes(pickKind(r)), 'the ordinary machine never gives a pearl or lamp egg'); }
+{ const r = random(11), counts = {}; for (let i = 0; i < 20000; i++) { const k = pickKind(r, true); counts[k] = (counts[k] || 0) + 1; }
   assert.ok(counts.frost > 300 && counts.frost < 700, 'the lamp egg ≈ 1/40 of turns'); assert.ok(counts.pearl > 450 && counts.pearl < 900, 'the pearl egg ≈ 1/30');
   assert.ok(STYLES.every(s => counts[s] > 300), 'every ordinary style turns up'); }
 
@@ -84,11 +83,15 @@ console.log('PASS: 扭蛋机 — planets vs JPL, almanac vs published, 100 slips
   const sealed = (await import('../dist/modules/gacha/couple.js')).default;
   const source = readFileSync(new URL('../notes/couple-bank.txt', import.meta.url), 'utf8');
   const key = source.match(/暗号[^：:]*[：:]\s*([udlr]{4,})/i)[1];
-  const extra = await unseal(sealed, key);
+  const found = await unseal(sealed, key), extra = found.questions, letter = found.letter;
   assert.ok(Array.isArray(extra) && extra.length >= 20 && extra.every(q => (q.kind === 'truth' || q.kind === 'dare') && q.text));
+  assert.ok(letter && letter.title && letter.paragraphs.length >= 3 && letter.paragraphs.every(p => typeof p === 'string' && p.length > 5), 'the letter is sealed with the questions');
   assert.equal(await unseal(sealed, 'udududud'), null, 'a wrong sequence opens nothing');
   const first = extra[0].text.slice(0, 8);
-  let leaked = ''; try { leaked = execFileSync('grep', ['-rl', '-e', key, '-e', first, 'dist'], { encoding: 'utf8' }); } catch {}
-  assert.equal(leaked.trim(), '', 'neither the key nor the questions appear in dist/');
-  console.log(`PASS: 扭蛋机 — hidden door (${extra.length} sealed questions, nothing readable in dist/)`);
+  const lines = letter.paragraphs.flatMap(p => ['-e', p.slice(0, 8)]);
+  let leaked = ''; try { leaked = execFileSync('grep', ['-rl', '-e', key, '-e', first, ...lines, 'dist'], { encoding: 'utf8' }); } catch {}
+  assert.equal(leaked.trim(), '', 'neither the key, the questions nor the letter appear in dist/');
+  const room = readFileSync(new URL('../dist/modules/gacha/index.js', import.meta.url), 'utf8');
+  assert.match(room, /PEARL_TURN = 8, LAMP_TURN = 9/, 'behind the door the 8th and 9th capsules are fixed');
+  console.log(`PASS: 扭蛋机 — hidden door (${extra.length} sealed questions and a letter, nothing readable in dist/)`);
 }

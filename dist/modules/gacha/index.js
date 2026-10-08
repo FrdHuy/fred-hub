@@ -1,15 +1,21 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=50';
-import { unwrap, STEP, FULL } from './machine-home.js?v=50';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=50';
-import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=50';
-import { play as sound } from '../../sound.js?v=50';
-import SEALED from './couple.js?v=50';
-import { unseal } from '../stories/seal.js?v=50';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=51';
+import { unwrap, STEP, FULL } from './machine-home.js?v=51';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=51';
+import { BANK, parseBank, createDeck } from './games.js?v=51';
+import { setGuest } from '../stories/guest.js?v=51';
+import { collectionPath } from '../../router.js';
+import { play as sound } from '../../sound.js?v=51';
+import SEALED from './couple.js?v=51';
+import { unseal } from '../stories/seal.js?v=51';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 const OPEN_AT = 200;          // degrees of twisting that open a capsule
 const MAX_WAITING = 4, MAX_PAPERS = 6, MAX_SHELLS = 12;
+// Behind the hidden door the 8th capsule is always the pearl egg and the 9th the lamp egg; after that they turn up by chance.
+const PEARL_TURN = 8, LAMP_TURN = 9;
+// Coming back from reading the letter, the door is still open and the box and the envelope are still on the desk.
+let resume = null;
 
 // 扭蛋机 room (docs/design/gashapon.md): the machine on the left, a clean desk on the right (phones: above / below).
 // Turn the crank a full circle → a capsule rolls onto the desk → hold it and twist → it pops open and its slip or card
@@ -81,34 +87,47 @@ export function mount({ container }) {
 
   // ——— The hidden door (for two): slider up, up, down, down · knob left, right, left, right · one turn of the crank ———
   // The presses themselves are the key: the extra questions are sealed with them (couple.js), nothing in the site says what they are.
-  const presses = []; let couple = false;
+  const presses = []; let couple = null, turns = 0, planted = [];   // couple: the unsealed things (questions, letter) while the door is open
   const press = k => { presses.push(k); if (presses.length > 8) presses.shift(); };
   async function turned() {
     const tried = presses.length === 8 ? presses.join('') : ''; presses.length = 0;
-    const extra = tried ? await unseal(SEALED, tried) : null;
-    if (!extra) { dispense(); return; }
+    const found = tried ? await unseal(SEALED, tried) : null;
+    if (!found) { dispense(); return; }
     if (couple) { leave(); return; }
-    enter(extra, tried, true);
+    enter(found, true);
   }
-  function enter(extra, key, celebrate) {
-    couple = true;
+  function enter(found, celebrate) {
+    couple = found; turns = 0;
+    const extra = found.questions ?? [];
     draw = createDeck([...everyone, ...extra.map((q, i) => ({ ...q, no: everyone.length + i + 1, ours: true }))], rnd);
-    if (!celebrate || reduced()) { machine.classList.add('is-couple'); return; }
+    const settle = () => { machine.classList.add('is-couple'); plant(); };
+    if (!celebrate || reduced()) { settle(); return; }
     // the chamber blooms into warm pink, every capsule jumps, the third mark lights up, a small chime
     sound('chime');
     machine.classList.add('is-blooming');
     for (const egg of machine.querySelectorAll('.gc-chamber .gc-egg')) egg.animate([{ translate: '0 0' }, { translate: `${(Math.random() - .5) * 6}px -${6 + Math.random() * 10}px` }, { translate: '0 2px' }, { translate: '0 0' }], { duration: 520 + Math.random() * 260, delay: Math.random() * 260, easing: 'cubic-bezier(.3,.7,.3,1)' });
-    setTimeout(() => machine.classList.add('is-couple'), 340);
+    setTimeout(settle, 340);
     setTimeout(() => machine.classList.remove('is-blooming'), 1300);
   }
-  function leave() { couple = false; draw = createDeck(everyone, rnd); machine.classList.remove('is-couple'); sound('key'); }
+  // Two capsules in the pile turn out to be the pearl egg and the lamp egg (they only exist behind the door).
+  function plant() {
+    const front = [...machine.querySelectorAll('.gc-layer.l2 .gc-egg')], mid = [...machine.querySelectorAll('.gc-layer.l1 .gc-egg')];
+    const swap = (el, kind) => { if (!el) return; planted.push([el, el.className, el.innerHTML]); el.className = `gc-egg ${kind}`; el.innerHTML = `<b class="gc-in"></b><b class="gc-out"></b><b class="gc-lip"></b>${kind === 'frost' ? '<b class="gc-core"></b>' : ''}`; };
+    swap(front[Math.floor(front.length * .3)], 'pearl'); swap(mid[Math.floor(mid.length * .7)] ?? front[front.length - 1], 'frost');
+  }
+  function leave() {
+    couple = null; draw = createDeck(everyone, rnd); machine.classList.remove('is-couple'); sound('key');
+    for (const [el, cls, html] of planted.splice(0)) { el.className = cls; el.innerHTML = html; }
+    papers.querySelectorAll('.gcr-box,.gcr-letter').forEach(el => el.remove());
+  }
   // The door closes behind you: leaving the room (or reloading) brings back the ordinary machine.
   try { localStorage.removeItem('fred-gacha-key'); } catch {}   // a key remembered by an earlier version
 
   // ——— A capsule falls into the chute and rolls out onto the desk ———
   function dispense() {
     if (eggs.children.length >= MAX_WAITING) { sound('error'); return; }
-    const kind = pickKind(rnd);
+    const n = couple ? ++turns : 0;
+    const kind = n === PEARL_TURN ? 'pearl' : n === LAMP_TURN ? 'frost' : pickKind(rnd, n > LAMP_TURN);
     const egg = { kind, mode, sign, id: Date.now() + rnd() };
     sound('reading');
     const size = narrow.matches ? 56 : 68;
@@ -183,10 +202,11 @@ export function mount({ container }) {
     while (shells.children.length > MAX_SHELLS) shells.firstElementChild.remove();
     if (!reduced()) pair.animate([{ transform: `translate(${at.x - x}px,${at.y - y}px) scale(1.3)`, opacity: .6 }, { transform: 'none', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.3,.7,.3,1)' });
   }
-  // What is inside: the lamp egg and the odd eggs carry Fred's things; otherwise a slip (签) or a question (游戏).
+  // What is inside: the pearl egg holds the jewellery box, the lamp egg the letter (both only behind the door);
+  // otherwise a slip (签) or a question (游戏).
   function content(egg) {
-    if (egg.kind === 'frost') return { type: 'note', special: true, ...SPECIAL };
-    if (egg.kind === 'pearl') return { type: 'note', ...PEARL };
+    if (egg.kind === 'pearl') return { type: 'gift' };
+    if (egg.kind === 'frost') return { type: 'letter' };
     if (egg.mode === 1) return { type: 'card', ...draw() };
     return { type: 'slip', ...todaySlip(today(), egg.sign) };
   }
@@ -213,28 +233,59 @@ export function mount({ container }) {
       el.className = 'gcr-slip'; el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '翻面'); el.innerHTML = twoSided(item);
     } else if (item.type === 'card') {
       el.className = 'gcr-card'; el.innerHTML = `<small>Nº ${String(item.no).padStart(3, '0')} · ${item.kind === 'truth' ? 'TRUTH' : 'DARE'}${item.ours ? ' · ♡' : ''}</small><b>${item.kind === 'truth' ? '真心话' : '大冒险'}</b><p>${esc(item.text)}</p>`;
+    } else if (item.type === 'gift') {
+      papers.querySelectorAll('.gcr-box').forEach(old => old.remove());   // there is only one box
+      el.className = 'gcr-box' + (item.open ? ' is-open' : ''); el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '打开首饰盒'); el.innerHTML = BOX; el.style.zIndex = 900;
     } else {
-      el.className = 'gcr-card note' + (item.special ? ' special' : ''); el.innerHTML = `<small>${item.special ? '✦' : '·'}</small><b>${esc(item.title)}</b><p>${esc(item.text)}</p>`;
+      papers.querySelectorAll('.gcr-letter').forEach(old => old.remove());
+      el.className = 'gcr-letter' + (item.stay ? ' is-aside' : ''); el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '打开信'); el.innerHTML = '<i></i>'; el.style.zIndex = 901;
     }
-    el.style.setProperty('--tilt', `${tilt}deg`); el.style.setProperty('--ox', `${ox}px`); el.style.setProperty('--oy', `${oy}px`);
+    el.style.setProperty('--tilt', `${item.type === 'gift' ? 0 : item.stay ? -7 : tilt}deg`); el.style.setProperty('--ox', `${ox}px`); el.style.setProperty('--oy', `${oy}px`);
     papers.append(el);
     // older papers settle back; only the last few stay on the desk
     [...papers.children].forEach((p, i, all) => p.classList.toggle('is-under', i < all.length - 1));
-    while (papers.children.length > MAX_PAPERS) papers.firstElementChild.remove();
+    while (papers.children.length > MAX_PAPERS) (papers.querySelector(':scope > :not(.gcr-box)') ?? papers.firstElementChild).remove();
     fit(el);
-    if (!reduced()) {
+    if (item.type === 'letter' && !item.stay) setTimeout(openLetter, reduced() ? 300 : 1500);
+    if (!reduced() && !item.stay && !(item.type === 'gift' && item.open)) {
       const r = el.getBoundingClientRect(), d = desk.getBoundingClientRect(), cx = r.left - d.left + r.width / 2, cy = r.top - d.top + r.height / 2;
       el.animate([{ transform: `translate(${at.x - cx}px,${at.y - cy}px) scale(.12) rotate(${tilt}deg)`, opacity: 0 }, { opacity: 1, offset: .3 }, { transform: getComputedStyle(el).transform }], { duration: 560, easing: 'cubic-bezier(.22,.75,.2,1)' });
       sound('paper');
     }
   }
+  // ——— The jewellery box and the letter ———
+  const BOX = `<div class="jb"><div class="jb-base"><div class="jb-pad"><svg viewBox="0 0 200 200" aria-hidden="true">
+<defs><radialGradient id="jb-pearl" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".32" stop-color="#fdf6f5"/><stop offset=".62" stop-color="#f3e1e2"/><stop offset=".86" stop-color="#dcc6ca"/><stop offset="1" stop-color="#cdb7bd"/></radialGradient>
+<radialGradient id="jb-glow" cx=".62" cy=".72" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<filter id="jb-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter></defs>
+<path d="M30 10 L100 99 L170 10" fill="none" stroke="#3d3f2a" stroke-opacity=".16" stroke-width="1.6" transform="translate(1.5 2.5)"/>
+<path d="M30 10 L100 99 L170 10" fill="none" stroke="#c9ccd0" stroke-width="1.5" stroke-dasharray="1.8 .9"/>
+<path d="M30 10 L100 99 L170 10" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width=".5" stroke-dasharray="1.8 .9"/>
+<ellipse cx="103" cy="162" rx="21" ry="6" fill="#3d3f2a" opacity=".28" filter="url(#jb-soft)"/>
+<g class="jb-gem" transform="translate(0 -9)"><circle cx="100" cy="113" r="6.2" fill="#e9ecef" stroke="#b9bdc2" stroke-width=".7"/><path d="M100 107.4 104.6 113 100 118.6 95.4 113z" fill="#fff" stroke="#c9cdd2" stroke-width=".4"/><path d="M95.4 113h9.2M100 107.4v11.2" stroke="#d9dde2" stroke-width=".4"/><path class="jb-twinkle" d="M100 103v20M90 113h20" stroke="#fff" stroke-width=".9" stroke-linecap="round"/></g>
+<circle cx="100" cy="134" r="24" fill="url(#jb-pearl)" stroke="#c9b4ba" stroke-opacity=".5" stroke-width=".5"/>
+<circle cx="100" cy="134" r="24" fill="url(#jb-glow)"/>
+<ellipse cx="91" cy="124" rx="7.5" ry="5" fill="#fff" opacity=".9" filter="url(#jb-soft)" transform="rotate(-28 91 124)"/>
+</svg></div></div><div class="jb-lid"><div class="jb-out"><i></i></div><div class="jb-in"></div></div></div>`;
+  const toggleBox = el => { el.classList.toggle('is-open'); sound(el.classList.contains('is-open') ? 'clack' : 'key'); el.setAttribute('aria-label', el.classList.contains('is-open') ? '合上首饰盒' : '打开首饰盒'); };
+  // The letter is read in 手记, on a sheet of its own; the arrow there comes back to this desk.
+  function openLetter() {
+    const letter = couple?.letter; if (!letter || signal.aborted) return;
+    const text = letter.paragraphs.join('');
+    setGuest({ id: 'letter', type: 'letter', title: letter.title, date: letter.date, sign: letter.sign, minutes: Math.max(1, Math.round(text.length / 400)), back: collectionPath('gacha'), html: letter.paragraphs.map(p => `<p>${esc(p)}</p>`).join('') });
+    resume = { found: couple, turns: Math.max(turns, LAMP_TURN), box: papers.querySelector('.gcr-box') ? (papers.querySelector('.gcr-box').classList.contains('is-open') ? 'open' : 'closed') : '' };
+    sound('paper'); location.hash = collectionPath('stories', 'letter');
+  }
+  papers.addEventListener('click', e => { const box = e.target.closest('.gcr-box'); if (box) { toggleBox(box); return; } if (e.target.closest('.gcr-letter')) openLetter(); }, { signal });
+  papers.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const box = e.target.closest('.gcr-box'); if (box) { e.preventDefault(); toggleBox(box); } else if (e.target.closest('.gcr-letter')) { e.preventDefault(); openLetter(); } }, { signal });
   // Slips are drawn at one size and scaled to the desk.
   function fit(el) {
+    if (el.classList.contains('gcr-box')) { el.style.setProperty('--b', `${Math.round(Math.min(260, desk.clientWidth * .6, desk.clientHeight * .5))}px`); return; }
     if (!el.classList.contains('gcr-slip')) return;
     const k = Math.min(1, desk.clientWidth * .78 / 400, desk.clientHeight * .82 / 500);
     el.style.setProperty('--k', k.toFixed(3));
   }
-  addEventListener('resize', () => papers.querySelectorAll('.gcr-slip').forEach(fit), { signal });
+  addEventListener('resize', () => papers.querySelectorAll('.gcr-slip,.gcr-box').forEach(fit), { signal });
 
   // ——— Clearing the desk: everything slides off the far edge ———
   room.querySelector('.gcr-clear').addEventListener('click', () => {
@@ -286,11 +337,20 @@ export function mount({ container }) {
   document.addEventListener('keydown', e => {
     if (document.getElementById('module-menu')?.hidden === false || e.target.closest?.('input,textarea')) return;
     if (e.key === 'Escape' && !reader.hidden) { e.stopPropagation(); closeRead(); return; }
-    if (e.target.closest?.('.gcr-egg,.gcr-folded')) return;
+    if (e.target.closest?.('.gcr-egg,.gcr-folded,.gcr-box,.gcr-letter')) return;
     if (e.key === 'Enter') { e.preventDefault(); autoTurn(); }
     else if (e.key === 'ArrowRight') setSign(sign + 1);
     else if (e.key === 'ArrowLeft') setSign(sign - 1);
   }, { signal, capture: true });
+
+  // back from the letter: the door is still open, the box and the envelope lie where they were
+  if (resume) {
+    const was = resume; resume = null;
+    enter(was.found, false); turns = was.turns;
+    const centre = { x: desk.clientWidth / 2, y: desk.clientHeight / 2 };
+    if (was.box) lay({ type: 'gift', open: was.box === 'open' }, centre);
+    lay({ type: 'letter', stay: true }, centre);
+  }
 
   return () => { events.abort(); cancelAnimationFrame(spring); document.querySelectorAll('.gcr-ghost').forEach(g => g.remove()); };
 }

@@ -70,9 +70,6 @@ export const BANK = `
 冒：下一轮说话都要在句尾加「喵」。
 冒：对着镜子（或手机前置）认真说三遍「你真好看」。
 `;
-// The easter eggs' contents (Fred's special things, later). The lamp egg has its own.
-export const SPECIAL = { title: '彩蛋', text: '（占位）这里是 Fred 的特别内容。' };
-export const PEARL = { title: '彩蛋', text: '（占位）扭到了一颗珠光蛋。这里放 Fred 的特别内容。' };
 
 export function parseBank(text) {
   return text.split('\n').map(line => line.trim()).map(line => { const m = line.match(/^(真|冒)[：:]\s*(.+)$/); return m ? { kind: m[1] === '真' ? 'truth' : 'dare', text: m[2] } : null; }).filter(Boolean).map((q, i) => ({ ...q, no: i + 1 }));
