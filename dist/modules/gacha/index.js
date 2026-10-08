@@ -1,10 +1,10 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=49';
-import { unwrap, STEP, FULL } from './machine-home.js?v=49';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=49';
-import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=49';
-import { play as sound } from '../../sound.js?v=49';
-import SEALED from './couple.js?v=49';
-import { unseal } from '../stories/seal.js?v=49';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=50';
+import { unwrap, STEP, FULL } from './machine-home.js?v=50';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=50';
+import { BANK, parseBank, createDeck, SPECIAL, PEARL } from './games.js?v=50';
+import { play as sound } from '../../sound.js?v=50';
+import SEALED from './couple.js?v=50';
+import { unseal } from '../stories/seal.js?v=50';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
