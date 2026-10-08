@@ -2,7 +2,7 @@
 // the day's officer (建除十二神) comes from the day's branch against the month's, and each officer has its 宜 / 忌.
 // The day's clash (冲) and its evil direction (煞) come from the day's branch.
 // Note: printed almanacs weigh many more spirits (神煞); this follows the 建除 lists, the most widely used layer.
-import { sunLongitude, dayNumber } from './astro.js?v=51';
+import { sunLongitude, dayNumber } from './astro.js?v=52';
 
 const GAN = '甲乙丙丁戊己庚辛壬癸', ZHI = '子丑寅卯辰巳午未申酉戌亥';
 const ANIMALS = '鼠牛虎兔龙蛇马羊猴鸡狗猪';

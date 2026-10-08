@@ -1,12 +1,12 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=51';
-import { unwrap, STEP, FULL } from './machine-home.js?v=51';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=51';
-import { BANK, parseBank, createDeck } from './games.js?v=51';
-import { setGuest } from '../stories/guest.js?v=51';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=52';
+import { unwrap, STEP, FULL } from './machine-home.js?v=52';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=52';
+import { BANK, parseBank, createDeck } from './games.js?v=52';
+import { setGuest } from '../stories/guest.js?v=52';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=51';
-import SEALED from './couple.js?v=51';
-import { unseal } from '../stories/seal.js?v=51';
+import { play as sound } from '../../sound.js?v=52';
+import SEALED from './couple.js?v=52';
+import { unseal } from '../stories/seal.js?v=52';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -238,7 +238,7 @@ export function mount({ container }) {
       el.className = 'gcr-box' + (item.open ? ' is-open' : ''); el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '打开首饰盒'); el.innerHTML = BOX; el.style.zIndex = 900;
     } else {
       papers.querySelectorAll('.gcr-letter').forEach(old => old.remove());
-      el.className = 'gcr-letter' + (item.stay ? ' is-aside' : ''); el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '打开信'); el.innerHTML = '<i></i>'; el.style.zIndex = 901;
+      el.className = 'gcr-letter' + (item.stay ? ' is-aside' : ''); el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '打开信'); el.innerHTML = ENVELOPE; el.style.zIndex = 901;
     }
     el.style.setProperty('--tilt', `${item.type === 'gift' ? 0 : item.stay ? -7 : tilt}deg`); el.style.setProperty('--ox', `${ox}px`); el.style.setProperty('--oy', `${oy}px`);
     papers.append(el);
@@ -246,7 +246,8 @@ export function mount({ container }) {
     [...papers.children].forEach((p, i, all) => p.classList.toggle('is-under', i < all.length - 1));
     while (papers.children.length > MAX_PAPERS) (papers.querySelector(':scope > :not(.gcr-box)') ?? papers.firstElementChild).remove();
     fit(el);
-    if (item.type === 'letter' && !item.stay) setTimeout(openLetter, reduced() ? 300 : 1500);
+    // the flap lifts, the sheet draws out, and then it is read in 手记
+    if (item.type === 'letter' && !item.stay) { setTimeout(() => { el.classList.add('is-open'); sound('paper'); }, reduced() ? 0 : 700); setTimeout(openLetter, reduced() ? 400 : 2700); }
     if (!reduced() && !item.stay && !(item.type === 'gift' && item.open)) {
       const r = el.getBoundingClientRect(), d = desk.getBoundingClientRect(), cx = r.left - d.left + r.width / 2, cy = r.top - d.top + r.height / 2;
       el.animate([{ transform: `translate(${at.x - cx}px,${at.y - cy}px) scale(.12) rotate(${tilt}deg)`, opacity: 0 }, { opacity: 1, offset: .3 }, { transform: getComputedStyle(el).transform }], { duration: 560, easing: 'cubic-bezier(.22,.75,.2,1)' });
@@ -254,19 +255,25 @@ export function mount({ container }) {
     }
   }
   // ——— The jewellery box and the letter ———
-  const BOX = `<div class="jb"><div class="jb-base"><div class="jb-pad"><svg viewBox="0 0 200 200" aria-hidden="true">
-<defs><radialGradient id="jb-pearl" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".32" stop-color="#fdf6f5"/><stop offset=".62" stop-color="#f3e1e2"/><stop offset=".86" stop-color="#dcc6ca"/><stop offset="1" stop-color="#cdb7bd"/></radialGradient>
-<radialGradient id="jb-glow" cx=".62" cy=".72" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
-<filter id="jb-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter></defs>
-<path d="M30 10 L100 99 L170 10" fill="none" stroke="#3d3f2a" stroke-opacity=".16" stroke-width="1.6" transform="translate(1.5 2.5)"/>
-<path d="M30 10 L100 99 L170 10" fill="none" stroke="#c9ccd0" stroke-width="1.5" stroke-dasharray="1.8 .9"/>
-<path d="M30 10 L100 99 L170 10" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width=".5" stroke-dasharray="1.8 .9"/>
-<ellipse cx="103" cy="162" rx="21" ry="6" fill="#3d3f2a" opacity=".28" filter="url(#jb-soft)"/>
-<g class="jb-gem" transform="translate(0 -9)"><circle cx="100" cy="113" r="6.2" fill="#e9ecef" stroke="#b9bdc2" stroke-width=".7"/><path d="M100 107.4 104.6 113 100 118.6 95.4 113z" fill="#fff" stroke="#c9cdd2" stroke-width=".4"/><path d="M95.4 113h9.2M100 107.4v11.2" stroke="#d9dde2" stroke-width=".4"/><path class="jb-twinkle" d="M100 103v20M90 113h20" stroke="#fff" stroke-width=".9" stroke-linecap="round"/></g>
-<circle cx="100" cy="134" r="24" fill="url(#jb-pearl)" stroke="#c9b4ba" stroke-opacity=".5" stroke-width=".5"/>
-<circle cx="100" cy="134" r="24" fill="url(#jb-glow)"/>
-<ellipse cx="91" cy="124" rx="7.5" ry="5" fill="#fff" opacity=".9" filter="url(#jb-soft)" transform="rotate(-28 91 124)"/>
-</svg></div></div><div class="jb-lid"><div class="jb-out"><i></i></div><div class="jb-in"></div></div></div>`;
+  const slices = n => Array.from({ length: n }, (_, i) => { const t = i / (n - 1), k = (.42 * (1 - t) ** 1.4).toFixed(3); return `<i class="jb-slice" style="--t:${t.toFixed(3)};background-image:linear-gradient(rgba(20,22,14,${k}),rgba(20,22,14,${k})),linear-gradient(90deg,#0003,#0000 9%,#ffffff24 34%,#0000 62%,#0003 100%)"></i>`; }).join('');
+  const PEARL = `<svg viewBox="0 0 100 100" aria-hidden="true"><defs>
+<radialGradient id="pl-body" cx=".39" cy=".33" r=".74"><stop offset="0" stop-color="#fff"/><stop offset=".14" stop-color="#fbf7f5"/><stop offset=".36" stop-color="#ede4e1"/><stop offset=".6" stop-color="#ddd0d0"/><stop offset=".8" stop-color="#c2b1b7"/><stop offset=".94" stop-color="#a08d96"/><stop offset="1" stop-color="#96838d"/></radialGradient>
+<radialGradient id="pl-core" cx=".35" cy=".29" r=".8"><stop offset=".52" stop-color="#5f4c58" stop-opacity="0"/><stop offset=".76" stop-color="#5f4c58" stop-opacity=".38"/><stop offset=".88" stop-color="#5f4c58" stop-opacity=".3"/><stop offset="1" stop-color="#5f4c58" stop-opacity=".04"/></radialGradient>
+<radialGradient id="pl-rose" cx=".6" cy=".62" r=".36"><stop offset="0" stop-color="#ffc9d3" stop-opacity=".3"/><stop offset="1" stop-color="#ffc9d3" stop-opacity="0"/></radialGradient>
+<radialGradient id="pl-bounce" cx=".55" cy="1" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<radialGradient id="pl-halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".5" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<filter id="pl-soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation=".9"/></filter><filter id="pl-hair" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation=".35"/></filter>
+<clipPath id="pl-clip"><circle cx="50" cy="50" r="48"/></clipPath></defs>
+<circle cx="50" cy="50" r="48" fill="url(#pl-body)"/><circle cx="50" cy="50" r="48" fill="url(#pl-core)"/><circle cx="50" cy="50" r="48" fill="url(#pl-rose)"/>
+<g clip-path="url(#pl-clip)"><path d="M14 74a44 44 0 0 0 72 0" fill="none" stroke="#4d5a47" stroke-opacity=".2" stroke-width="5" filter="url(#pl-soft)"/><ellipse cx="54" cy="98" rx="33" ry="12" fill="url(#pl-bounce)" filter="url(#pl-soft)"/>
+<path d="M7.5 60a44 44 0 0 0 26 34" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round" filter="url(#pl-soft)"/>
+<ellipse cx="35" cy="30" rx="21" ry="15" fill="url(#pl-halo)" opacity=".8" transform="rotate(-34 35 30)"/></g>
+<ellipse cx="33" cy="27" rx="11.5" ry="7" fill="#fff" transform="rotate(-36 33 27)" filter="url(#pl-hair)"/><circle cx="24.5" cy="41" r="1.9" fill="#fff" opacity=".9" filter="url(#pl-hair)"/><circle cx="63" cy="74" r="1.6" fill="#fff" opacity=".6" filter="url(#pl-soft)"/>
+<circle cx="50" cy="50" r="47.6" fill="none" stroke="#8f7c86" stroke-opacity=".6" stroke-width=".7"/></svg>`;
+  const GEM = `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#eef0f2" stroke="#a9adb2" stroke-width="1.6"/><path d="M20 5 30.6 9.4 35 20 30.6 30.6 20 35 9.4 30.6 5 20 9.4 9.4z" fill="#fff" stroke="#c3cad1" stroke-width=".8"/><path d="M20 5 25 15 35 20 25 25 20 35 15 25 5 20 15 15z" fill="#dfe6ec"/><path d="M15 15h10v10H15z" fill="#fff"/><path d="M20 5 15 15 9.4 9.4zM35 20 25 25 30.6 30.6z" fill="#b9c4ce"/><path class="jb-twinkle" d="M20 -8v56M-8 20h56" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const CHAIN = `<svg class="jb-chain" viewBox="0 0 200 200" aria-hidden="true"><path d="M46 -6 L100 92 L154 -6" fill="none" stroke="#3d3f2a" stroke-opacity=".2" stroke-width="1.6" transform="translate(1.4 2.6)"/><path d="M46 -6 L100 92 L154 -6" fill="none" stroke="#c4c8cc" stroke-width="1.5" stroke-dasharray="2 1"/><path d="M46 -6 L100 92 L154 -6" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width=".55" stroke-dasharray="2 1"/></svg>`;
+  const BOX = `<div class="jb"><div class="jb-body"><i class="jb-shadow"></i><div class="jb-base">${slices(46)}<div class="jb-rim"><div class="jb-pad">${CHAIN}<i class="jb-cast"></i><i class="jb-gem">${GEM}</i><i class="jb-pearl">${PEARL}</i></div></div></div><div class="jb-lid">${slices(30)}<i class="jb-slice trim" style="--t:0"></i><i class="jb-slice trim" style="--t:.035"></i><div class="jb-top"></div><div class="jb-lining"><div class="jb-satin"></div></div><i class="jb-clasp"></i></div></div></div>`;
+  const ENVELOPE = `<div class="env"><div class="env-body"><i class="env-shadow"></i><i class="env-back"></i><i class="env-sheet"></i><i class="env-front"></i><div class="env-flap"><i class="env-out"><i></i></i><i class="env-in"></i><i class="env-seal"><svg viewBox="0 0 16 15"><path d="M8 14.2C3 10.4.6 7.8.6 4.9.6 2.6 2.4.9 4.6.9c1.4 0 2.6.7 3.4 1.9C8.8 1.6 10 .9 11.4.9c2.2 0 4 1.7 4 4 0 2.9-2.4 5.5-7.4 9.3z"/></svg></i></div></div></div>`;
   const toggleBox = el => { el.classList.toggle('is-open'); sound(el.classList.contains('is-open') ? 'clack' : 'key'); el.setAttribute('aria-label', el.classList.contains('is-open') ? '合上首饰盒' : '打开首饰盒'); };
   // The letter is read in 手记, on a sheet of its own; the arrow there comes back to this desk.
   function openLetter() {
@@ -280,7 +287,7 @@ export function mount({ container }) {
   papers.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const box = e.target.closest('.gcr-box'); if (box) { e.preventDefault(); toggleBox(box); } else if (e.target.closest('.gcr-letter')) { e.preventDefault(); openLetter(); } }, { signal });
   // Slips are drawn at one size and scaled to the desk.
   function fit(el) {
-    if (el.classList.contains('gcr-box')) { el.style.setProperty('--b', `${Math.round(Math.min(260, desk.clientWidth * .6, desk.clientHeight * .5))}px`); return; }
+    if (el.classList.contains('gcr-box')) { el.style.setProperty('--b', `${Math.round(Math.min(250, desk.clientWidth * .6, desk.clientHeight * .46))}px`); return; }
     if (!el.classList.contains('gcr-slip')) return;
     const k = Math.min(1, desk.clientWidth * .78 / 400, desk.clientHeight * .82 / 500);
     el.style.setProperty('--k', k.toFixed(3));
