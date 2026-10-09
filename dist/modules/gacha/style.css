@@ -105,7 +105,7 @@
 [data-module="gacha"] .gcr-shells{z-index:40}
 [data-module="gacha"] .gcr-papers>*{pointer-events:auto}
 /* a capsule waiting on the desk; twisting turns it and opens the seam */
-[data-module="gacha"] .gcr-egg{position:absolute;width:var(--size);height:var(--size);margin:calc(var(--size) / -2) 0 0 calc(var(--size) / -2);padding:0;min-height:0;border:0;background:none;cursor:grab;touch-action:none;z-index:50;rotate:var(--twist,0deg);transition:rotate .25s}
+[data-module="gacha"] .gcr-egg{position:absolute;width:var(--size);height:var(--size);margin:calc(var(--size) / -2) 0 0 calc(var(--size) / -2);padding:0;min-height:0;border:0;background:none;cursor:grab;touch-action:none;z-index:50;rotate:var(--twist,0deg);transition:rotate .25s,left .6s cubic-bezier(.3,.8,.2,1),top .6s cubic-bezier(.3,.8,.2,1)}
 [data-module="gacha"] .gcr-egg:active{cursor:grabbing;transition:none}
 [data-module="gacha"] .gcr-egg .gc-out,[data-module="gacha"] .gcr-egg .gc-lip,[data-module="gacha"] .gcr-egg .gc-in{translate:0 calc(var(--open,0) * 9%);transition:translate .25s}
 [data-module="gacha"] .gcr-egg:active .gc-out,[data-module="gacha"] .gcr-egg:active .gc-lip,[data-module="gacha"] .gcr-egg:active .gc-in{transition:none}
@@ -122,12 +122,23 @@
 /* behind the hidden door: a jewellery box and a sealed letter. The box is a rounded solid built from thin slices,
    seen from in front and a little above; its lid turns on the back edge. */
 [data-module="gacha"] .gcr-box,[data-module="gacha"] .gcr-letter{position:absolute;left:50%;transform:translate(calc(-50% + var(--ox,0px)),calc(-50% + var(--oy,0px))) rotate(var(--tilt,0deg));cursor:pointer}
-[data-module="gacha"] .gcr-box{--b:230px;top:70%;width:var(--b);height:var(--b);filter:none;transition:scale 1.4s cubic-bezier(.3,.8,.2,1)}
-[data-module="gacha"] .gcr-box.is-open{scale:1.16}
-/* opened: the desk falls back into shade around it */
-[data-module="gacha"] .gcr-box::before{content:"";position:absolute;left:50%;top:30%;width:300vmax;height:300vmax;translate:-50% -50%;background:radial-gradient(circle,#2a271c00 0,#2a271c00 calc(var(--b) * .8),#2a271c59 calc(var(--b) * 1.5),#2a271c8c calc(var(--b) * 2.6));opacity:0;transition:opacity 1.2s;pointer-events:none}
-[data-module="gacha"] .gcr-box.is-open::before{opacity:1}
-.jb-mote{position:absolute;pointer-events:none;background:radial-gradient(circle,#fff 0,#ffe9b0 35%,#f2c97a 100%);filter:drop-shadow(0 0 3px #ffe2a0);clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%)}
+[data-module="gacha"] .gcr-box{--b:230px;top:70%;width:var(--b);height:var(--b);filter:none}
+/* the scene the box opens in: the room goes dark, rays turn behind it, a halo breathes, dust drifts */
+[data-module="gacha"] .gcr-stage{position:fixed;inset:0;z-index:210;overflow:hidden;cursor:pointer;background:radial-gradient(circle at 50% 58%,#3b3e30f2,#1d1f17fa 70%);opacity:0;transition:opacity .9s}
+[data-module="gacha"] .gcr-stage[hidden]{display:none}
+[data-module="gacha"] .gcr-stage.is-on{opacity:1}
+[data-module="gacha"] .gcr-stage .gcr-box{left:50%;top:64%;transform:translate(-50%,-50%);transition:none}
+.gcr-rays,.gcr-halo{position:absolute;left:50%;top:56%;border-radius:50%;translate:-50% -50%;opacity:0;pointer-events:none}
+.gcr-rays{width:170vmax;height:170vmax;background:repeating-conic-gradient(from 0deg,#ffe7b000 0deg,#ffe7b000 7deg,#ffe7b038 10deg,#fff4d64d 11.5deg,#ffe7b000 15deg,#ffe7b000 24deg);-webkit-mask:radial-gradient(circle,#000 0,#000a 12%,#0000 46%);mask:radial-gradient(circle,#000 0,#000a 12%,#0000 46%);transition:opacity 2s;animation:gcr-rays 70s linear infinite}
+.gcr-halo{width:120vmin;height:120vmin;background:radial-gradient(circle,#fff2cc66 0,#ffdf9a2e 30%,#ffdf9a00 62%);transition:opacity 1.6s}
+.is-lit>.gcr-rays{opacity:1}.is-lit>.gcr-halo{opacity:1;animation:gcr-halo 4.5s 1.6s ease-in-out infinite}
+@keyframes gcr-rays{to{rotate:360deg}}
+@keyframes gcr-halo{50%{scale:1.08;opacity:.75}}
+.gcr-dust{position:absolute;inset:0;opacity:0;transition:opacity 1.5s 1s;pointer-events:none}
+.is-lit>.gcr-dust{opacity:1}
+.gcr-dust .jb-mote{animation:gcr-dust linear infinite}
+@keyframes gcr-dust{0%{translate:0 0;scale:.2;opacity:0}20%{opacity:.95;scale:1}80%{opacity:.6}100%{translate:14px -26vh;scale:.3;opacity:0}}
+.jb-mote{position:absolute;pointer-events:none;background:radial-gradient(circle,#fff 0,#ffe9b0 35%,#f2c97a 100%);filter:drop-shadow(0 0 4px #ffe2a0);clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%)}
 .jb{--cam:44deg;--h:calc(var(--b) * .2);--l:calc(var(--b) * .13);--r:calc(var(--b) * .113);--wall:#465242;--top:#55624f;--trim:#cdbf98;position:absolute;inset:0;perspective:1500px;perspective-origin:50% 20%}
 .jb-body{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(var(--cam))}
 .jb-body *{position:absolute}
@@ -149,10 +160,12 @@
 .jb-pearl,.jb-gem,.jb-cast{opacity:0;transition:opacity .15s}
 .is-open .jb-pearl,.is-open .jb-gem,.is-open .jb-cast{opacity:1;transition:opacity .5s .45s}
 .is-open .jb-cast{opacity:.5}
+.is-open .jb-pearl{animation:jb-rise 1.5s .45s cubic-bezier(.2,.9,.25,1.25) both}
+@keyframes jb-rise{0%{transform:translateZ(calc(var(--b) * .03)) rotateX(calc(var(--cam) * -1)) scale(.55)}100%{transform:translateZ(calc(var(--b) * .094)) rotateX(calc(var(--cam) * -1)) scale(1)}}
 /* light from inside: it flares as the lid lifts, then stays as a soft glow on the cushion */
 .jb-light{left:50%;top:60%;width:calc(var(--b) * 1.5);height:calc(var(--b) * 1.5);margin:calc(var(--b) * -.75) 0 0 calc(var(--b) * -.75);border-radius:50%;background:radial-gradient(circle,#fffaf0 0,#fff3d6cc 18%,#ffe9bd55 40%,#ffe9bd00 68%);opacity:0;transform:translateZ(1px);pointer-events:none}
 .is-open .jb-light{animation:jb-light 3.4s .5s cubic-bezier(.3,.7,.3,1) both}
-@keyframes jb-light{0%{opacity:0;scale:.3}45%{opacity:1;scale:1.1}100%{opacity:.3;scale:.8}}
+@keyframes jb-light{0%{opacity:0;scale:.3}40%{opacity:1;scale:1.25}100%{opacity:.5;scale:.9}}
 .jb-glint{opacity:0}
 .is-open .jb-glint{animation:jb-glint 1.6s 2.2s ease-in-out both}
 @keyframes jb-glint{0%{opacity:0;translate:-70px 0}40%{opacity:.85}100%{opacity:0;translate:70px 0}}
@@ -191,7 +204,7 @@
 .env-seal svg{position:absolute;inset:27%;width:46%;height:46%;fill:#8f3526;opacity:.8}
 /* read already: the envelope lies to one side, so the box stays in view */
 [data-module="gacha"] .gcr-letter.is-aside{left:22%;top:16%;scale:.6}
-@media (prefers-reduced-motion:reduce){.jb-lid,.is-open .jb-lid,.env-flap,.env-sheet,[data-module="gacha"] .gcr-box{transition:none}.is-open .jb-twinkle,.is-open .jb-glint{animation:none}.is-open .jb-light{animation:none;opacity:.28}}
+@media (prefers-reduced-motion:reduce){.jb-lid,.is-open .jb-lid,.env-flap,.env-sheet,[data-module="gacha"] .gcr-box{transition:none}.is-open .jb-twinkle,.is-open .jb-glint,.is-open .jb-pearl,.gcr-rays,.gcr-dust .jb-mote,.is-lit>.gcr-halo{animation:none}.is-open .jb-light{animation:none;opacity:.28}}
 [data-module="gacha"] .gcr-papers{perspective:1800px}
 [data-module="gacha"] .gcr-slip{width:400px;height:500px;cursor:pointer;perspective:1800px}
 /* the slip turns over inside its own box, so where it lies on the desk never changes */
