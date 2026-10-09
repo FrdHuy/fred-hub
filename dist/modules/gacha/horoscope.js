@@ -2,7 +2,7 @@
 // (astro.js), counted as houses from your sign (whole-sign houses, as newspaper horoscopes do) and scored by traditional rules
 // (Venus and the Moon for love, Jupiter and the 2nd house for money, the 10th house for work, the 1st and 6th for health …).
 // The words speak about everyday things only — no planets — in plain, direct language (original writing, 2026-09-30).
-import { positions, signOf } from './astro.js?v=52';
+import { positions, signOf } from './astro.js?v=53';
 
 export const ASPECTS = ['综合', '感情', '财运', '事业', '健康'];
 // Houses counted from your sign (1 = your sign).

@@ -1,17 +1,17 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=52';
-import { unwrap, STEP, FULL } from './machine-home.js?v=52';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=52';
-import { BANK, parseBank, createDeck } from './games.js?v=52';
-import { setGuest } from '../stories/guest.js?v=52';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=53';
+import { unwrap, STEP, FULL } from './machine-home.js?v=53';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=53';
+import { BANK, parseBank, createDeck } from './games.js?v=53';
+import { setGuest } from '../stories/guest.js?v=53';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=52';
-import SEALED from './couple.js?v=52';
-import { unseal } from '../stories/seal.js?v=52';
+import { play as sound } from '../../sound.js?v=53';
+import SEALED from './couple.js?v=53';
+import { unseal } from '../stories/seal.js?v=53';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 const OPEN_AT = 200;          // degrees of twisting that open a capsule
-const MAX_WAITING = 4, MAX_PAPERS = 6, MAX_SHELLS = 12;
+const MAX_WAITING = 6, MAX_PAPERS = 6, MAX_SHELLS = 12;
 // Behind the hidden door the 8th capsule is always the pearl egg and the 9th the lamp egg; after that they turn up by chance.
 const PEARL_TURN = 8, LAMP_TURN = 9;
 // Coming back from reading the letter, the door is still open and the box and the envelope are still on the desk.
@@ -125,7 +125,12 @@ export function mount({ container }) {
 
   // ——— A capsule falls into the chute and rolls out onto the desk ———
   function dispense() {
-    if (eggs.children.length >= MAX_WAITING) { sound('error'); return; }
+    if (eggs.children.length >= MAX_WAITING) {
+      // the desk is full: the flap rattles and the waiting capsules shake — open one first
+      sound('error');
+      if (!reduced()) { flap.animate([{ transform: 'none' }, { transform: 'perspective(200px) rotateX(-22deg)' }, { transform: 'none' }], { duration: 260 }); [...eggs.children].forEach((e, i) => e.animate([{ rotate: '0deg' }, { rotate: '-12deg' }, { rotate: '10deg' }, { rotate: '-5deg' }, { rotate: '0deg' }], { duration: 460, delay: i * 50 })); }
+      return;
+    }
     const n = couple ? ++turns : 0;
     const kind = n === PEARL_TURN ? 'pearl' : n === LAMP_TURN ? 'frost' : pickKind(rnd, n > LAMP_TURN);
     const egg = { kind, mode, sign, id: Date.now() + rnd() };
@@ -244,7 +249,7 @@ export function mount({ container }) {
     papers.append(el);
     // older papers settle back; only the last few stay on the desk
     [...papers.children].forEach((p, i, all) => p.classList.toggle('is-under', i < all.length - 1));
-    while (papers.children.length > MAX_PAPERS) (papers.querySelector(':scope > :not(.gcr-box)') ?? papers.firstElementChild).remove();
+    while (papers.children.length > MAX_PAPERS) (papers.querySelector(':scope > :not(.gcr-box,.gcr-letter)') ?? papers.firstElementChild).remove();
     fit(el);
     // the flap lifts, the sheet draws out, and then it is read in 手记
     if (item.type === 'letter' && !item.stay) { setTimeout(() => { el.classList.add('is-open'); sound('paper'); }, reduced() ? 0 : 700); setTimeout(openLetter, reduced() ? 400 : 2700); }
@@ -280,8 +285,13 @@ export function mount({ container }) {
     const letter = couple?.letter; if (!letter || signal.aborted) return;
     const text = letter.paragraphs.join('');
     setGuest({ id: 'letter', type: 'letter', title: letter.title, date: letter.date, sign: letter.sign, minutes: Math.max(1, Math.round(text.length / 400)), back: collectionPath('gacha'), html: letter.paragraphs.map(p => `<p>${esc(p)}</p>`).join('') });
-    resume = { found: couple, turns: Math.max(turns, LAMP_TURN), box: papers.querySelector('.gcr-box') ? (papers.querySelector('.gcr-box').classList.contains('is-open') ? 'open' : 'closed') : '' };
-    sound('paper'); location.hash = collectionPath('stories', 'letter');
+    // the whole desk is kept as it is (capsules still waiting, papers, the box, the shells) for the way back
+    const target = collectionPath('stories', 'letter');
+    resume = { found: couple, turns: Math.max(turns, LAMP_TURN), layer, papers: [...papers.children], shells: [...shells.children], eggs: [...eggs.children] };
+    // …but only for coming straight back: going anywhere else closes the door
+    const watch = () => { if (location.hash === target) return; removeEventListener('hashchange', watch); if (!location.hash.startsWith(collectionPath('gacha'))) resume = null; };
+    addEventListener('hashchange', watch);
+    sound('paper'); location.hash = target;
   }
   papers.addEventListener('click', e => { const box = e.target.closest('.gcr-box'); if (box) { toggleBox(box); return; } if (e.target.closest('.gcr-letter')) openLetter(); }, { signal });
   papers.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const box = e.target.closest('.gcr-box'); if (box) { e.preventDefault(); toggleBox(box); } else if (e.target.closest('.gcr-letter')) { e.preventDefault(); openLetter(); } }, { signal });
@@ -350,13 +360,14 @@ export function mount({ container }) {
     else if (e.key === 'ArrowLeft') setSign(sign - 1);
   }, { signal, capture: true });
 
-  // back from the letter: the door is still open, the box and the envelope lie where they were
+  // back from the letter: the door is still open and the desk is as it was; the envelope now lies to one side
   if (resume) {
     const was = resume; resume = null;
-    enter(was.found, false); turns = was.turns;
-    const centre = { x: desk.clientWidth / 2, y: desk.clientHeight / 2 };
-    if (was.box) lay({ type: 'gift', open: was.box === 'open' }, centre);
-    lay({ type: 'letter', stay: true }, centre);
+    enter(was.found, false); turns = was.turns; layer = was.layer;
+    for (const el of was.papers) { if (el.classList.contains('gcr-letter')) continue; el.getAnimations().forEach(a => a.cancel()); papers.append(el); fit(el); }
+    for (const el of was.shells) shells.append(el);
+    for (const el of was.eggs) { el.style.setProperty('--twist', '0deg'); el.style.setProperty('--open', '0'); eggs.append(el); }
+    lay({ type: 'letter', stay: true }, { x: desk.clientWidth / 2, y: desk.clientHeight / 2 });
   }
 
   return () => { events.abort(); cancelAnimationFrame(spring); document.querySelectorAll('.gcr-ghost').forEach(g => g.remove()); };

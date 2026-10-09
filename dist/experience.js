@@ -1,8 +1,8 @@
 import { ticketContact, discContact } from './contact.js';
-import { createPanel } from './modules/bucketlist/panel-home.js?v=52';
-import { createTypewriter } from './modules/stories/typewriter-home.js?v=52';
-import { createGacha } from './modules/gacha/machine-home.js?v=52';
-import { play as sound } from './sound.js?v=52';
+import { createPanel } from './modules/bucketlist/panel-home.js?v=53';
+import { createTypewriter } from './modules/stories/typewriter-home.js?v=53';
+import { createGacha } from './modules/gacha/machine-home.js?v=53';
+import { play as sound } from './sound.js?v=53';
 
 export function createInteraction(gallery, enter) {
   const shell=document.querySelector('.gallery-shell'), hint=shell.querySelector('.interaction-hint');

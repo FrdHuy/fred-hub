@@ -1,9 +1,9 @@
-import { parseItems, itemLines } from './items.js?v=52';
-import { loadEntries } from './storage.js?v=52';
-import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=52';
-import { play as sound } from '../../sound.js?v=52';
-import notes from '../stories/data.js?v=52';
-import { noteForItem } from '../stories/notes.js?v=52';
+import { parseItems, itemLines } from './items.js?v=53';
+import { loadEntries } from './storage.js?v=53';
+import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=53';
+import { play as sound } from '../../sound.js?v=53';
+import notes from '../stories/data.js?v=53';
+import { noteForItem } from '../stories/notes.js?v=53';
 import { collectionPath } from '../../router.js';
 
 const DETENT = 24;
