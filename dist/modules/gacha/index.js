@@ -1,12 +1,12 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=55';
-import { unwrap, STEP, FULL } from './machine-home.js?v=55';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=55';
-import { BANK, parseBank, createDeck } from './games.js?v=55';
-import { setGuest } from '../stories/guest.js?v=55';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=56';
+import { unwrap, STEP, FULL } from './machine-home.js?v=56';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=56';
+import { BANK, parseBank, createDeck } from './games.js?v=56';
+import { setGuest } from '../stories/guest.js?v=56';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=55';
-import SEALED from './couple.js?v=55';
-import { unseal } from '../stories/seal.js?v=55';
+import { play as sound } from '../../sound.js?v=56';
+import SEALED from './couple.js?v=56';
+import { unseal } from '../stories/seal.js?v=56';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };

@@ -13,6 +13,7 @@
 - Sub-routes: `#/collection/<id>/<sub>` → `mount({ route })`；同模块内切换时 main.js 调用 `cleanup.route(sub)`（模块给返回的 cleanup 函数挂一个 `route` 属性即可）。
 - `dist/modules/bucketlist/`: 人生清单，含手稿样式、条目 UI 和 localStorage 数据边界。
 - 罗盘（wheel）已于 v0.35.2 删除。
+- `dist/room/`: 3D 小屋（`#/room`，分支 claude/room-3d）。不是模块，是另一种导航：`config.js` 把场景里的物件映射到模块 id；Three.js 0.170.0 自托管在 `dist/vendor/`；内部导入不带 `?v=`。说明见 `docs/design/room.md`，检查 `scripts/check-room.mjs`。
 - `dist/modules/empty.js`: current common placeholder; do not change it for one module’s new feature.
 - `main.js`: shared header, menu, navigation, mounting/cleanup.
 - `tokens.css`: shared type and material variables (`--font-mono`, `--font-ui`, `--font-literary`, `--shell-*`, `--glass`). Use them instead of hard-coded font stacks or new plastic colours.

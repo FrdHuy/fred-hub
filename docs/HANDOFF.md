@@ -21,6 +21,7 @@
 | bucketlist 百灯控制面板（dist/modules/bucketlist/**；共享：experience.js 中 bucketlist 分支、catalog.js 中 bucketlist 封面、main.js 中清单打开动画、hub.css 清单返回箭头） | Claude Code | v0.28 已合入 main，无运行中编辑 |
 | travel 翻牌屏（dist/modules/travel/**；设计见 docs/design/travel.md） | Claude Code | v0.31 已完成（占位数据），无运行中编辑 |
 | music 磁带（dist/modules/music/**、scripts/music-picker.mjs、scripts/tapedeck/、scripts/check-music.mjs；共享：catalog 封面、experience 控制器、main.js 进门起点、hub.css 返回箭头、sound.js 新声音） | 搁置 | v0.37.1 Fred：效果太差，从首页和菜单撤下；源码保留、未注册（catalog / modules/index.js / index.html 样式链接已去掉） |
+| 3D 小屋 `#/room`（dist/room/**、dist/vendor/three-0.170.0/**、scripts/vendor-three.mjs、scripts/check-room.mjs；共享：index.html 加 #room-view 与样式链接、router.js 加 room 路由、main.js showRoom 与路由分支；设计 docs/design/room.md） | Claude Code | 分支 `claude/room-3d`，第 1 阶段完成，未合入 main、未推送 |
 | wheel | 已删除（v0.35.2，Fred 决定） | 源码、compass.png 与相关 CSS 已移除 |
 
 开始任务前填写自己的范围；结束更新状态。表格不是程序锁，也不会自动通知另一个 agent。
@@ -200,3 +201,11 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - v0.42 扭蛋机：① 公开题库 100 道（真心话 50 / 大冒险 50，games.js BANK）。② 隐藏通道（给 Fred 和对象）：在房间里按一串暗号操作（滑块上/下 + 星座旋钮左/右，共 8 步）再转一圈扭把 → 扭蛋仓由灰绿绽成暖粉、仓里的蛋一起跳一下、滑块旁亮起第三个小图标（心形）、四声上行的小铃（sound chime）；之后抽题 = 公开题库 + 情侣题库（题卡标 ♡）；同一设备记住（localStorage fred-gacha-key），再按一次暗号退出。情侣题目原文在 `notes/couple-bank.txt`（不部署，暗号也只写在那里），`node scripts/seal-couple.mjs` 用暗号把题库 AES-GCM 加密成 dist/modules/gacha/couple.js；网站上只有密文，代码里不写暗号（每次满圈拿最近 8 次操作去试解密）。为此滑块改成真开关：点已在的那一半只会「顶一下」不翻面；旋钮点左半 / 右半 = 左 / 右一格。check-gacha 断言 dist/ 里搜不到暗号和题目原文。局限：8 步、每步 4 种，有心人可离线穷举（约 6.5 万种），定位是彩蛋不是保险箱。资源 v47。
 - v0.42.1 扭蛋机隐藏通道不再记住（Fred）：离开房间或刷新就恢复普通机器，每次都要重新按暗号；旧版本存下的 localStorage fred-gacha-key 进门时清掉。资源 v49。
 - v0.42.2 扭蛋机：珠光蛋和灯蛋只存在于隐藏通道里（普通机器的仓里和出蛋都不再有；`pickKind(rnd, easter)` 第二个参数为 true 才会出，`pile()` 不再放）。进门后仓里有两颗蛋变成珠光 / 灯蛋，第 8 颗必出珠光蛋、第 9 颗必出灯蛋（index.js PEARL_TURN / LAMP_TURN），之后才按概率出。珠光蛋 = 桌上一只盒子（`.gcr-box`，点一下掀盖；盒身和盒盖是一层层薄片叠出来的圆角实体，俯视约 44°，盖子绕后沿 rotateX，珍珠和钻是立起来朝向镜头的 SVG）；灯蛋 = 一封信（`.gcr-letter`），片刻后自动跳到手记阅读页显示。密封内容改成对象 `{ questions, letter }`（seal-couple.mjs 同时读 `notes/couple-bank.txt` 和 `notes/couple-letter.txt`）。手记新增「客人稿」`stories/guest.js`（setGuest / getGuest，只在内存里）：别的模块可以递一篇不在 data.js 里的稿子给阅读页，路由 `#/collection/stories/<guest.id>`，返回箭头和 Esc 回 `guest.back`，有 `sign` 时用落款代替 FIN，类型 `letter`。从信回来时门还开着（模块级 resume，只活在这次页面里）。`notes/couple-*.txt` 已加入 .gitignore 并从 git 里取消跟踪（仓库是公开的；此前提交过的版本仍在历史里，暗号需要 Fred 决定是否更换）。games.js 的 SPECIAL / PEARL 占位删除。从信回来时整张桌面原样保留（没拧开的蛋、纸、盒子、蛋壳；去别处则关门）。桌上最多等 6 颗蛋，满了再转会晃一下提示。开珠光蛋时桌上的纸和蛋壳全部滑走；盒子合着时项链不显示（否则会穿过盒盖）；开盒：盖子慢慢掀起、盒内暖光、金色光点上升、四周压暗、盒子略放大、小铃。资源 v55。
+
+## v0.43（分支 claude/room-3d，未合入 main）3D 小屋 · 第 1 阶段（Claude Code）
+- Fred 想试一个 3D 等距微缩场景作为导航：花园里的温暖小木屋，傍晚黄金时刻，注重光影。方案与决定见 docs/design/room.md。**首页 `#/` 不变**，小屋在 `#/room`。
+- 新增：dist/room/（config 物件↔模块映射、scene 地块与小屋、garden 花园、decor 摆设、objects/ 八件物件、lights 灯光与时刻预设、effects 光束与微尘、view 镜头限制、index 入口、style.css）；dist/vendor/three-0.170.0/（自托管，768KB）；scripts/vendor-three.mjs；scripts/check-room.mjs。
+- 共享改动：router.js 新增 `{ type: 'room' }`；main.js 新增 showRoom()（动态 import，离开时停渲染循环）、showRoute 的 room 分支、Esc 在小屋里不回首页（第 2 阶段用来关闭面板）；index.html 新增 `<main id="room-view">` 和 room/style.css；资源 v56。dist/modules/** 没有改动。
+- **新库**：Three.js 0.170.0（Fred 指定）。仍然无构建、无 npm：文件直接放在 dist/vendor/。
+- 验证：全部 check 通过（新增 check-room）；浏览器 1440×900 与 375×812 截图；镜头限制用脚本验证（方位角 11°–79°、俯仰 40°–73°、距离 0.45–1.12 倍）；一帧约 550 次绘制调用、1.9 万三角形；首页与手记页回归正常。注意：应用内浏览器面板在后台时 document.hidden 为真，渲染循环按设计暂停，拖动 / 滚轮只能在前台或 Fred 自己的浏览器里看。
+- 下一步：第 2 阶段（悬停 / 点击 / 镜头推近 / 模块整页淡入 / 键盘），等 Fred 看过第 1 阶段的画面再做。

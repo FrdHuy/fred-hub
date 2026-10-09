@@ -1,10 +1,10 @@
-import { createInteraction } from './experience.js?v=55';
-import { soundOn, setSound } from './sound.js?v=55';
-import { mountModule } from './modules/index.js?v=55';
-import { modules, getModule, createCover } from './catalog.js?v=55';
-import { CollectionGallery } from './gallery.js?v=55';
+import { createInteraction } from './experience.js?v=56';
+import { soundOn, setSound } from './sound.js?v=56';
+import { mountModule } from './modules/index.js?v=56';
+import { modules, getModule, createCover } from './catalog.js?v=56';
+import { CollectionGallery } from './gallery.js?v=56';
 import { readRoute, navigate } from './router.js';
-import { attachSheen } from './sheen.js?v=55';
+import { attachSheen } from './sheen.js?v=56';
 
 const $ = selector => document.querySelector(selector);
 // Focus rings are for keyboard users. Script-moved focus after a click or tap stays invisible.
@@ -55,6 +55,17 @@ function openRoom(rect, color, behind) {
   animate(screen, [{ clipPath: from }, { clipPath: full }], { duration: 460, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' });
   return animate(veil, [{ opacity: 1 }, { opacity: 1, offset: .6 }, { opacity: 0 }], { duration: 780, easing: 'ease-out' });
 }
+// 3D 小屋（#/room）：Three.js 和场景代码只在第一次进来时才加载；离开时停掉渲染循环，回来接着用同一个场景。
+const room = $('#room-view'); let roomScene = null, roomLoading = null;
+function showRoom(on) {
+  room.hidden = !on;
+  if (!on) { roomScene?.stop(); return; }
+  if (roomScene) { roomScene.start(); return; }
+  roomLoading ??= import('./room/index.js?v=56').then(({ mountRoom }) => {
+    roomScene = mountRoom(room); room.dataset.state = 'ready';
+    if (activeRoute.type === 'room') roomScene.start();
+  }).catch(error => { console.error(error); room.dataset.state = 'failed'; });
+}
 function renderCollection(item) {
   disposeModule();
   detail.replaceChildren(); detail.dataset.module = item.id;
@@ -89,14 +100,17 @@ async function showRoute(initial = false) {
     transitionItem = getModule(previousRoute.id);
   }
   closeMenu(false);
-  gallery.freeze(); activeRoute = item ? nextRoute : nextRoute.type === 'home' ? nextRoute : { type: 'missing' };
+  gallery.freeze(); activeRoute = item ? nextRoute : nextRoute.type === 'home' || nextRoute.type === 'room' ? nextRoute : { type: 'missing' };
   if (activeRoute.type === 'home') {
     disposeModule(); disposeModule = () => {}; document.documentElement.dataset.theme = '';
-    home.hidden = false; detail.hidden = true; document.title = 'Fred’s Hub — 生活收藏室';
+    home.hidden = false; detail.hidden = true; showRoom(false); document.title = 'Fred’s Hub — 生活收藏室';
     if (pendingModule) { gallery.focusModule(pendingModule); pendingModule = null; }
     else if (transitionItem) gallery.focusModule(transitionItem.id); else gallery.draw();
+  } else if (activeRoute.type === 'room') {
+    disposeModule(); disposeModule = () => {}; document.documentElement.dataset.theme = 'dark';
+    home.hidden = true; detail.hidden = true; showRoom(true); document.title = '小屋 — Fred’s Hub';
   } else {
-    home.hidden = true; detail.hidden = false;
+    home.hidden = true; detail.hidden = false; showRoom(false);
     if (item) { renderCollection(item); document.title = `${item.title} — Fred’s Hub`; }
     else { renderMissing(); document.title = '未找到收藏 — Fred'; }
   }
@@ -162,7 +176,7 @@ document.addEventListener('keydown', e => {
   if (activeRoute.type === 'home') {
     if (e.key === 'ArrowLeft') { e.preventDefault(); gallery.select(gallery.target - 1); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); gallery.select(gallery.target + 1); }
-  } else if (e.key === 'Escape') navigate();
+  } else if (activeRoute.type !== 'room' && e.key === 'Escape') navigate();
 });
 $('.skip-link').addEventListener('click', e => {
   e.preventDefault();

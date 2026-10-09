@@ -1,7 +1,8 @@
-// Routes: #/ (home), #/collection/<id>, and #/collection/<id>/<sub> — a place inside a module (an article, a flight).
+// Routes: #/ (home), #/room (the 3D cabin), #/collection/<id>, and #/collection/<id>/<sub> — a place inside a module (an article, a flight).
 export function readRoute(hash = location.hash) {
   const path = hash.replace(/^#/, '') || '/';
   if (path === '/') return { type: 'home' };
+  if (path === '/room' || path === '/room/') return { type: 'room' };
   const match = path.match(/^\/collection\/([^/]+)(?:\/([^/]+))?\/?$/);
   if (match) {
     try { const route = { type: 'collection', id: decodeURIComponent(match[1]) }; if (match[2]) route.sub = decodeURIComponent(match[2]); return route; }

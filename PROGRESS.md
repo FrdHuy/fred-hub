@@ -3,7 +3,7 @@
 > Claude Code 与 Codex 共用的进度总览。**开始工作前先读本文件和 `AGENTS.md`**，再读 `docs/DESIGN.md`（统一设计语言，任何视觉/交互改动必读）、`docs/HANDOFF.md`（逐版本交接、所有权表）和 `docs/MODULES.md`（模块接口）。
 > 本文件管“全局现状 + 待办 + 约定”；每轮的详细改动与验证继续写在 `docs/HANDOFF.md` 和 `docs/开发进度-vX.md`。
 
-最近更新：2026-09-29 · Claude Code（v0.33 手记打字机）
+最近更新：2026-10-09 · Claude Code（分支 claude/room-3d：3D 小屋第 1 阶段，未合入 main）
 上一次代码改动：v0.33 · 2026-09-29 · Claude Code
 
 ---
@@ -36,6 +36,8 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 
 - travel 翻牌屏：已完成（v0.31），等 Fred 的真实行程数据替换占位（Claude Code）。
 - 手记：已完成（v0.33），等 Fred 写第一篇真实文章（见 notes/README.md）。
+
+- 3D 小屋 `#/room`（分支 `claude/room-3d`，**未合入 main**）：第 1 阶段（静态场景 + 灯光 + 镜头）完成；第 2 阶段交互、第 3 阶段 Bloom 与降级待做。设计与决定见 docs/design/room.md。Three.js 0.170.0 自托管在 dist/vendor/。
 
 ## 4. 待办清单（按优先级）
 

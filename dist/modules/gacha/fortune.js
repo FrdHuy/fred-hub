@@ -1,6 +1,6 @@
 // 今日签: the date (Gregorian, lunar, the day's stems and branches), a slip for the chosen sign, the almanac's 宜 / 忌.
 // Step 3 fills in the real almanac rules and the verified 观音灵签 texts; until then the slip itself is marked 示意.
-import { ZODIAC } from './machine.js?v=55';
+import { ZODIAC } from './machine.js?v=56';
 
 const GAN = '甲乙丙丁戊己庚辛壬癸', ZHI = '子丑寅卯辰巳午未申酉戌亥';
 const CN = '〇一二三四五六七八九';
@@ -27,9 +27,9 @@ export function lunar(date) {
 // Same day + same sign → the same slip, always. A small stable hash picks it.
 export function slipIndex(date, sign, count) { let h = 2166136261; for (const c of `${date.y}-${date.m}-${date.d}:${sign}`) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h % count; }
 
-import LINGQIAN from './lingqian.js?v=55';
-import { almanac } from './almanac.js?v=55';
-import { horoscope, ASPECTS } from './horoscope.js?v=55';
+import LINGQIAN from './lingqian.js?v=56';
+import { almanac } from './almanac.js?v=56';
+import { horoscope, ASPECTS } from './horoscope.js?v=56';
 export { ASPECTS };
 // Same day + same sign → the same one of the hundred slips.
 export function todaySlip(date, sign) {
