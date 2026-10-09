@@ -58,7 +58,28 @@ export function contact(w, d, strength = .42, x = 0, z = 0, y = .008) {
   const material = new THREE.MeshBasicMaterial({ map: blob, color: '#2a1608', transparent: true, opacity: strength, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), material);
   m.rotation.x = -Math.PI / 2; m.position.set(x, y, z); m.renderOrder = 2;
+  m.raycast = () => {};                                    // 阴影贴片比物件大一圈，不能算作「指到了物件」
   return m;
+}
+
+// 材质默认是全场景共用的。需要单独变化的东西（悬停发亮的物件、会隐去的墙）先调用 own() 换成自己的一份，
+// 返回这些材质；每份材质上记着原始的不透明度和发光强度（userData.base）。
+export function own(object) {
+  const copies = new Map();
+  object.traverse(o => {
+    if (!o.isMesh) return;
+    if (!copies.has(o.material)) {
+      const copy = o.material.clone();
+      copy.userData.base = { opacity: copy.opacity, transparent: copy.transparent, depthWrite: copy.depthWrite, glow: copy.emissive?.getHex() ? copy.emissiveIntensity : 0 };
+      copies.set(o.material, copy);
+    }
+    o.material = copies.get(o.material);
+  });
+  return [...copies.values()];
+}
+// 把一组 own() 过的材质淡到 k（1 = 原样，0 = 看不见）。只改不透明度：物体仍在场景里，所以照样投影。
+export function fade(materials, k) {
+  for (const m of materials) { const base = m.userData.base; m.opacity = base.opacity * k; m.transparent = base.transparent || k < 1; m.depthWrite = base.depthWrite && k > .5; }
 }
 
 // 固定种子的随机数：花、书、冰箱贴每次打开都在同一个位置。

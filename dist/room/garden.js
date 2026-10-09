@@ -11,7 +11,7 @@ const LEAVES = ['#7fae52', '#95bd60', '#6c9c4a', '#a6c86c'];
 function spot(random, margin = .5) {
   for (;;) {
     const x = ISLAND.min + margin + random() * (ISLAND.max - ISLAND.min - margin * 2), z = ISLAND.min + margin + random() * (ISLAND.max - ISLAND.min - margin * 2);
-    if (x > ROOM.half + .5 || z > ROOM.half + .5) return [x, z];
+    if (Math.max(Math.abs(x), Math.abs(z)) > ROOM.half + .55) return [x, z];
   }
 }
 function instances(geometry, material, count, place) {
@@ -21,12 +21,12 @@ function instances(geometry, material, count, place) {
   return mesh;
 }
 
-function tree(x, z) {
+function tree(x, z, scale = 1) {
   const random = rng(3), t = group(cyl(.16, .24, 1.9, mat('#7a5238'), 0, 0, 0, 6), tilt(cyl(.07, .1, .9, mat('#7a5238'), .3, 1.2, .1, 5), 0, 0, -.7), contact(2.6, 2.6, .3));
   for (const [dx, dy, dz, r] of [[0, 2.5, 0, 1.05], [.75, 2.2, .2, .7], [-.65, 2.15, -.25, .75], [.1, 3.2, -.1, .7], [-.2, 2.3, .75, .62], [.5, 2.9, -.55, .55]]) {
     const leaf = ball(r, mat(pick(random, LEAVES)), dx, dy, dz, 0); leaf.rotation.set(random() * 3, random() * 3, 0); t.add(leaf);
   }
-  t.position.set(x, GRASS, z);
+  t.position.set(x, GRASS, z); t.scale.setScalar(scale);
   return t;
 }
 function bush(x, z, size, random) {
@@ -58,12 +58,12 @@ export function buildGarden() {
   [[.9, 3.75], [1.05, 4.4], [1.35, 5.0], [1.25, 5.65], [1.6, 6.2], [1.5, 6.8]].forEach(([x, z], i) => {
     const s = cyl(.34 + random() * .08, .36, .05, stone[i % 3], x + (random() - .5) * .1, GRASS - .005, z, 7); s.rotation.y = random() * 3; s.scale.x = 1.15; garden.add(s);
   });
-  garden.add(tree(-2.3, 5.5), lantern(2.3, 5.1), bench(-1.2, 3.75, 0));
-  for (const [x, z, size] of [[3.75, -2.6, .42], [3.9, -1.5, .3], [4.3, 2.9, .5], [-3.6, 4.2, .4], [6.3, 6.2, .55], [5.6, -3.3, .5], [6.5, 1.2, .36], [3.6, 6.4, .34]]) garden.add(bush(x, z, size, random));
+  garden.add(tree(-2.3, 5.5), tree(-4.5, -4.5, .78), lantern(2.3, 5.1), bench(-1.2, 3.75, 0));
+  for (const [x, z, size] of [[3.75, -2.6, .42], [3.9, -1.5, .3], [4.3, 2.9, .5], [-3.6, 4.2, .4], [6.3, 6.2, .55], [5.6, -3.3, .5], [6.5, 1.2, .36], [3.6, 6.4, .34], [-1.4, -4.4, .45], [1.6, -4.7, .34], [3.4, -4.3, .4], [-4.6, .6, .4], [-4.4, 2.6, .32]]) garden.add(bush(x, z, size, random));
   for (const [x, z, r] of [[5.2, 4.6, .22], [5.45, 4.85, .13], [-3.5, 6.5, .2], [6.4, -1.6, .18]]) garden.add(ball(r, mat('#b9ae9c'), x, GRASS + r * .5, z, 0));
 
   // 花：一丛一丛地开——屋侧的花坛、小径两边、树下，再零星撒一些。
-  const beds = [[3.6, 4.1, -.6, 2.6, 26], [.1, .75, 4.1, 6.4, 12], [1.9, 2.7, 3.9, 6.6, 14], [-3.6, -1.2, 4.6, 6.6, 12], [4.2, 6.8, 3.4, 6.8, 22], [4.4, 6.9, -3.8, 2.6, 18]];
+  const beds = [[3.6, 4.1, -.6, 2.6, 26], [.1, .75, 4.1, 6.4, 12], [1.9, 2.7, 3.9, 6.6, 14], [-3.6, -1.2, 4.6, 6.6, 12], [4.2, 6.8, 3.4, 6.8, 22], [4.4, 6.9, -3.8, 2.6, 18], [-.6, 3.0, -5.2, -3.7, 20], [-5.2, -3.8, -2.6, 3.4, 18], [4.0, 6.8, -5.2, -3.9, 12]];
   const flowers = beds.flatMap(([x0, x1, z0, z1, n]) => Array.from({ length: n }, () => [x0 + random() * (x1 - x0), z0 + random() * (z1 - z0), .2 + random() * .24, pick(random, PETALS)]));
   garden.add(
     instances(new THREE.CylinderGeometry(.016, .02, 1, 4), mat('#5f8a44'), flowers.length, (d, i) => { const [x, z, h] = flowers[i]; d.position.set(x, GRASS + h / 2, z); d.scale.set(1, h, 1); d.rotation.set(0, 0, 0); }),
@@ -76,14 +76,14 @@ export function buildGarden() {
   const tufts = Array.from({ length: 150 }, () => [...spot(random, .3), .08 + random() * .1, pick(random, ['#aed072', '#8fb85a', '#bcd983'])]);
   garden.add(instances(new THREE.ConeGeometry(.05, 1, 4), mat('#ffffff'), tufts.length, (d, i) => { const [x, z, h, tint] = tufts[i]; d.position.set(x, GRASS + h / 2, z); d.scale.set(1, h, 1); d.rotation.set(0, random() * 3, (random() - .5) * .4); return tint; }));
 
-  // 木栅栏：沿着朝向镜头的两条边，小径处留出口；矮矮的，不挡视线。
-  const edge = ISLAND.max - .25, pickets = [], rails = group(), wood = mat('#efe6d6');
-  const run = (from, to, alongX) => {
+  // 木栅栏：围一整圈，小径处留出口；矮矮的，不挡视线。
+  const near = ISLAND.max - .25, back = ISLAND.min + .25, pickets = [], rails = group(), wood = mat('#efe6d6');
+  const run = (from, to, edge, alongX) => {
     const length = to - from, mid = (from + to) / 2;
     for (const y of [.14, .34]) rails.add(alongX ? box(length, .035, .03, wood, mid, GRASS + y, edge) : box(.03, .035, length, wood, edge, GRASS + y, mid));
-    for (let p = from + .12; p < to; p += .26) pickets.push(alongX ? [p, edge + .02, 0] : [edge + .02, p, Math.PI / 2]);
+    for (let p = from + .12; p < to; p += .26) pickets.push(alongX ? [p, edge, 0] : [edge, p, Math.PI / 2]);
   };
-  run(-3.9, .95, true); run(2.1, edge, true); run(-3.9, edge, false);
+  run(back, .95, near, true); run(2.1, near, near, true); run(back, near, near, false); run(back, near, back, true); run(back, near, back, false);
   garden.add(rails, instances(new THREE.BoxGeometry(.09, .5, .025), wood, pickets.length, (d, i) => { const [x, z, turn] = pickets[i]; d.position.set(x, GRASS + .25, z); d.rotation.set(0, turn, 0); d.scale.set(1, 1, 1); }));
   return garden;
 }

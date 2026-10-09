@@ -36,11 +36,11 @@ export function createLights({ renderer, scene }, name) {
   const fill = new THREE.DirectionalLight(mood.fill.color, mood.fill.intensity); fill.position.set(...mood.fill.from).multiplyScalar(20); scene.add(fill);
 
   // 太阳：平行光 + 一张覆盖整块地的阴影贴图。
-  const sunDirection = new THREE.Vector3(...mood.sun.from).normalize(), center = new THREE.Vector3(1.5, 0, 1.5);
+  const sunDirection = new THREE.Vector3(...mood.sun.from).normalize(), center = new THREE.Vector3(.8, 0, .8);
   const sun = new THREE.DirectionalLight(mood.sun.color, mood.sun.intensity);
   sun.position.copy(center).addScaledVector(sunDirection, 30); sun.target.position.copy(center);
   sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -.0004; sun.shadow.normalBias = .035;
-  Object.assign(sun.shadow.camera, { left: -10, right: 10, top: 10, bottom: -10, near: 5, far: 60 });
+  Object.assign(sun.shadow.camera, { left: -11, right: 11, top: 11, bottom: -11, near: 5, far: 60 });
   scene.add(sun, sun.target);
 
   // 室内外的灯：找到每个灯位，装上对应的灯。

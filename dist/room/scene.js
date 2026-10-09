@@ -2,11 +2,11 @@
 // 坐标约定：1 单位 ≈ 1 米；房间地板 y = 0，x / z 各从 -3 到 3；镜头在 +x +z 方向，所以
 // 左后墙在 x = -3，右后墙在 z = -3，朝向镜头的两面墙被「切掉」，只留一圈矮墙脚。
 import * as THREE from './three.js';
-import { mat, box, cyl, ball, group, paint, contact, rng, tilt } from './kit.js';
+import { mat, satin, box, cyl, ball, rod, group, paint, contact, rng, tilt } from './kit.js';
 
 export const ROOM = { half: 3, wallHeight: 3.2, wallThick: .2 };
 export const GRASS = -.14;                                   // 草地比地板低一个门槛
-export const ISLAND = { min: -4.2, max: 7.2 };               // 地块在 x / z 上的范围（小屋靠后，前面两侧是花园）
+export const ISLAND = { min: -5.6, max: 7.2 };               // 地块在 x / z 上的范围（小屋略靠后，四周都是花园，前面两侧更宽）
 // 左后墙上的窗。光束、地板上的窗格光斑都由它决定（effects.js 也读这个）。
 export const WINDOW = { x: -ROOM.half, z0: -.4, z1: 2.0, y0: .95, y1: 2.45 };
 
@@ -61,42 +61,67 @@ export function buildIsland() {
 }
 
 // ── 小屋 ──────────────────────────────────────────────────────────────────────
+// 四面墙各自成组（west / north / east / south），挡在镜头和房间之间的那面会自动隐去（cutaway.js），
+// 所以可以绕着小屋转一整圈。默认视角下隐去的是 east 和 south；它们不投影，光影只由 west / north 决定。
 export function buildHouse() {
   const { half: R, wallHeight: H, wallThick: T } = ROOM, random = rng(21), house = group();
   // 地基 + 一条条地板（每条颜色略有不同，接缝处自然出现细线）。
-  house.add(box(R * 2 + T * 2 + .1, .3, R * 2 + T * 2 + .1, mat('#8c7a6a'), -T / 2, -.34, -T / 2));
+  house.add(box(R * 2 + T * 2 + .1, .3, R * 2 + T * 2 + .1, mat('#8c7a6a'), 0, -.34, 0));
   for (let i = 0; i < 12; i++) house.add(box(.485, .05, R * 2, mat(WOOD.floor[Math.floor(random() * 4)], { roughness: .62 }), -R + .25 + i * .5, -.05, 0));
   house.add(box(R * 2, .02, R * 2, mat('#5d3d28'), 0, -.06, 0));                         // 板缝下面的深色底
 
   const plaster = mat(WALL.plaster, { roughness: .95 }), green = mat(WALL.wainscot), beam = mat(WOOD.beam), trim = mat(WOOD.trim);
-  const { z0, z1, y0, y1 } = WINDOW, wx = -R - T / 2;
-  // 左后墙：围着窗洞的四块 + 护墙板 + 顶梁。
-  house.add(
-    box(T, H, z0 + R + T, plaster, wx, 0, (z0 - R - T) / 2), box(T, H, R - z1, plaster, wx, 0, (R + z1) / 2),
-    box(T, y0, z1 - z0, plaster, wx, 0, (z0 + z1) / 2), box(T, H - y1, z1 - z0, plaster, wx, y1, (z0 + z1) / 2),
+  const { z0, z1, y0, y1 } = WINDOW, far = R + T / 2, DOOR = { x0: .3, x1: 1.5, top: 2.1 };
+  const walls = { west: group(), north: group(), east: group(), south: group() };
+  // 西墙（x = -3）：围着窗洞的四块 + 护墙板 + 顶梁 + 窗。
+  walls.west.add(
+    box(T, H, z0 + R, plaster, -far, 0, (z0 - R) / 2), box(T, H, R - z1, plaster, -far, 0, (R + z1) / 2),
+    box(T, y0, z1 - z0, plaster, -far, 0, (z0 + z1) / 2), box(T, H - y1, z1 - z0, plaster, -far, y1, (z0 + z1) / 2),
     box(.035, .9, R * 2, green, -R + .017, 0, 0), box(.06, .05, R * 2, trim, -R + .03, .9, 0), box(.05, .1, R * 2, trim, -R + .042, 0, 0),
-    box(T + .08, .1, R * 2 + T + .04, beam, wx, H, -T / 2),
+    box(T + .08, .1, R * 2, beam, -far, H, 0), buildWindow(),
   );
-  // 右后墙：整面。
-  const wz = -R - T / 2;
-  house.add(
-    box(R * 2, H, T, plaster, 0, 0, wz),
+  // 北墙（z = -3）：整面。
+  walls.north.add(
+    box(R * 2, H, T, plaster, 0, 0, -far),
     box(R * 2, .9, .035, green, 0, 0, -R + .017), box(R * 2, .05, .06, trim, 0, .9, -R + .03), box(R * 2, .1, .05, trim, 0, 0, -R + .042),
-    box(R * 2 + .04, .1, T + .08, beam, 0, H, wz),
-    box(T + .1, H + .1, T + .1, beam, wx, 0, wz),                                        // 墙角立柱
+    box(R * 2, .1, T + .08, beam, 0, H, -far),
   );
-  // 被切开的两面墙：只留矮墙脚，切口用浅色；+z 一侧留出门口。
-  const cut = mat(WALL.cut), DOOR = { x0: .3, x1: 1.5 };
+  // 东墙（x = +3）：转到屋后才看得见——一面圆镜、一块搁板。
+  walls.east.add(
+    box(T, H, R * 2, plaster, far, 0, 0),
+    box(.035, .9, R * 2, green, R - .017, 0, 0), box(.06, .05, R * 2, trim, R - .03, .9, 0), box(.05, .1, R * 2, trim, R - .042, 0, 0),
+    box(T + .08, .1, R * 2, beam, far, H, 0),
+    rod(.36, .03, trim, R - .02, 1.85, -.7, 'x', 20), rod(.31, .034, mat('#cfd8da', { roughness: .25, metalness: .4 }), R - .02, 1.85, -.7, 'x', 20),
+    box(.18, .03, 1.0, trim, R - .1, 1.35, 1.3), cyl(.07, .055, .1, mat('#c9764f'), R - .1, 1.38, 1.05, 8), ball(.09, mat('#7fae52'), R - .1, 1.56, 1.05, 0),
+    box(.1, .16, .12, mat('#5f7f8a'), R - .1, 1.38, 1.45), box(.1, .2, .05, mat('#e0b354'), R - .1, 1.38, 1.58),
+  );
+  // 南墙（z = +3）：门洞 + 敞开的门。
+  walls.south.add(
+    box(DOOR.x0 + R, H, T, plaster, (DOOR.x0 - R) / 2, 0, far), box(R - DOOR.x1, H, T, plaster, (R + DOOR.x1) / 2, 0, far), box(DOOR.x1 - DOOR.x0, H - DOOR.top, T, plaster, (DOOR.x0 + DOOR.x1) / 2, DOOR.top, far),
+    box(DOOR.x0 + R, .9, .035, green, (DOOR.x0 - R) / 2, 0, R - .017), box(R - DOOR.x1, .9, .035, green, (R + DOOR.x1) / 2, 0, R - .017),
+    box(DOOR.x0 + R, .05, .06, trim, (DOOR.x0 - R) / 2, .9, R - .03), box(R - DOOR.x1, .05, .06, trim, (R + DOOR.x1) / 2, .9, R - .03),
+    box(.07, DOOR.top, T + .06, mat('#f4ede0'), DOOR.x0, 0, far), box(.07, DOOR.top, T + .06, mat('#f4ede0'), DOOR.x1, 0, far), box(DOOR.x1 - DOOR.x0 + .14, .07, T + .06, mat('#f4ede0'), (DOOR.x0 + DOOR.x1) / 2, DOOR.top, far),
+    box(R * 2, .1, T + .08, beam, 0, H, far),
+    box(.05, DOOR.top - .04, 1.1, mat('#c9764f'), DOOR.x1 + .03, 0, far + T / 2 + .55), ball(.03, satin(), DOOR.x1 - .02, 1.0, far + T / 2 + 1.0, 0),
+  );
+  for (const name of ['east', 'south']) walls[name].traverse(o => { o.castShadow = false; });
+  // 四根墙角立柱：相邻两面墙有一面隐去，它就跟着隐去。
+  const posts = [[-far, -far, ['west', 'north'], true], [far, -far, ['north', 'east'], false], [far, far, ['east', 'south'], false], [-far, far, ['south', 'west'], true]].map(([x, z, between, shadow]) => {
+    const part = group(box(T + .1, H + .1, T + .1, beam, x, 0, z)); part.children[0].castShadow = shadow;
+    return { part, walls: between };
+  });
+  house.add(...Object.values(walls), ...posts.map(post => post.part));
+  house.userData.cutaway = { walls, posts };
+  // 墙脚：墙隐去之后留下的一圈矮切口，南面留出门口。
+  const cut = mat(WALL.cut), S = T + .03;
   house.add(
-    box(T, .2, R * 2 + T, cut, R + T / 2, -.04, T / 2),
-    box(DOOR.x0 + R, .2, T, cut, (DOOR.x0 - R) / 2, -.04, R + T / 2), box(R - DOOR.x1, .2, T, cut, (R + DOOR.x1) / 2, -.04, R + T / 2),
-    box(DOOR.x1 - DOOR.x0, .06, T + .3, mat(WOOD.dark), (DOOR.x0 + DOOR.x1) / 2, -.06, R + T / 2 + .1),   // 门槛
-    box(T + .1, .5, T + .1, beam, wx, -.04, R + T / 2), box(T + .1, .5, T + .1, beam, R + T / 2, -.04, wz),
+    box(S, .2, R * 2 + T, cut, far, -.04, 0), box(DOOR.x0 + R, .2, S, cut, (DOOR.x0 - R) / 2, -.04, far), box(R - DOOR.x1, .2, S, cut, (R + DOOR.x1) / 2, -.04, far),
+    box(S, .2, R * 2 + T, cut, -far, -.04, 0), box(R * 2 + T, .2, S, cut, 0, -.04, -far),
+    box(DOOR.x1 - DOOR.x0, .06, T + .3, mat(WOOD.dark), (DOOR.x0 + DOOR.x1) / 2, -.06, far + .1),   // 门槛
+    ...[[-far, -far], [far, -far], [far, far], [-far, far]].map(([x, z]) => box(T + .12, .24, T + .12, beam, x, -.04, z)),
   );
-  house.add(buildWindow());
-  // 墙根的暗角：两条窄长的接触阴影，让墙和地板的交界有分量。
-  const along = contact(.7, R * 2, .34, -R + .3, 0), across = contact(R * 2, .7, .34, 0, -R + .3);
-  house.add(along, across);
+  // 墙根的暗角：窄长的接触阴影，让墙和地板的交界有分量。
+  house.add(contact(.7, R * 2, .34, -R + .3, 0), contact(R * 2, .7, .34, 0, -R + .3));
   return house;
 }
 

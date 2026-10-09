@@ -17,3 +17,15 @@
 .r3-list:hover{opacity:1}
 .r3-list svg{width:22px;height:22px}
 @media(prefers-reduced-motion:reduce){.r3-canvas{transition:none}.r3-loading>span{animation:none}}
+/* 名称标签：跟着物件走的一小块暖白标签；还没建好的模块颜色淡一些，后面带一个空心圆点 */
+.r3-label{position:absolute;left:0;top:0;z-index:2;pointer-events:none;padding:6px 12px 7px;border-radius:999px;background:rgba(253,250,244,.94);color:#343832;font:500 13px/1 var(--font-ui);letter-spacing:.08em;white-space:nowrap;box-shadow:0 6px 18px rgba(30,20,10,.28);opacity:0;transition:opacity .18s}
+.r3-label.is-on{opacity:1}
+.r3-label.is-soon{background:rgba(253,250,244,.72);color:#6f716a}
+.r3-label.is-soon:after{content:'';display:inline-block;width:6px;height:6px;margin-left:8px;border:1.5px solid currentColor;border-radius:50%;vertical-align:1px}
+/* 过渡幕：镜头推近到头时淡成模块页的底色，回来时再淡开 */
+.r3-veil{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .5s ease}
+.r3-veil.is-on{opacity:1;transition-duration:.38s}
+.r3-veil.is-cut{transition:none}
+/* 键盘 / 读屏用的物件链接：看不见，但能聚焦 */
+.r3-nav{position:absolute;left:0;bottom:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media(prefers-reduced-motion:reduce){.r3-label,.r3-veil{transition:none}}

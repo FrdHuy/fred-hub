@@ -1,5 +1,5 @@
 import { createInteraction } from './experience.js?v=56';
-import { soundOn, setSound } from './sound.js?v=56';
+import { soundOn, setSound, play as sound } from './sound.js?v=56';
 import { mountModule } from './modules/index.js?v=56';
 import { modules, getModule, createCover } from './catalog.js?v=56';
 import { CollectionGallery } from './gallery.js?v=56';
@@ -56,13 +56,22 @@ function openRoom(rect, color, behind) {
   return animate(veil, [{ opacity: 1 }, { opacity: 1, offset: .6 }, { opacity: 0 }], { duration: 780, easing: 'ease-out' });
 }
 // 3D 小屋（#/room）：Three.js 和场景代码只在第一次进来时才加载；离开时停掉渲染循环，回来接着用同一个场景。
-const room = $('#room-view'); let roomScene = null, roomLoading = null;
-function showRoom(on) {
+// roomReturn：这一页是从小屋里点物件进来的 → 返回箭头、Esc、模块自己的「回首页」都回小屋（镜头拉回全景）。
+const room = $('#room-view'); let roomScene = null, roomLoading = null, roomReturn = false;
+const goBack = () => { if (roomReturn) location.hash = '#/room'; else navigate(); };
+// 有的模块会自己改写返回箭头（手记在桌面上把它指回 #/）。不改模块：从小屋进来时，指向首页的返回箭头一律改回小屋。
+detail.addEventListener('click', e => { if (roomReturn && e.target.closest?.('.back-link')?.getAttribute('href') === '#/') { e.preventDefault(); goBack(); } });
+function showRoom(on, from) {
   room.hidden = !on;
   if (!on) { roomScene?.stop(); return; }
-  if (roomScene) { roomScene.start(); return; }
+  if (roomScene) { roomScene.start(from); return; }
   roomLoading ??= import('./room/index.js?v=56').then(({ mountRoom }) => {
-    roomScene = mountRoom(room); room.dataset.state = 'ready';
+    roomScene = mountRoom(room, {
+      open(entry) { roomReturn = true; navigate(entry.module); },
+      tint: id => getModule(id)?.theme === 'dark' ? '#100e0c' : '#f8f7f4',
+      sound,
+    });
+    room.dataset.state = 'ready';
     if (activeRoute.type === 'room') roomScene.start();
   }).catch(error => { console.error(error); room.dataset.state = 'failed'; });
 }
@@ -72,10 +81,10 @@ function renderCollection(item) {
   // A module may bring its own page theme; the shared header follows it.
   document.documentElement.dataset.theme = item.theme || '';
   const toolbar = document.createElement('div'); toolbar.className = 'detail-toolbar';
-  const back = document.createElement('a'); back.className = 'back-link'; back.href = '#/'; back.textContent = '← 放回收藏';
+  const back = document.createElement('a'); back.className = 'back-link'; back.href = roomReturn ? '#/room' : '#/'; back.textContent = '← 放回收藏';
   toolbar.append(back); detail.append(toolbar);
   const container = document.createElement('div'); container.className = 'module-content'; detail.append(container);
-  disposeModule = mountModule({ container, item, navigate, createCover, route: activeRoute.sub });
+  disposeModule = mountModule({ container, item, navigate: (id, sub) => id ? navigate(id, sub) : goBack(), createCover, route: activeRoute.sub });
 }
 function renderMissing() {
   disposeModule(); disposeModule = () => {}; document.documentElement.dataset.theme = '';
@@ -103,12 +112,12 @@ async function showRoute(initial = false) {
   gallery.freeze(); activeRoute = item ? nextRoute : nextRoute.type === 'home' || nextRoute.type === 'room' ? nextRoute : { type: 'missing' };
   if (activeRoute.type === 'home') {
     disposeModule(); disposeModule = () => {}; document.documentElement.dataset.theme = '';
-    home.hidden = false; detail.hidden = true; showRoom(false); document.title = 'Fred’s Hub — 生活收藏室';
+    home.hidden = false; detail.hidden = true; showRoom(false); roomReturn = false; document.title = 'Fred’s Hub — 生活收藏室';
     if (pendingModule) { gallery.focusModule(pendingModule); pendingModule = null; }
     else if (transitionItem) gallery.focusModule(transitionItem.id); else gallery.draw();
   } else if (activeRoute.type === 'room') {
     disposeModule(); disposeModule = () => {}; document.documentElement.dataset.theme = 'dark';
-    home.hidden = true; detail.hidden = true; showRoom(true); document.title = '小屋 — Fred’s Hub';
+    home.hidden = true; detail.hidden = true; roomReturn = false; showRoom(true, leaving); document.title = '小屋 — Fred’s Hub';
   } else {
     home.hidden = true; detail.hidden = false; showRoom(false);
     if (item) { renderCollection(item); document.title = `${item.title} — Fred’s Hub`; }
@@ -125,7 +134,7 @@ async function showRoute(initial = false) {
       animate(paper,[{transform:from},{transform:'none'}],{duration:520,easing:'cubic-bezier(.22,.75,.2,1)'}),
     ]);
     paper.style.removeProperty('transform-origin');
-  }else if(!initial&&!motion.matches){
+  }else if(!initial&&!motion.matches&&activeRoute.type!=='room'){   // 小屋有自己的过渡幕（room/interact.js）
     // The typewriter's sheet of paper grows into the page; the readers' screens grow into their dark rooms.
     await openRoom(screenOrigin, item?.id === 'stories' && screenOrigin ? '#fdfcf8' : getComputedStyle(document.body).backgroundColor, leaving);
   }
@@ -176,7 +185,7 @@ document.addEventListener('keydown', e => {
   if (activeRoute.type === 'home') {
     if (e.key === 'ArrowLeft') { e.preventDefault(); gallery.select(gallery.target - 1); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); gallery.select(gallery.target + 1); }
-  } else if (activeRoute.type !== 'room' && e.key === 'Escape') navigate();
+  } else if (activeRoute.type !== 'room' && e.key === 'Escape') goBack();
 });
 $('.skip-link').addEventListener('click', e => {
   e.preventDefault();

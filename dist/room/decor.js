@@ -55,7 +55,10 @@ function fairyLights() {
   return quiet(line);
 }
 
+// north：挂在北墙上的摆设，交给 cutaway.js 跟着北墙一起隐去。
 export function buildDecor() {
-  return group(rug(.5, 1.05), table(1.35, .45), cat(.25, 1.5, -.5), floorLamp(2.5, -1.2), bookshelf(-2.84, 2.48, Math.PI / 2), plant(1.48, -2.6), fairyLights(),
+  const lights = fairyLights(), decor = group(rug(.5, 1.05), table(1.35, .45), cat(.25, 1.5, -.5), floorLamp(2.5, -1.2), bookshelf(-2.84, 2.48, Math.PI / 2), plant(1.48, -2.6), lights,
     cyl(.3, .32, .12, mat('#d98a5f', { roughness: 1 }), 2.1, 0, .9, 12), contact(.9, .9, .34, 2.1, .9));
+  decor.userData.onWall = { north: [lights] };
+  return decor;
 }

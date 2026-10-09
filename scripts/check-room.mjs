@@ -13,6 +13,7 @@ for (const entry of objects) {
   assert.ok(existsSync(`dist/room/objects/${entry.object}.js`), `${entry.object}: 没有这个物件造型`);
   assert.ok(entry.label, `${entry.object}: 缺 label`);
   assert.ok(Array.isArray(entry.at) && entry.at.length === 3 && entry.at.every(Number.isFinite), `${entry.object}: at 应为 [x, y, z]`);
+  if (entry.wall) assert.ok(['west', 'north', 'east', 'south'].includes(entry.wall), `${entry.object}: wall 应为 west / north / east / south`);
   if (entry.soon) assert.ok(!entry.module, `${entry.object}: 标了 soon 就不要写 module`);
   else assert.ok(ids.has(entry.module), `${entry.object}: 模块 ${entry.module} 不在 catalog.js 里`);
 }
