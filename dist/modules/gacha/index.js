@@ -1,12 +1,12 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=54';
-import { unwrap, STEP, FULL } from './machine-home.js?v=54';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=54';
-import { BANK, parseBank, createDeck } from './games.js?v=54';
-import { setGuest } from '../stories/guest.js?v=54';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=55';
+import { unwrap, STEP, FULL } from './machine-home.js?v=55';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=55';
+import { BANK, parseBank, createDeck } from './games.js?v=55';
+import { setGuest } from '../stories/guest.js?v=55';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=54';
-import SEALED from './couple.js?v=54';
-import { unseal } from '../stories/seal.js?v=54';
+import { play as sound } from '../../sound.js?v=55';
+import SEALED from './couple.js?v=55';
+import { unseal } from '../stories/seal.js?v=55';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -240,8 +240,8 @@ export function mount({ container }) {
       el.className = 'gcr-card'; el.innerHTML = `<small>Nº ${String(item.no).padStart(3, '0')} · ${item.kind === 'truth' ? 'TRUTH' : 'DARE'}${item.ours ? ' · ♡' : ''}</small><b>${item.kind === 'truth' ? '真心话' : '大冒险'}</b><p>${esc(item.text)}</p>`;
     } else if (item.type === 'gift') {
       papers.querySelectorAll('.gcr-box').forEach(old => old.remove());   // there is only one box
-      // the desk is cleared for it: every paper slides away
-      [...papers.children].filter(p => !p.classList.contains('gcr-letter')).forEach((p, i) => { if (reduced()) { p.remove(); return; } p.style.pointerEvents = 'none'; p.animate([{ translate: '0 0', opacity: 1 }, { translate: `${desk.clientWidth}px 0`, opacity: 0 }], { duration: 420, delay: i * 30, easing: 'cubic-bezier(.5,0,.8,.4)', fill: 'forwards' }).finished.then(() => p.remove(), () => p.remove()); });
+      // the desk is cleared for it: every paper and every empty shell slides away (capsules still waiting stay)
+      [...papers.children].filter(p => !p.classList.contains('gcr-letter')).concat([...shells.children]).forEach((p, i) => { if (reduced()) { p.remove(); return; } p.style.pointerEvents = 'none'; p.animate([{ translate: '0 0', opacity: 1 }, { translate: `${desk.clientWidth}px 0`, opacity: 0 }], { duration: 420, delay: i * 30, easing: 'cubic-bezier(.5,0,.8,.4)', fill: 'forwards' }).finished.then(() => p.remove(), () => p.remove()); });
       el.className = 'gcr-box' + (item.open ? ' is-open' : ''); el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '打开首饰盒'); el.innerHTML = BOX; el.style.zIndex = 900;
     } else {
       papers.querySelectorAll('.gcr-letter').forEach(old => old.remove());
