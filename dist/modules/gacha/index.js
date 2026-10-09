@@ -1,12 +1,12 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=53';
-import { unwrap, STEP, FULL } from './machine-home.js?v=53';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=53';
-import { BANK, parseBank, createDeck } from './games.js?v=53';
-import { setGuest } from '../stories/guest.js?v=53';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=54';
+import { unwrap, STEP, FULL } from './machine-home.js?v=54';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=54';
+import { BANK, parseBank, createDeck } from './games.js?v=54';
+import { setGuest } from '../stories/guest.js?v=54';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=53';
-import SEALED from './couple.js?v=53';
-import { unseal } from '../stories/seal.js?v=53';
+import { play as sound } from '../../sound.js?v=54';
+import SEALED from './couple.js?v=54';
+import { unseal } from '../stories/seal.js?v=54';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -229,7 +229,7 @@ export function mount({ container }) {
 <div class="seal">${s.glyph}<br>${esc(s.signName)}</div></div>`;
   function lay(item, at) {
     const el = document.createElement('div'); el.style.zIndex = ++layer;
-    const tilt = ((rnd() - .5) * 5).toFixed(1), ox = Math.round((rnd() - .5) * 26), oy = Math.round((rnd() - .5) * 20);
+    const still = item.type === 'gift', tilt = ((rnd() - .5) * 5).toFixed(1), ox = still ? 0 : Math.round((rnd() - .5) * 26), oy = still ? 0 : Math.round((rnd() - .5) * 20);
     if (item.type === 'slip' && narrow.matches) {
       // phones: a folded slip on the desk; tap to read it unfolded
       el.className = 'gcr-folded'; el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', `打开签：${item.rankText}`);
@@ -240,6 +240,8 @@ export function mount({ container }) {
       el.className = 'gcr-card'; el.innerHTML = `<small>Nº ${String(item.no).padStart(3, '0')} · ${item.kind === 'truth' ? 'TRUTH' : 'DARE'}${item.ours ? ' · ♡' : ''}</small><b>${item.kind === 'truth' ? '真心话' : '大冒险'}</b><p>${esc(item.text)}</p>`;
     } else if (item.type === 'gift') {
       papers.querySelectorAll('.gcr-box').forEach(old => old.remove());   // there is only one box
+      // the desk is cleared for it: every paper slides away
+      [...papers.children].filter(p => !p.classList.contains('gcr-letter')).forEach((p, i) => { if (reduced()) { p.remove(); return; } p.style.pointerEvents = 'none'; p.animate([{ translate: '0 0', opacity: 1 }, { translate: `${desk.clientWidth}px 0`, opacity: 0 }], { duration: 420, delay: i * 30, easing: 'cubic-bezier(.5,0,.8,.4)', fill: 'forwards' }).finished.then(() => p.remove(), () => p.remove()); });
       el.className = 'gcr-box' + (item.open ? ' is-open' : ''); el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '打开首饰盒'); el.innerHTML = BOX; el.style.zIndex = 900;
     } else {
       papers.querySelectorAll('.gcr-letter').forEach(old => old.remove());
@@ -262,24 +264,41 @@ export function mount({ container }) {
   // ——— The jewellery box and the letter ———
   const slices = n => Array.from({ length: n }, (_, i) => { const t = i / (n - 1), k = (.42 * (1 - t) ** 1.4).toFixed(3); return `<i class="jb-slice" style="--t:${t.toFixed(3)};background-image:linear-gradient(rgba(20,22,14,${k}),rgba(20,22,14,${k})),linear-gradient(90deg,#0003,#0000 9%,#ffffff24 34%,#0000 62%,#0003 100%)"></i>`; }).join('');
   const PEARL = `<svg viewBox="0 0 100 100" aria-hidden="true"><defs>
-<radialGradient id="pl-body" cx=".39" cy=".33" r=".74"><stop offset="0" stop-color="#fff"/><stop offset=".14" stop-color="#fbf7f5"/><stop offset=".36" stop-color="#ede4e1"/><stop offset=".6" stop-color="#ddd0d0"/><stop offset=".8" stop-color="#c2b1b7"/><stop offset=".94" stop-color="#a08d96"/><stop offset="1" stop-color="#96838d"/></radialGradient>
-<radialGradient id="pl-core" cx=".35" cy=".29" r=".8"><stop offset=".52" stop-color="#5f4c58" stop-opacity="0"/><stop offset=".76" stop-color="#5f4c58" stop-opacity=".38"/><stop offset=".88" stop-color="#5f4c58" stop-opacity=".3"/><stop offset="1" stop-color="#5f4c58" stop-opacity=".04"/></radialGradient>
-<radialGradient id="pl-rose" cx=".6" cy=".62" r=".36"><stop offset="0" stop-color="#ffc9d3" stop-opacity=".3"/><stop offset="1" stop-color="#ffc9d3" stop-opacity="0"/></radialGradient>
+<radialGradient id="pl-body" cx=".4" cy=".34" r=".75"><stop offset="0" stop-color="#fff"/><stop offset=".18" stop-color="#fbf6f3"/><stop offset=".4" stop-color="#ecdfdd"/><stop offset=".62" stop-color="#d6c4c7"/><stop offset=".82" stop-color="#b29fa8"/><stop offset=".95" stop-color="#8c7984"/><stop offset="1" stop-color="#7f6d78"/></radialGradient>
+<radialGradient id="pl-rim" cx=".5" cy=".5" r=".5"><stop offset=".8" stop-color="#fff" stop-opacity="0"/><stop offset=".95" stop-color="#fff" stop-opacity=".42"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></radialGradient>
+<radialGradient id="pl-rose" cx=".66" cy=".66" r=".34"><stop offset="0" stop-color="#ff9fb4" stop-opacity=".26"/><stop offset="1" stop-color="#ff9fb4" stop-opacity="0"/></radialGradient>
+<radialGradient id="pl-mint" cx=".72" cy=".3" r=".3"><stop offset="0" stop-color="#c9f0df" stop-opacity=".34"/><stop offset="1" stop-color="#c9f0df" stop-opacity="0"/></radialGradient>
+<radialGradient id="pl-blue" cx=".27" cy=".7" r=".3"><stop offset="0" stop-color="#cfdcff" stop-opacity=".36"/><stop offset="1" stop-color="#cfdcff" stop-opacity="0"/></radialGradient>
 <radialGradient id="pl-bounce" cx=".55" cy="1" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
-<radialGradient id="pl-halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".5" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
-<filter id="pl-soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation=".9"/></filter><filter id="pl-hair" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation=".35"/></filter>
+<radialGradient id="pl-halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".5" stop-color="#fff" stop-opacity=".42"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<filter id="pl-soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation=".9"/></filter><filter id="pl-hair" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation=".3"/></filter><filter id="pl-wide" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="5"/></filter>
 <clipPath id="pl-clip"><circle cx="50" cy="50" r="48"/></clipPath></defs>
-<circle cx="50" cy="50" r="48" fill="url(#pl-body)"/><circle cx="50" cy="50" r="48" fill="url(#pl-core)"/><circle cx="50" cy="50" r="48" fill="url(#pl-rose)"/>
-<g clip-path="url(#pl-clip)"><path d="M14 74a44 44 0 0 0 72 0" fill="none" stroke="#4d5a47" stroke-opacity=".2" stroke-width="5" filter="url(#pl-soft)"/><ellipse cx="54" cy="98" rx="33" ry="12" fill="url(#pl-bounce)" filter="url(#pl-soft)"/>
-<path d="M7.5 60a44 44 0 0 0 26 34" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round" filter="url(#pl-soft)"/>
-<ellipse cx="35" cy="30" rx="21" ry="15" fill="url(#pl-halo)" opacity=".8" transform="rotate(-34 35 30)"/></g>
-<ellipse cx="33" cy="27" rx="11.5" ry="7" fill="#fff" transform="rotate(-36 33 27)" filter="url(#pl-hair)"/><circle cx="24.5" cy="41" r="1.9" fill="#fff" opacity=".9" filter="url(#pl-hair)"/><circle cx="63" cy="74" r="1.6" fill="#fff" opacity=".6" filter="url(#pl-soft)"/>
-<circle cx="50" cy="50" r="47.6" fill="none" stroke="#8f7c86" stroke-opacity=".6" stroke-width=".7"/></svg>`;
+<circle cx="50" cy="50" r="48" fill="url(#pl-body)"/><circle cx="50" cy="50" r="48" fill="url(#pl-rose)"/><circle cx="50" cy="50" r="48" fill="url(#pl-mint)"/><circle cx="50" cy="50" r="48" fill="url(#pl-blue)"/><circle cx="50" cy="50" r="48" fill="url(#pl-rim)"/>
+<g clip-path="url(#pl-clip)"><path d="M13 73a44 44 0 0 0 74 0" fill="none" stroke="#4d5a47" stroke-opacity=".22" stroke-width="5" filter="url(#pl-soft)"/><ellipse cx="54" cy="98" rx="33" ry="12" fill="url(#pl-bounce)" filter="url(#pl-soft)"/>
+<ellipse cx="36" cy="31" rx="22" ry="16" fill="url(#pl-halo)" transform="rotate(-34 36 31)"/><ellipse cx="68" cy="70" rx="9" ry="5" fill="#fff" opacity=".14" filter="url(#pl-soft)" transform="rotate(-34 68 70)"/>
+<ellipse class="jb-glint" cx="50" cy="50" rx="16" ry="70" fill="#fff" filter="url(#pl-wide)" transform="rotate(35 50 50)"/></g>
+<path d="M24 26C27 18 36 13 45 13c2 0 3 2 1 3.5C39 20 34 25 31 32c-1 2-4 2-5.5.5C24 31 23.4 28 24 26z" fill="#fff" filter="url(#pl-hair)"/><circle cx="23.5" cy="42" r="2" fill="#fff" opacity=".9" filter="url(#pl-hair)"/>
+<circle cx="50" cy="50" r="47.6" fill="none" stroke="#6f5d68" stroke-opacity=".55" stroke-width=".7"/></svg>`;
   const GEM = `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#eef0f2" stroke="#a9adb2" stroke-width="1.6"/><path d="M20 5 30.6 9.4 35 20 30.6 30.6 20 35 9.4 30.6 5 20 9.4 9.4z" fill="#fff" stroke="#c3cad1" stroke-width=".8"/><path d="M20 5 25 15 35 20 25 25 20 35 15 25 5 20 15 15z" fill="#dfe6ec"/><path d="M15 15h10v10H15z" fill="#fff"/><path d="M20 5 15 15 9.4 9.4zM35 20 25 25 30.6 30.6z" fill="#b9c4ce"/><path class="jb-twinkle" d="M20 -8v56M-8 20h56" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
-  const CHAIN = `<svg class="jb-chain" viewBox="0 0 200 200" aria-hidden="true"><path d="M46 -6 L100 92 L154 -6" fill="none" stroke="#3d3f2a" stroke-opacity=".2" stroke-width="1.6" transform="translate(1.4 2.6)"/><path d="M46 -6 L100 92 L154 -6" fill="none" stroke="#c4c8cc" stroke-width="1.5" stroke-dasharray="2 1"/><path d="M46 -6 L100 92 L154 -6" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width=".55" stroke-dasharray="2 1"/></svg>`;
-  const BOX = `<div class="jb"><div class="jb-body"><i class="jb-shadow"></i><div class="jb-base">${slices(46)}<div class="jb-rim"><div class="jb-pad">${CHAIN}<i class="jb-cast"></i><i class="jb-gem">${GEM}</i><i class="jb-pearl">${PEARL}</i></div></div></div><div class="jb-lid">${slices(30)}<i class="jb-slice trim" style="--t:0"></i><i class="jb-slice trim" style="--t:.035"></i><div class="jb-top"></div><div class="jb-lining"><div class="jb-satin"></div></div><i class="jb-clasp"></i></div></div></div>`;
+  const CHAIN = `<svg class="jb-chain" viewBox="0 0 200 200" aria-hidden="true"><path d="M46 -6 L100 84 L154 -6" fill="none" stroke="#3d3f2a" stroke-opacity=".2" stroke-width="1.6" transform="translate(1.4 2.6)"/><path d="M46 -6 L100 84 L154 -6" fill="none" stroke="#c4c8cc" stroke-width="1.5" stroke-dasharray="2 1"/><path d="M46 -6 L100 84 L154 -6" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width=".55" stroke-dasharray="2 1"/></svg>`;
+  const BOX = `<div class="jb"><div class="jb-body"><i class="jb-shadow"></i><div class="jb-base">${slices(46)}<div class="jb-rim"><div class="jb-pad">${CHAIN}<i class="jb-light"></i><i class="jb-cast"></i><i class="jb-gem">${GEM}</i><i class="jb-pearl">${PEARL}</i></div></div></div><div class="jb-lid">${slices(30)}<i class="jb-slice trim" style="--t:0"></i><i class="jb-slice trim" style="--t:.035"></i><div class="jb-top"></div><div class="jb-lining"><div class="jb-satin"></div></div><i class="jb-clasp"></i></div></div></div>`;
   const ENVELOPE = `<div class="env"><div class="env-body"><i class="env-shadow"></i><i class="env-back"></i><i class="env-sheet"></i><i class="env-front"></i><div class="env-flap"><i class="env-out"><i></i></i><i class="env-in"></i><i class="env-seal"><svg viewBox="0 0 16 15"><path d="M8 14.2C3 10.4.6 7.8.6 4.9.6 2.6 2.4.9 4.6.9c1.4 0 2.6.7 3.4 1.9C8.8 1.6 10 .9 11.4.9c2.2 0 4 1.7 4 4 0 2.9-2.4 5.5-7.4 9.3z"/></svg></i></div></div></div>`;
-  const toggleBox = el => { el.classList.toggle('is-open'); sound(el.classList.contains('is-open') ? 'clack' : 'key'); el.setAttribute('aria-label', el.classList.contains('is-open') ? '合上首饰盒' : '打开首饰盒'); };
+  // Opening the box: the clasp gives, the lid lifts slowly, warm light comes up from inside, a few motes rise, a small bell.
+  function toggleBox(el) {
+    const opening = el.classList.toggle('is-open');
+    el.setAttribute('aria-label', opening ? '合上首饰盒' : '打开首饰盒');
+    if (!opening) { sound('key'); return; }
+    sound('clack'); setTimeout(() => sound('chime'), reduced() ? 0 : 1300);
+    if (reduced()) return;
+    const b = el.clientWidth;
+    for (let i = 0; i < 22; i++) {
+      const m = document.createElement('i'); m.className = 'jb-mote';
+      const x = (Math.random() - .5) * b * .9, y = -b * (.05 + Math.random() * .35), size = 9 + Math.random() * 15;
+      m.style.cssText = `left:calc(50% + ${x.toFixed(0)}px);top:calc(50% + ${y.toFixed(0)}px);width:${size.toFixed(1)}px;height:${size.toFixed(1)}px`;
+      el.append(m);
+      m.animate([{ translate: '0 0', scale: .2, opacity: 0 }, { opacity: 1, scale: 1, offset: .25 }, { translate: `${((Math.random() - .5) * 40).toFixed(0)}px ${(-b * (.35 + Math.random() * .5)).toFixed(0)}px`, scale: .3, opacity: 0 }], { duration: 1500 + Math.random() * 1300, delay: 1100 + Math.random() * 1500, easing: 'cubic-bezier(.2,.6,.3,1)', fill: 'both' }).finished.then(() => m.remove(), () => m.remove());
+    }
+  }
   // The letter is read in 手记, on a sheet of its own; the arrow there comes back to this desk.
   function openLetter() {
     const letter = couple?.letter; if (!letter || signal.aborted) return;
