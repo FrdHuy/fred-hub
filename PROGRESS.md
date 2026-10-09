@@ -37,7 +37,7 @@ Fred’s Hub —— 私人“生活收藏室”网站。首页是一条横向收
 - travel 翻牌屏：已完成（v0.31），等 Fred 的真实行程数据替换占位（Claude Code）。
 - 手记：已完成（v0.33），等 Fred 写第一篇真实文章（见 notes/README.md）。
 
-- 3D 小屋 `#/room`（分支 `claude/room-3d`，**未合入 main**）：第 1、2 阶段完成（场景 + 灯光 + 镜头；悬停 / 点击推近进模块 / 返回 / 键盘；可绕屋一圈，挡视线的墙自动隐去）；第 3 阶段 Bloom 与降级待做。设计与决定见 docs/design/room.md。Three.js 0.170.0 自托管在 dist/vendor/。
+- 3D 小屋 `#/room`（分支 `claude/room-3d`，**未合入 main**）：三个阶段都已完成（场景 + 灯光 + 镜头；悬停 / 点击推近进模块 / 返回 / 键盘；可绕屋一圈；Bloom、性能档位自动降级、无 WebGL 时静态截图 + 2D 链接）。待 Fred 决定：物件与模块主题的取舍、是否合入 main。设计与决定见 docs/design/room.md。Three.js 0.170.0 自托管在 dist/vendor/。
 
 ## 4. 待办清单（按优先级）
 

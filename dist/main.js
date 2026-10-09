@@ -65,13 +65,13 @@ function showRoom(on, from) {
   room.hidden = !on;
   if (!on) { roomScene?.stop(); return; }
   if (roomScene) { roomScene.start(from); return; }
-  roomLoading ??= import('./room/index.js?v=56').then(({ mountRoom }) => {
-    roomScene = mountRoom(room, {
+  // enter.js 先看设备：能跑 3D 就加载场景，否则给静态截图 + 2D 链接（见 room/quality.js）。
+  roomLoading ??= import('./room/enter.js?v=56').then(({ enterRoom }) => enterRoom(room, {
       open(entry) { roomReturn = true; navigate(entry.module); },
       tint: id => getModule(id)?.theme === 'dark' ? '#100e0c' : '#f8f7f4',
       sound,
-    });
-    room.dataset.state = 'ready';
+  })).then(scene => {
+    roomScene = scene; room.dataset.state = scene.flat ? 'flat' : 'ready';
     if (activeRoute.type === 'room') roomScene.start();
   }).catch(error => { console.error(error); room.dataset.state = 'failed'; });
 }

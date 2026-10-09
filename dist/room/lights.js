@@ -44,14 +44,14 @@ export function createLights({ renderer, scene }, name) {
   scene.add(sun, sun.target);
 
   // 室内外的灯：找到每个灯位，装上对应的灯。
-  const lamps = [];
+  const lamps = [], shadowLamps = [];
   scene.traverse(node => { if (node.name.startsWith('light:')) lamps.push(node); });
   for (const node of lamps) {
     const spec = LAMPS[node.name.slice(6)]; if (!spec) continue;
     const light = spec.kind === 'spot' ? new THREE.SpotLight(spec.color, spec.intensity * mood.lamps, spec.distance, spec.angle, spec.penumbra, 2) : new THREE.PointLight(spec.color, spec.intensity * mood.lamps, spec.distance, 2);
     if (spec.kind === 'spot') { light.target.position.set(.05, -1, .12); node.add(light.target); }     // 朝下偏向桌面中间
-    if (spec.shadow) { light.castShadow = true; light.shadow.mapSize.set(spec.shadow, spec.shadow); light.shadow.bias = -.003; light.shadow.normalBias = .03; if (spec.kind === 'point') { light.shadow.camera.near = .2; light.shadow.camera.far = spec.distance; } }
+    if (spec.shadow) { light.castShadow = true; light.shadow.mapSize.set(spec.shadow, spec.shadow); light.shadow.bias = -.003; light.shadow.normalBias = .03; if (spec.kind === 'point') { light.shadow.camera.near = .2; light.shadow.camera.far = spec.distance; } shadowLamps.push(light); }
     node.add(light);
   }
-  return { mood, sun, sunDirection };
+  return { mood, sun, sunDirection, shadowLamps };
 }

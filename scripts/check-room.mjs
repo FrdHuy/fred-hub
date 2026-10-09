@@ -33,6 +33,10 @@ for (const file of sources) {
   assert.ok(!/from\s+'three'/.test(text), `${file}: 从 ./three.js 导入，不用裸模块名`);
 }
 for (const file of readdirSync(`${vendor}/addons`, { recursive: true }).filter(f => f.endsWith('.js'))) assert.ok(!/from\s+'three'/.test(readFileSync(`${vendor}/addons/${file}`, 'utf8')), `${file}: 仍在用裸模块名 three`);
+// 降级：静态截图在；判断设备和静态版的代码不能依赖 Three.js（否则低端设备还是要下载它）。
+assert.ok(existsSync('dist/room/fallback.jpg'), '缺静态截图 dist/room/fallback.jpg');
+for (const file of ['enter.js', 'quality.js', 'flat.js', 'config.js']) assert.ok(!/from\s+'\.\/(three|index|scene|kit)\.js'/.test(readFileSync(`dist/room/${file}`, 'utf8')), `${file}: 不能静态导入 3D 代码`);
+assert.ok(readFileSync('dist/main.js', 'utf8').includes('./room/enter.js'), 'main.js 通过 enter.js 进小屋');
 const html = readFileSync('dist/index.html', 'utf8');
 assert.ok(html.includes('id="room-view"') && html.includes('./room/style.css'));
 assert.ok(!/unpkg|jsdelivr|googleapis|gstatic/.test(html + readFileSync('dist/main.js', 'utf8')), '不使用国内不稳定的外部源');

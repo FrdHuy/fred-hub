@@ -16,7 +16,6 @@ const WALL = { plaster: '#f1e5d0', wainscot: '#a9b596', cut: '#d9c7a8' };
 // ── 渲染器 ────────────────────────────────────────────────────────────────────
 export function createStage(host) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));     // 像素比上限 2，高分屏不白白多算
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;        // ACES：高光柔和地压下去，暖光不会死白
   renderer.shadowMap.enabled = true;
