@@ -8,7 +8,7 @@
 //   flat    不用 WebGL：静态截图 + 普通 2D 导航（flat.js）
 //
 // 运行中还会看实际帧率：连续偏慢就自动降一档，并记在这台设备上（下次直接用那一档）。
-// 测试：网址里加 ?room=0…4 固定档位，?room=flat 看静态版。例：http://127.0.0.1:57123/?room=1#/room
+// 测试：网址里加 ?room=0…4 固定档位，?room=flat 看静态版。例：127.0.0.1:57123/?room=1#/room
 const KEY = 'fred-room-quality', TOP = 4;
 const WEAK_GPU = /mali-4|mali-t6|adreno \(tm\) [1-4]\d\d|powervr sgx|intel\(r\) hd graphics [2-4]\d{3}|gma/i, SOFTWARE = /swiftshader|llvmpipe|software|basic render/i;
 const clamp = n => Math.max(0, Math.min(TOP, n));

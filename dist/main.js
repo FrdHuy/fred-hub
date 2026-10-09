@@ -97,6 +97,7 @@ async function showRoute(initial = false) {
     activeRoute = nextRoute; disposeModule.route(nextRoute.sub); return;
   }
   const previousRoute = activeRoute; let transitionItem = null;
+  if (previousRoute.type === 'room' && item) roomReturn = true;      // 从小屋进的模块页（3D 点击或静态版链接）：返回时回小屋
   const leaving = getComputedStyle(document.body).backgroundColor;
   const openingList = !initial && previousRoute.type==='home' && item?.id==='bucketlist';
   // The Life List opens out of the powered-up panel on the home page.
