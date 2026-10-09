@@ -1,5 +1,5 @@
-import { flipPath } from './trips.js?v=55';
-import { play as sound } from '../../sound.js?v=55';
+import { flipPath } from './trips.js?v=57';
+import { play as sound } from '../../sound.js?v=57';
 
 // A row of split-flap cells. Each cell: fixed top/bottom halves plus two leaves that fall over the split.
 const STEP = 72;

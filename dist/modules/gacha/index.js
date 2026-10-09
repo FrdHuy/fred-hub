@@ -1,12 +1,12 @@
-import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=55';
-import { unwrap, STEP, FULL } from './machine-home.js?v=55';
-import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=55';
-import { BANK, parseBank, createDeck } from './games.js?v=55';
-import { setGuest } from '../stories/guest.js?v=55';
+import { machineMarkup, eggMarkup, random, pickKind } from './machine.js?v=57';
+import { unwrap, STEP, FULL } from './machine-home.js?v=57';
+import { todaySlip, reading, today, SIGN_NAMES } from './fortune.js?v=57';
+import { BANK, parseBank, createDeck } from './games.js?v=57';
+import { setGuest } from '../stories/guest.js?v=57';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=55';
-import SEALED from './couple.js?v=55';
-import { unseal } from '../stories/seal.js?v=55';
+import { play as sound } from '../../sound.js?v=57';
+import SEALED from './couple.js?v=57';
+import { unseal } from '../stories/seal.js?v=57';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
@@ -32,7 +32,8 @@ export function mount({ container }) {
   const room = document.createElement('section'); room.className = 'gcr'; room.lang = 'zh-CN';
   room.innerHTML = `<h1 class="gcr-sr">扭蛋机</h1><div class="gcr-machine">${machineMarkup({ seed: Date.now() % 1e9, mode, sign })}</div>
 <div class="gcr-desk"><button class="gcr-clear" type="button" aria-label="清空桌面"><svg viewBox="0 0 20 20"><path d="M4 15.5h12M6 12.5h9M8.5 9.5h6"/><path d="M15.5 4.5 11 9"/></svg></button><div class="gcr-shells" aria-hidden="true"></div><div class="gcr-papers" aria-live="polite"></div><div class="gcr-eggs"></div></div>
-<div class="gcr-read" hidden><div class="gcr-read-in"></div></div>`;
+<div class="gcr-read" hidden><div class="gcr-read-in"></div></div>
+<div class="gcr-stage" hidden><i class="gcr-rays"></i><i class="gcr-halo"></i><div class="gcr-dust"></div></div>`;
   container.append(room);
   const machine = room.querySelector('.gc'), desk = room.querySelector('.gcr-desk'), papers = room.querySelector('.gcr-papers'), shells = room.querySelector('.gcr-shells'), eggs = room.querySelector('.gcr-eggs');
   const crank = machine.querySelector('.gc-crank'), knob = machine.querySelector('.gc-zod'), drop = machine.querySelector('.gc-drop'), flap = machine.querySelector('.gc-flap'), reader = room.querySelector('.gcr-read');
@@ -157,11 +158,23 @@ export function mount({ container }) {
   // Where a capsule comes to rest: the lower-left part of the desk, not on top of another one.
   function landing(d, size) {
     const taken = [...eggs.children].map(e => [parseFloat(e.style.left), parseFloat(e.style.top)]);
+    if (papers.querySelector('.gcr-box') || staged) return slots(d, size).find(([x, y]) => taken.every(([tx, ty]) => Math.hypot(tx - x, ty - y) > size * .8)) ?? { x: d.width * .1, y: d.height * .5 };
     for (let i = 0; i < 20; i++) {
       const x = d.width * (.08 + rnd() * .3), y = d.height * (narrow.matches ? .06 + rnd() * .12 : .7 + rnd() * .16);
       if (taken.every(([tx, ty]) => Math.hypot(tx - x, ty - y) > size * 1.1)) return { x, y };
     }
     return { x: d.width * .15, y: d.height * .8 };
+  }
+  // With the box in the middle of the desk, waiting capsules stand in columns at the side, clear of it.
+  function slots(d, size) {
+    const cols = narrow.matches ? [.1, .9] : [.08, .2], out = [];
+    for (const c of cols) for (let y = d.height * .9; y > d.height * .3; y -= size * 1.08) out.push(Object.assign([d.width * c, y], { x: d.width * c, y }));
+    return out;
+  }
+  function eggsAside() {
+    const d = desk.getBoundingClientRect(), all = [...eggs.children]; if (!all.length) return;
+    const free = slots(d, parseFloat(all[0].style.getPropertyValue('--size')));
+    all.forEach((e, i) => { const s = free[i] ?? free[free.length - 1]; e.style.left = `${s.x}px`; e.style.top = `${s.y}px`; });
   }
 
   // ——— Twisting a capsule open ———
@@ -240,7 +253,8 @@ export function mount({ container }) {
       el.className = 'gcr-card'; el.innerHTML = `<small>Nº ${String(item.no).padStart(3, '0')} · ${item.kind === 'truth' ? 'TRUTH' : 'DARE'}${item.ours ? ' · ♡' : ''}</small><b>${item.kind === 'truth' ? '真心话' : '大冒险'}</b><p>${esc(item.text)}</p>`;
     } else if (item.type === 'gift') {
       papers.querySelectorAll('.gcr-box').forEach(old => old.remove());   // there is only one box
-      // the desk is cleared for it: every paper and every empty shell slides away (capsules still waiting stay)
+      eggsAside();
+      // the desk is cleared for it: every paper and every empty shell slides away (capsules still waiting stand aside)
       [...papers.children].filter(p => !p.classList.contains('gcr-letter')).concat([...shells.children]).forEach((p, i) => { if (reduced()) { p.remove(); return; } p.style.pointerEvents = 'none'; p.animate([{ translate: '0 0', opacity: 1 }, { translate: `${desk.clientWidth}px 0`, opacity: 0 }], { duration: 420, delay: i * 30, easing: 'cubic-bezier(.5,0,.8,.4)', fill: 'forwards' }).finished.then(() => p.remove(), () => p.remove()); });
       el.className = 'gcr-box' + (item.open ? ' is-open' : ''); el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', '打开首饰盒'); el.innerHTML = BOX; el.style.zIndex = 900;
     } else {
@@ -283,22 +297,55 @@ export function mount({ container }) {
   const CHAIN = `<svg class="jb-chain" viewBox="0 0 200 200" aria-hidden="true"><path d="M46 -6 L100 84 L154 -6" fill="none" stroke="#3d3f2a" stroke-opacity=".2" stroke-width="1.6" transform="translate(1.4 2.6)"/><path d="M46 -6 L100 84 L154 -6" fill="none" stroke="#c4c8cc" stroke-width="1.5" stroke-dasharray="2 1"/><path d="M46 -6 L100 84 L154 -6" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width=".55" stroke-dasharray="2 1"/></svg>`;
   const BOX = `<div class="jb"><div class="jb-body"><i class="jb-shadow"></i><div class="jb-base">${slices(46)}<div class="jb-rim"><div class="jb-pad">${CHAIN}<i class="jb-light"></i><i class="jb-cast"></i><i class="jb-gem">${GEM}</i><i class="jb-pearl">${PEARL}</i></div></div></div><div class="jb-lid">${slices(30)}<i class="jb-slice trim" style="--t:0"></i><i class="jb-slice trim" style="--t:.035"></i><div class="jb-top"></div><div class="jb-lining"><div class="jb-satin"></div></div><i class="jb-clasp"></i></div></div></div>`;
   const ENVELOPE = `<div class="env"><div class="env-body"><i class="env-shadow"></i><i class="env-back"></i><i class="env-sheet"></i><i class="env-front"></i><div class="env-flap"><i class="env-out"><i></i></i><i class="env-in"></i><i class="env-seal"><svg viewBox="0 0 16 15"><path d="M8 14.2C3 10.4.6 7.8.6 4.9.6 2.6 2.4.9 4.6.9c1.4 0 2.6.7 3.4 1.9C8.8 1.6 10 .9 11.4.9c2.2 0 4 1.7 4 4 0 2.9-2.4 5.5-7.4 9.3z"/></svg></i></div></div></div>`;
-  // Opening the box: the clasp gives, the lid lifts slowly, warm light comes up from inside, a few motes rise, a small bell.
-  function toggleBox(el) {
-    const opening = el.classList.toggle('is-open');
-    el.setAttribute('aria-label', opening ? '合上首饰盒' : '打开首饰盒');
-    if (!opening) { sound('key'); return; }
-    sound('clack'); setTimeout(() => sound('chime'), reduced() ? 0 : 1300);
+  // Opening the box is a scene of its own: the room goes dark, the box comes forward and grows, trembles once,
+  // then the lid lifts slowly — light pours out, rays turn behind it, gold dust bursts and keeps drifting, the pearl rises.
+  // A click anywhere (or Esc) closes it and sets it back on the desk.
+  const stage = room.querySelector('.gcr-stage'), dust = stage.querySelector('.gcr-dust');
+  let staged = null;
+  const later = (ms, fn) => setTimeout(() => { if (!signal.aborted && staged) fn(); }, reduced() ? 0 : ms);
+  function openBox(el) {
+    if (staged) return;
+    const from = el.getBoundingClientRect(), size = Math.round(Math.min(innerWidth * .62, innerHeight * .36, 460));
+    staged = { el, b: el.style.getPropertyValue('--b'), at: performance.now() };
+    stage.hidden = false; stage.append(el); el.style.setProperty('--b', `${size}px`);
+    const to = el.getBoundingClientRect();
+    void stage.offsetWidth; stage.classList.add('is-on');
+    if (!reduced()) el.animate([{ translate: `${from.left + from.width / 2 - to.left - to.width / 2}px ${from.top + from.height / 2 - to.top - to.height / 2}px`, scale: from.width / to.width }, { translate: '0 0', scale: 1 }], { duration: 1000, easing: 'cubic-bezier(.3,.8,.2,1)' });
+    sound('paper');
+    // a held breath: the box trembles, the clasp gives
+    later(1150, () => { sound('clack'); el.querySelector('.jb').animate([{ rotate: '0deg' }, { rotate: '-1.6deg' }, { rotate: '1.4deg' }, { rotate: '-.9deg' }, { rotate: '.6deg' }, { rotate: '0deg' }], { duration: 520 }); });
+    later(1800, () => { el.classList.add('is-open'); el.setAttribute('aria-label', '合上首饰盒'); });
+    later(2300, () => { stage.classList.add('is-lit'); burst(el, size); });
+    later(2900, () => sound('chime'));
+    if (!dust.children.length) dust.innerHTML = Array.from({ length: 34 }, () => { const z = 5 + Math.random() * 11; return `<i class="jb-mote" style="left:${(8 + Math.random() * 84).toFixed(1)}%;top:${(25 + Math.random() * 70).toFixed(1)}%;width:${z.toFixed(1)}px;height:${z.toFixed(1)}px;animation-duration:${(5 + Math.random() * 6).toFixed(1)}s;animation-delay:${(-Math.random() * 9).toFixed(1)}s"></i>`; }).join('');
+  }
+  // gold dust thrown out of the box as the light comes
+  function burst(el, size) {
     if (reduced()) return;
-    const b = el.clientWidth;
-    for (let i = 0; i < 22; i++) {
+    for (let i = 0; i < 46; i++) {
       const m = document.createElement('i'); m.className = 'jb-mote';
-      const x = (Math.random() - .5) * b * .9, y = -b * (.05 + Math.random() * .35), size = 9 + Math.random() * 15;
-      m.style.cssText = `left:calc(50% + ${x.toFixed(0)}px);top:calc(50% + ${y.toFixed(0)}px);width:${size.toFixed(1)}px;height:${size.toFixed(1)}px`;
+      const a = -Math.PI * (.08 + Math.random() * .84), far = size * (.5 + Math.random() * 1.3), z = 7 + Math.random() * 17;
+      m.style.cssText = `left:50%;top:50%;width:${z.toFixed(1)}px;height:${z.toFixed(1)}px;margin:${(-z / 2).toFixed(1)}px`;
       el.append(m);
-      m.animate([{ translate: '0 0', scale: .2, opacity: 0 }, { opacity: 1, scale: 1, offset: .25 }, { translate: `${((Math.random() - .5) * 40).toFixed(0)}px ${(-b * (.35 + Math.random() * .5)).toFixed(0)}px`, scale: .3, opacity: 0 }], { duration: 1500 + Math.random() * 1300, delay: 1100 + Math.random() * 1500, easing: 'cubic-bezier(.2,.6,.3,1)', fill: 'both' }).finished.then(() => m.remove(), () => m.remove());
+      const x = Math.cos(a) * far, y = Math.sin(a) * far;
+      m.animate([{ translate: '0 0', scale: .2, opacity: 0 }, { translate: `${(x * .7).toFixed(0)}px ${(y * .7).toFixed(0)}px`, scale: 1, opacity: 1, offset: .3 }, { translate: `${x.toFixed(0)}px ${(y + size * .5).toFixed(0)}px`, scale: .2, opacity: 0, rotate: `${Math.round((Math.random() - .5) * 240)}deg` }], { duration: 2200 + Math.random() * 1800, delay: Math.random() * 500, easing: 'cubic-bezier(.15,.7,.3,1)', fill: 'both' }).finished.then(() => m.remove(), () => m.remove());
     }
   }
+  function closeBox() {
+    if (!staged || staged.closing) return;
+    const { el, b } = staged; staged.closing = true;
+    el.classList.remove('is-open'); el.setAttribute('aria-label', '打开首饰盒'); stage.classList.remove('is-lit', 'is-on'); sound('key');
+    el.querySelectorAll(':scope > .jb-mote').forEach(m => m.remove());
+    setTimeout(() => {
+      if (signal.aborted) return;
+      const from = el.getBoundingClientRect();
+      el.getAnimations().forEach(a => a.cancel()); el.style.setProperty('--b', b); papers.append(el); stage.hidden = true; staged = null;
+      const to = el.getBoundingClientRect();
+      if (!reduced()) el.animate([{ translate: `${from.left + from.width / 2 - to.left - to.width / 2}px ${from.top + from.height / 2 - to.top - to.height / 2}px`, scale: from.width / to.width }, { translate: '0 0', scale: 1 }], { duration: 700, easing: 'cubic-bezier(.3,.8,.2,1)' });
+    }, reduced() ? 0 : 650);
+  }
+  const toggleBox = el => staged ? closeBox() : openBox(el);
+  stage.addEventListener('click', () => { if (staged && performance.now() - staged.at > 1200) closeBox(); }, { signal });
   // The letter is read in 手记, on a sheet of its own; the arrow there comes back to this desk.
   function openLetter() {
     const letter = couple?.letter; if (!letter || signal.aborted) return;
@@ -372,6 +419,7 @@ export function mount({ container }) {
   // Keyboard: Enter turns the crank; ←/→ turn the knob; Esc closes the slip first.
   document.addEventListener('keydown', e => {
     if (document.getElementById('module-menu')?.hidden === false || e.target.closest?.('input,textarea')) return;
+    if (staged) { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); closeBox(); } return; }
     if (e.key === 'Escape' && !reader.hidden) { e.stopPropagation(); closeRead(); return; }
     if (e.target.closest?.('.gcr-egg,.gcr-folded,.gcr-box,.gcr-letter')) return;
     if (e.key === 'Enter') { e.preventDefault(); autoTurn(); }
