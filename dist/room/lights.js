@@ -13,7 +13,9 @@ const GREEN = ['#7fae52', '#95bd60', '#6c9c4a', '#a6c86c'];
 //   lamps     室内外灯的亮度倍数（白天调低，夜里调高）
 //   beam      窗口光束的浓度（0 = 没有）；dust 光里微尘的多少（0–1）
 //   garden    花园：草、树、灌木、草丛的颜色；flowers 开花的比例；litter [颜色, 比例] 地上的落花 / 落叶；
+//             carpet 树下那一圈落花 / 落叶的颜色（不写 = 没有）；treeGlow 树叶自带的亮度；
 //             stone 石头的颜色（不写 = 原色）；wet 湿润反光；snow 积雪
+//             （季节专属的摆设不在这张表里，见 seasonal.js，按预设的名字对应）
 //   weather   飘落 / 飞舞的东西：'rain' | 'snow' | 'petals' | 'leaves' | 'fireflies' | null（见 weather.js）
 //   clouds    低处有几朵云（0 = 没有云，高处那朵投影的云也不出现）；cloud 云的颜色（见 sky.js）；stars 天上有多少颗星
 export const MOODS = {
@@ -31,7 +33,7 @@ export const MOODS = {
     sun: { from: [-1, .42, -.25], color: '#ffd6a2', intensity: 4.6 },
     hemisphere: { sky: '#a6c6e6', ground: '#8cab8c', intensity: .72 }, fill: { color: '#cddfee', intensity: .4 },
     lamps: .7, exposure: 1, beam: .07, dust: 1, weather: 'petals', clouds: 4, cloud: '#fff1e6',
-    garden: { grass: '#a3d068', tree: ['#f6b6cd', '#fad0e0', '#f09dbf', '#fbe2ec'], bush: ['#8fc35a', '#a3d06b', '#7bb450', '#b5da7c'], tuft: '#ffffff', flowers: 1, litter: ['#f8c9da', .7] },
+    garden: { grass: '#a3d068', tree: ['#f6b6cd', '#fad0e0', '#f09dbf', '#fbe2ec'], bush: ['#8fc35a', '#a3d06b', '#7bb450', '#b5da7c'], tuft: '#ffffff', flowers: 1, litter: ['#f8c9da', .8], carpet: '#fbd3e1', treeGlow: .3 },
   },
   // 夏：夏夜。深蓝的天、满天星，月光淡淡的，萤火虫在花园里一明一灭，屋里的灯亮着。
   summer: {
@@ -44,10 +46,10 @@ export const MOODS = {
   // 秋：晴朗的下午。天是清澈的蓝，和红黄的树互为补色；草还带着绿，灌木有绿有红，地上铺着落叶。
   autumn: {
     label: '秋', ink: '#5e4d58', sky: ['#3d7cc2', '#8fbee6', '#f4dfbf'], skyGlow: 'rgba(255,212,150,.55)', fog: ['#ece3d3', .006],
-    sun: { from: [-1, .62, -.25], color: '#ffbf76', intensity: 5 },
+    sun: { from: [-1, .5, -.25], color: '#ffb768', intensity: 5.2 },
     hemisphere: { sky: '#a8c5ee', ground: '#a07a4a', intensity: .85 }, fill: { color: '#d4def0', intensity: .5 },
     lamps: .6, exposure: 1.04, beam: .055, dust: .8, weather: 'leaves', clouds: 4, cloud: '#fff8ee',
-    garden: { grass: '#aab85a', tree: ['#d9662b', '#eda736', '#c4472a', '#e9c24a'], bush: ['#5f8a44', '#a8482c', '#6f9a4a', '#c98a34'], tuft: '#e6dc9a', flowers: .22, litter: ['#d8782c', 1] },
+    garden: { grass: '#aab85a', tree: ['#d9662b', '#eda736', '#c4472a', '#e9c24a'], bush: ['#5f8a44', '#a8482c', '#6f9a4a', '#c98a34'], tuft: '#e6dc9a', flowers: .22, litter: ['#d8782c', 1], carpet: '#e0892e', treeGlow: .12 },
   },
   // 冬：阴天里一点淡淡的太阳，到处是雪，屋里的灯显得格外暖。
   winter: {

@@ -214,3 +214,4 @@ Fred 体验反馈优先。按指定模块添加数据模型/编辑能力时，�
 - v0.43 3D 小屋合入 main 上线（Fred 2026-10-10）。菜单顶部加「收藏 / 小屋」切换（`.view-switch`，hub.css 末尾）：收藏 = `#/`，小屋 = `#/room`；从小屋进的模块页里，切换显示为「小屋」。资源统一为 v58。细节见 docs/design/room.md。
 - **小屋的时刻与天气**（分支 claude/room-weather，Claude Code，2026-10-10）：六个预设——傍晚 / 春 / 夏 / 秋 / 冬 / 雨夜，左下角图标切换（moodbar.js），记在 localStorage `fred-room-mood`。lights.js 的 MOODS 扩成整张预设表并提供 setMood；新增 weather.js（雨丝 + 水花、雪、花瓣、落叶）；garden.js 加 setSeason（换色、花量、落叶、湿润、积雪）；kit.js 加 tone（有名字、可换色的材质）；effects.js 的光束随主光方向重算；scene.js 墙顶加积雪片。只改了 dist/room/** 和 scripts/check-room.mjs，共享文件和模块没动。验证：带显卡的无头 Chrome 逐个点图标截图六张、无报错、雨夜 60 帧；全部 check 通过。未测真机。说明见 docs/design/room.md「时刻与天气」。
 - 小屋天气第二轮（同一分支 claude/room-weather）：按 Fred 的反馈重做春（清晨）、夏（夏夜 + 萤火虫 + 星星）、秋（晴朗下午，蓝天配红叶）；新增 sky.js（云 + 扫过草地的云影）。仍只改 dist/room/**。无头 Chrome 重拍六张，无报错。
+- 小屋天气第三轮（claude/room-weather）：新增 seasonal.js——春（蝴蝶、晾衣绳、小鸟、洒水壶）和秋（落叶堆、耙子、南瓜、干草垛、稻草人、蘑菇、雁）的专属摆设；树下一圈落花 / 落叶（carpet）；花树自发光；花瓣和落叶更多更大；秋天太阳再低一点。仍只改 dist/room/**。

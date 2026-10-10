@@ -8,8 +8,8 @@ const TOP = 8.5;                                             // 从多高开始�
 const KINDS = {
   rain: { streaks: 900, splashes: 150 },
   snow: { flakes: 520, color: '#ffffff', size: .11, fall: .55, sway: .35, opacity: .95 },
-  petals: { flakes: 150, color: '#fbd0df', size: .07, fall: .32, sway: .6, opacity: .95 },
-  leaves: { flakes: 110, color: '#e08a35', size: .1, fall: .42, sway: .7, opacity: 1 },
+  petals: { flakes: 260, color: '#fcd3e2', size: .09, fall: .32, sway: .6, opacity: .95 },
+  leaves: { flakes: 190, color: '#e8862e', size: .13, fall: .42, sway: .7, opacity: 1 },
 };
 
 export function createWeather(scene, still = false) {

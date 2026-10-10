@@ -90,24 +90,32 @@ export function buildGarden() {
   const litter = Array.from({ length: 260 }, () => [...spot(random, .3), pick(random, ['#ffffff', '#e9e9e9', '#d6d6d6', '#f6f6f6'])]);
   const fallen = instances(new THREE.BoxGeometry(.13, .008, .08), tone('litter', '#ffffff'), litter.length, (d, i) => { const [x, z, tint] = litter[i]; d.position.set(x, GRASS + .012, z); d.rotation.set(0, random() * 6.28, 0); d.scale.set(1, 1, 1); return tint; });
   fallen.castShadow = false; fallen.count = 0; garden.add(fallen);
+  // 树下的一圈：春天是落花，秋天是落叶——比别处密得多，一眼能看出是从这棵树上掉下来的。
+  const under = [[-2.3, 5.5, 2.3, 170], [-4.5, -4.5, 1.4, 60]].flatMap(([cx, cz, r, n]) => Array.from({ length: n }, () => { const a = random() * 6.28, d = Math.sqrt(random()) * r; return [cx + Math.cos(a) * d, cz + Math.sin(a) * d, pick(random, ['#ffffff', '#ececec', '#dcdcdc', '#f7f7f7'])]; }))
+    .filter(([x, z]) => Math.max(Math.abs(x), Math.abs(z)) > ROOM.half + .3 && Math.max(x, z) < ISLAND.max - .3 && Math.min(x, z) > ISLAND.min + .3);
+  const carpet = instances(new THREE.BoxGeometry(.14, .01, .09), tone('carpet', '#ffffff'), under.length, (d, i) => { const [x, z, tint] = under[i]; d.position.set(x, GRASS + .016, z); d.rotation.set(0, random() * 6.28, 0); d.scale.set(1, 1, 1); return tint; });
+  carpet.castShadow = false; carpet.count = 0; garden.add(carpet);
   // 冬天的积雪：长椅、庭院灯顶、石头上各一小堆，平时不显示。
   const white = mat('#f4f7fa', { roughness: .9 }), snow = group(box(1.42, .06, .42, white, -1.2, GRASS + .46, 3.75), box(1.42, .05, .1, white, -1.2, GRASS + .84, 3.49), box(.34, .05, .34, white, 2.3, GRASS + 1.6, 5.1),
     ...[[5.2, 4.6, .2], [-3.5, 6.5, .18], [6.4, -1.6, .16]].map(([x, z, r]) => { const cap = ball(r, white, x, GRASS + r * 1.05, z, 0); cap.scale.y = .5; return cap; }));
   snow.traverse(o => { o.castShadow = false; }); snow.visible = false; garden.add(snow);
   const meshes = garden.children.filter(o => o.isInstancedMesh);
-  garden.userData.season = { flowers: meshes.filter(m => ['stem', 'petal', 'pollen'].some(name => m.material === tones.get(name))), total: flowers.length, tufts: meshes.find(m => m.material === tones.get('tuft')), fallen, snow };
+  garden.userData.season = { flowers: meshes.filter(m => ['stem', 'petal', 'pollen'].some(name => m.material === tones.get(name))), total: flowers.length, tufts: meshes.find(m => m.material === tones.get('tuft')), fallen, carpet, snow };
   return garden;
 }
 
 // 按预设（lights.js 里 MOODS[...].garden）给花园换季：草、树、灌木改色，花开多少，地上有没有落叶，湿不湿，有没有雪。
 export function setSeason(garden, house, look) {
-  const { flowers, total, tufts, fallen, snow } = garden.userData.season, paint = (name, color) => tones.get(name)?.color.set(color);
+  const { flowers, total, tufts, fallen, carpet, snow } = garden.userData.season, paint = (name, color) => tones.get(name)?.color.set(color);
   paint('grass', look.grass); paint('tuft', look.tuft ?? '#ffffff');
   for (let i = 0; i < 4; i++) { paint('tree' + i, look.tree[i]); paint('bush' + i, look.bush[i]); }
   STONES.forEach((color, i) => paint('stone' + i, look.stone ?? color));
   for (const mesh of flowers) mesh.count = Math.round(total * (look.flowers ?? 1));
   tufts.count = look.snow ? 40 : tufts.instanceMatrix.count;
   fallen.count = look.litter ? Math.round(fallen.instanceMatrix.count * look.litter[1]) : 0; if (look.litter) paint('litter', look.litter[0]);
+  carpet.count = look.carpet ? carpet.instanceMatrix.count : 0; if (look.carpet) paint('carpet', look.carpet);
+  // 花树自己带一点亮度（背光时粉色才不发闷）；别的季节是 0。
+  for (let i = 0; i < 4; i++) { const leaf = tones.get('tree' + i); leaf.emissive.copy(leaf.color); leaf.emissiveIntensity = look.treeGlow ?? 0; }
   // 湿润：草和石头变光滑，灯光会在上面留下高光。
   tones.get('grass').roughness = look.wet ? .38 : .82; for (let i = 0; i < 3; i++) { const stone = tones.get('stone' + i); stone.roughness = look.wet ? .16 : .82; stone.metalness = look.wet ? .25 : 0; }
   snow.visible = !!look.snow; for (const cap of house.userData.snow) cap.visible = !!look.snow;
