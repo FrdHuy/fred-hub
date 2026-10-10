@@ -61,10 +61,10 @@ export const MOODS = {
   },
   // 雨夜：深蓝的夜，只有月光和屋里的暖灯；雨丝落下，地面湿得反光。
   rain: {
-    label: '雨夜', sky: ['#070b16', '#101930', '#1d2843'], skyGlow: null, fog: ['#18223c', .02],
+    label: '雨夜', sky: ['#070b16', '#101930', '#1d2843'], skyGlow: null, fog: ['#18223c', .024],
     sun: { from: [-1, 1, -.25], color: '#7f98d0', intensity: .6 },
     hemisphere: { sky: '#3d4d7c', ground: '#1c2030', intensity: .4 }, fill: { color: '#3d4a6e', intensity: .22 },
-    lamps: 1.7, exposure: 1.05, beam: 0, dust: 0, weather: 'rain',
+    lamps: 1.7, exposure: 1.05, beam: 0, dust: 0, weather: 'rain', clouds: 5, cloud: '#1c2440',
     garden: { grass: '#7fa85a', tree: GREEN, bush: GREEN, tuft: '#ffffff', flowers: .7, stone: '#8f8a84', wet: true },
   },
 };
@@ -114,7 +114,14 @@ export function createLights({ renderer, scene }) {
     sunDirection.set(...mood.sun.from).normalize(); sun.position.copy(center).addScaledVector(sunDirection, 30);
     sun.color.set(mood.sun.color); sun.intensity = mood.sun.intensity;
     for (const lamp of lamps) lamp.light.intensity = lamp.base * mood.lamps;
+    current = mood;
     return mood;
   }
-  return { setMood, sun, sunDirection, shadowLamps };
+  // 闪电：k 从 0 到 1，天光和主光瞬间变成冷白色的强光，k 回到 0 就恢复。
+  let current = MOODS.golden;
+  function flash(k) {
+    hemisphere.intensity = current.hemisphere.intensity + k * 2.4; sun.intensity = current.sun.intensity + k * 5;
+    renderer.toneMappingExposure = current.exposure * (1 + k * .35);
+  }
+  return { setMood, flash, sun, sunDirection, shadowLamps };
 }

@@ -1,12 +1,15 @@
 // 季节专属的摆设：只在某一个时刻 / 天气出现的东西（lights.js 里 MOODS 的名字 → 这里的一组东西）。
 //   spring  蝴蝶、晾衣绳上的衣服、栅栏上的小鸟、花坛边的洒水壶和几盆小苗
 //   autumn  落叶堆和耙子、门口和长椅上的南瓜、干草垛和稻草人、树下的蘑菇、天上飞过的一队雁
+//   winter  雪人、挂彩灯的小松树、栅栏上的一串暖灯和积雪、雪堆、脚印、雪橇、柴堆
+//   rain    水洼和涟漪、门口的伞和雨靴、石板上的青蛙、闪电
 // 加别的季节的摆设：在 build 里加一个同名函数，返回 { group, update?(time) }。
 import * as THREE from './three.js';
-import { mat, satin, box, cyl, ball, rod, group, contact, rng, pick, tilt } from './kit.js';
+import { mat, glow, satin, box, cyl, ball, rod, group, contact, rng, pick, tilt } from './kit.js';
 import { GRASS, ISLAND } from './scene.js';
 
 const G = GRASS;
+const quietBall = (r, material, x, y, z) => { const b = ball(r, material, x, y, z, 0); b.castShadow = false; return b; };   // 小灯泡：不投影
 
 const build = {
   spring() {
@@ -74,15 +77,73 @@ const build = {
       flock.children.forEach((goose, i) => { const flap = Math.sin(time * 5 + i) * .35; goose.children[0].rotation.z = flap; goose.children[1].rotation.z = -flap; });
     } };
   },
+
+  winter() {
+    const random = rng(31), all = group(), white = mat('#f4f7fa', { roughness: .9 }), near = ISLAND.max - .25, back = ISLAND.min + .25;
+    // 雪人：三个雪球、胡萝卜鼻子、围巾、小桶帽子、树枝手臂。
+    const coal = mat('#3a3d38'), snowman = group(contact(1.3, 1.3, .3, 0, 0, .01), ball(.36, white, 0, .3, 0, 1), ball(.27, white, 0, .78, 0, 1), ball(.2, white, 0, 1.14, 0, 1),
+      tilt(cyl(0, .035, .16, mat('#e8822c'), 0, 1.07, .26, 5), Math.PI / 2, 0, 0), ball(.022, coal, -.07, 1.2, .18, 0), ball(.022, coal, .07, 1.2, .18, 0), ball(.022, coal, 0, .86, .26, 0), ball(.022, coal, 0, .72, .27, 0),
+      cyl(.22, .22, .07, mat('#c4472a', { roughness: 1 }), 0, .93, 0, 10), box(.09, .26, .05, mat('#c4472a', { roughness: 1 }), .13, .7, .2),
+      cyl(.13, .15, .18, mat('#5f7f8a'), 0, 1.3, 0, 8), tilt(cyl(.012, .016, .5, mat('#5a4334'), -.42, .62, 0, 4), 0, 0, 1.1), tilt(cyl(.012, .016, .5, mat('#5a4334'), .42, .62, 0, 4), 0, 0, -1.1));
+    snowman.position.set(-.1, G, 4.9); snowman.rotation.y = .5; all.add(snowman);
+    // 小松树：三层树冠各压着一层雪，挂着彩色小灯，顶上一颗星。
+    const pine = group(contact(1.6, 1.6, .3, 0, 0, .01), cyl(.07, .09, .3, mat('#5a4334'), 0, 0, 0, 6));
+    [[.62, .75, .25], [.48, .65, .7], [.33, .55, 1.12]].forEach(([r, h, y]) => { const tier = cyl(0, r, h, mat('#3f7a52'), 0, y, 0, 7), cap = cyl(0, r * .72, h * .7, white, 0, y + h * .34, 0, 7); cap.castShadow = false; pine.add(tier, cap); });
+    ['#ff6b5e', '#ffd166', '#7fc8ff', '#ff9ec4', '#ffd166', '#ff6b5e', '#7fc8ff', '#ffd166', '#ff9ec4'].forEach((color, i) => { const a = i * 2.3, y = .42 + i * .13, r = .52 - i * .045; pine.add(quietBall(.035, glow(color, 5), Math.cos(a) * r, y, Math.sin(a) * r)); });
+    pine.add(quietBall(.07, glow('#ffe08a', 6), 0, 1.72, 0)); pine.position.set(5.4, G, 5.3); all.add(pine);
+    // 栅栏上的一串暖色小灯（朝向默认镜头的两条边）+ 栅栏顶的积雪。
+    const bulb = glow('#ffd28a', 5);
+    for (let p = back + .4; p < near; p += .62) { if (p < .95 || p > 2.1) all.add(quietBall(.03, bulb, p, G + .43 - Math.abs(Math.sin(p * 2.5)) * .05, near + .05)); all.add(quietBall(.03, bulb, near + .05, G + .43 - Math.abs(Math.sin(p * 2.5)) * .05, p)); }
+    for (const [from, to, edge, alongX] of [[back, .95, near, true], [2.1, near, near, true], [back, near, near, false], [back, near, back, true], [back, near, back, false]]) {
+      const cap = alongX ? box(to - from, .04, .07, white, (from + to) / 2, G + .5, edge) : box(.07, .04, to - from, white, edge, G + .5, (from + to) / 2); cap.castShadow = false; all.add(cap);
+    }
+    // 雪堆、小径上的一串脚印、雪橇、盖着雪的柴堆。
+    for (const [x, z, r] of [[6.2, 6.3, .8], [-4.8, 6.2, .7], [6.4, -4.6, .75], [3.9, 3.9, .5], [-4.6, 3.3, .55], [4.2, -3.9, .5], [-1.0, -4.6, .6]]) { const drift = ball(r, white, x, G - r * .12, z, 1); drift.scale.y = .34; drift.rotation.y = random() * 6; drift.castShadow = false; all.add(drift); }
+    [[1.62, 6.5], [1.42, 6.1], [1.56, 5.7], [1.3, 5.3], [1.42, 4.9], [1.14, 4.5], [1.22, 4.1], [.96, 3.75]].forEach(([x, z], i) => { const step = box(.09, .012, .17, mat('#b4c2d4', { roughness: 1 }), x, G + .004, z); step.rotation.y = .25 + (i % 2 ? .12 : -.12); step.castShadow = false; all.add(step); });
+    const sled = group(box(.34, .03, .8, mat('#c4472a')), box(.03, .09, .86, mat('#7d5237'), -.14, -.09, 0), box(.03, .09, .86, mat('#7d5237'), .14, -.09, 0), contact(.7, 1.1, .28, 0, 0, -.1));
+    sled.position.set(3.25, G + .12, 4.6); sled.rotation.y = -.6; all.add(sled);
+    const logs = group(contact(1.3, .7, .3, 0, 0, .01));
+    for (let i = 0; i < 9; i++) { const row = i < 4 ? 0 : i < 7 ? 1 : 2, n = i - [0, 4, 7][row]; logs.add(rod(.075, .5, mat(pick(random, ['#8a5a3c', '#9a6a45', '#7d5237'])), -.24 + n * .16 + row * .08, .075 + row * .14, 0, 'z', 7)); }
+    const cover = box(.72, .05, .56, white, 0, .42, 0); cover.castShadow = false; logs.add(cover); logs.position.set(2.5, G, 3.55); all.add(logs);
+    return { group: all };
+  },
+
+  rain(hooks) {
+    const random = rng(41), all = group(), rings = [];
+    // 水洼：深色、很光滑的一片，会映出灯光；上面一圈圈涟漪不断扩开。
+    const water = mat('#4a5f8e', { roughness: .1, metalness: .3, emissive: '#1b2a4c', emissiveIntensity: .9 }), ripple = new THREE.MeshBasicMaterial({ color: '#b9c9ea', transparent: true, opacity: .5, depthWrite: false, fog: false });
+    for (const [x, z, r] of [[2.9, 4.7, .62], [.2, 5.6, .5], [4.9, 2.2, .7], [5.6, 5.9, .55], [-3.4, 4.4, .5], [4.6, -2.4, .6], [1.9, 6.2, .38], [-.6, -4.6, .5]]) {
+      const pool = cyl(r, r, .012, water, x, G + .002, z, 12); pool.scale.z = .72; pool.rotation.y = random() * 3; pool.castShadow = false; all.add(pool);
+      for (let i = 0; i < 3; i++) {
+        const ring = new THREE.Mesh(new THREE.RingGeometry(.9, 1, 20), ripple.clone()); ring.rotation.x = -Math.PI / 2; ring.position.set(x + (random() - .5) * r * .9, G + .018, z + (random() - .5) * r * .5);
+        all.add(ring); rings.push({ ring, size: .1 + random() * .14, period: .9 + random() * .8, offset: random() });
+      }
+    }
+    // 门口：一把撑开晾着的伞、一双雨靴；小径的石板上蹲着一只青蛙。
+    const umbrella = group(cyl(0, .5, .2, mat('#a23a2c', { roughness: .6 }), 0, .62, 0, 8), cyl(.012, .012, .8, satin(), 0, 0, 0, 5), ball(.03, mat('#5a4334'), 0, 0, 0, 0), contact(1.2, 1.2, .3, 0, 0, .01));
+    umbrella.position.set(2.2, G + .32, 3.75); umbrella.rotation.set(.95, .4, .25); all.add(umbrella);
+    for (const [bx, turn] of [[.05, .2], [-.12, -.15]]) { const boot = group(cyl(.045, .05, .2, mat('#e9b83a', { roughness: .4 }), 0, 0, 0, 7), box(.08, .06, .14, mat('#e9b83a', { roughness: .4 }), 0, 0, .05)); boot.position.set(.55 + bx, G + .08, 3.42); boot.rotation.y = turn; all.add(boot); }
+    const frog = group(ball(.07, mat('#6fae4a', { roughness: .4 }), 0, .05, 0, 1), ball(.045, mat('#6fae4a', { roughness: .4 }), 0, .09, .06, 1), ball(.018, mat('#f4f7c8'), -.03, .125, .08, 0), ball(.018, mat('#f4f7c8'), .03, .125, .08, 0));
+    frog.children[0].scale.set(1.2, .7, 1.3); frog.position.set(1.36, G + .05, 5.0); frog.rotation.y = .8; all.add(frog);
+    // 闪电：隔十来秒亮两下。真正变亮的是灯光（hooks.flash，见 lights.js），这里只管时间。
+    let next = 4;
+    return { group: all, update(time) {
+      for (const r of rings) { const t = (time / r.period + r.offset) % 1; r.ring.scale.setScalar(r.size * (.25 + t)); r.ring.material.opacity = .55 * (1 - t); }
+      const since = time - next;
+      if (since > .6) { next = time + 7 + random() * 12; hooks.flash?.(0); }
+      else if (since >= 0) hooks.flash?.(since < .09 ? 1 : since < .2 ? .12 : since < .3 ? .75 : Math.max(0, .5 - (since - .3) * 1.7));
+    }, rest() { hooks.flash?.(0); } };
+  },
 };
 
-export function createSeasonal(scene, still = false) {
+// hooks：{ flash(k) }——闪电时让灯光亮一下（0–1）。
+export function createSeasonal(scene, still = false, hooks = {}) {
   const made = {};                                           // 用到哪个季节才造哪个季节的东西
   let current = null;
   function set(name) {
-    if (current) made[current].group.visible = false;
+    if (current) { made[current].group.visible = false; made[current].rest?.(); }
     current = build[name] ? name : null; if (!current) return;
-    if (!made[name]) { made[name] = build[name](); scene.add(made[name].group); }
+    if (!made[name]) { made[name] = build[name](hooks); scene.add(made[name].group); }
     made[name].group.visible = true; made[name].update?.(0);
   }
   return { set, update(time) { if (current && !still) made[current].update?.(time); } };    // prefers-reduced-motion：蝴蝶和衣服不动

@@ -6,7 +6,7 @@ import { GRASS, ISLAND, ROOM } from './scene.js';
 
 const TOP = 8.5;                                             // 从多高开始落
 const KINDS = {
-  rain: { streaks: 900, splashes: 150 },
+  rain: { streaks: 1500, splashes: 280 },
   snow: { flakes: 520, color: '#ffffff', size: .11, fall: .55, sway: .35, opacity: .95 },
   petals: { flakes: 260, color: '#fcd3e2', size: .09, fall: .32, sway: .6, opacity: .95 },
   leaves: { flakes: 190, color: '#e8862e', size: .13, fall: .42, sway: .7, opacity: 1 },
@@ -52,8 +52,8 @@ export function createWeather(scene, still = false) {
     if (kind === 'rain') {
       const a = rainGeometry.attributes.position.array, b = splashGeometry.attributes.position.array, height = TOP - GRASS;
       drops.forEach((d, i) => {
-        const y = TOP - ((d.offset + time * d.speed * 1.5) % 1) * height, lean = (TOP - y) * .06;       // 微微斜着落
-        a[i * 6] = d.x + lean; a[i * 6 + 1] = y; a[i * 6 + 2] = d.z; a[i * 6 + 3] = d.x + lean + d.length * .06; a[i * 6 + 4] = y - d.length; a[i * 6 + 5] = d.z;
+        const y = TOP - ((d.offset + time * d.speed * 1.9) % 1) * height, lean = (TOP - y) * .2;        // 被风吹斜了
+        a[i * 6] = d.x + lean; a[i * 6 + 1] = y; a[i * 6 + 2] = d.z; a[i * 6 + 3] = d.x + lean + d.length * .2; a[i * 6 + 4] = y - d.length; a[i * 6 + 5] = d.z;
       });
       splash.forEach((s, i) => {
         const t = ((time / s.period + s.offset) % 1) / .3;                                              // 每个周期只有前三成时间看得见

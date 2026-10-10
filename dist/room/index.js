@@ -39,7 +39,7 @@ export function mountRoom(host, options = {}) {
   const placed = placeObjects(scene, objects);
   const lights = createLights(stage);                             // 要在物件之后：灯装在物件留下的灯位上
   lights.setMood(mood);
-  const weather = createWeather(scene, still), sky = createSky(scene, still), seasonal = createSeasonal(scene, still);
+  const weather = createWeather(scene, still), sky = createSky(scene, still), seasonal = createSeasonal(scene, still, { flash: k => lights.flash(k) });
   const effects = createEffects(stage, lights.sunDirection, still);
   const view = createView(stage, host, still);
   const cutaway = createCutaway(house, decor.userData.onWall, placed);
