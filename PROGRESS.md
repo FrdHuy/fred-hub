@@ -3,7 +3,7 @@
 > Claude Code 与 Codex 共用的进度总览。**开始工作前先读本文件和 `AGENTS.md`**，再读 `docs/DESIGN.md`（统一设计语言，任何视觉/交互改动必读）、`docs/HANDOFF.md`（逐版本交接、所有权表）和 `docs/MODULES.md`（模块接口）。
 > 本文件管“全局现状 + 待办 + 约定”；每轮的详细改动与验证继续写在 `docs/HANDOFF.md` 和 `docs/开发进度-vX.md`。
 
-最近更新：2026-10-09 · Claude Code（分支 claude/room-3d：3D 小屋第 1 阶段，未合入 main）
+最近更新：2026-10-10 · Claude Code（小屋的六种时刻 / 天气上线，资源 v59）
 上一次代码改动：v0.33 · 2026-09-29 · Claude Code
 
 ---
