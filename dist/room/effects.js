@@ -9,22 +9,24 @@ import { rng } from './kit.js';
 const BLOOM = { strength: .42, radius: .75, threshold: 1.7 };
 
 export function createEffects({ renderer, scene, camera }, sunDirection, still = false) {
-  const ray = sunDirection.clone().negate(), { x, z0, z1, y0, y1 } = WINDOW, random = rng(8);
+  const ray = new THREE.Vector3(), { x, z0, z1, y0, y1 } = WINDOW, random = rng(8);
   // 窗上一点顺着阳光走到地板的落点。
   const land = p => p.clone().addScaledVector(ray, p.y / -ray.y);
-  // 光束：每格窗一片半透明的斜棱柱，靠窗亮、落地处淡；叠加混合，不写深度。
-  const positions = [], colors = [], panes = 3, gap = .06, width = (z1 - z0) / panes;
-  for (let i = 0; i < panes; i++) {
-    const a = z0 + i * width + gap, b = z0 + (i + 1) * width - gap;
-    const [A, B, C, D] = [[y0, a], [y0, b], [y1, b], [y1, a]].map(([y, z]) => new THREE.Vector3(x, y, z)), [A2, B2, C2, D2] = [A, B, C, D].map(land);
-    for (const [p, q, q2, p2] of [[D, C, C2, D2], [A, B, B2, A2], [A, D, D2, A2], [B, C, C2, B2]]) {
-      for (const v of [p, q, q2, p, q2, p2]) { positions.push(v.x, v.y, v.z); const near = v.x === x ? 1 : .18; colors.push(near, near, near); }
+  // 光束：每格窗一片半透明的斜棱柱，靠窗亮、落地处淡；叠加混合，不写深度。太阳换了高度就重新算一遍（setSun）。
+  const panes = 3, gap = .06, width = (z1 - z0) / panes, beamGeometry = new THREE.BufferGeometry();
+  function shapeBeam() {
+    const positions = [], colors = [];
+    for (let i = 0; i < panes; i++) {
+      const a = z0 + i * width + gap, b = z0 + (i + 1) * width - gap;
+      const [A, B, C, D] = [[y0, a], [y0, b], [y1, b], [y1, a]].map(([y, z]) => new THREE.Vector3(x, y, z)), [A2, B2, C2, D2] = [A, B, C, D].map(land);
+      for (const [p, q, q2, p2] of [[D, C, C2, D2], [A, B, B2, A2], [A, D, D2, A2], [B, C, C2, B2]]) {
+        for (const v of [p, q, q2, p, q2, p2]) { positions.push(v.x, v.y, v.z); const near = v.x === x ? 1 : .18; colors.push(near, near, near); }
+      }
     }
+    beamGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); beamGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   }
-  const beamGeometry = new THREE.BufferGeometry();
-  beamGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); beamGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   const beam = new THREE.Mesh(beamGeometry, new THREE.MeshBasicMaterial({ color: '#ffbf80', vertexColors: true, transparent: true, opacity: .06, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
-  beam.renderOrder = 3; scene.add(beam);
+  beam.renderOrder = 3; beam.frustumCulled = false; scene.add(beam);
 
   // 微尘：只在光束里看得见。每一粒记住自己在窗上的位置和沿光线走了多远，慢慢飘。
   const count = 110, motes = Array.from({ length: count }, () => ({ y: y0 + random() * (y1 - y0), z: z0 + random() * (z1 - z0), along: random(), speed: .006 + random() * .012, phase: random() * 6.28 }));
@@ -41,7 +43,14 @@ export function createEffects({ renderer, scene, camera }, sunDirection, still =
     });
     dustGeometry.attributes.position.needsUpdate = true;
   }
-  update(0);
+  let dustMood = 1, dustShare = 1;
+  const showDust = () => { dustGeometry.setDrawRange(0, Math.round(count * dustMood * dustShare)); };
+  // 换时刻：太阳方向、光束的颜色和浓度、微尘的多少。
+  function setSun(direction, color, strength, motes) {
+    ray.copy(direction).negate(); shapeBeam(); beam.material.color.set(color); beam.material.opacity = strength; beam.visible = strength > 0;
+    dustMood = motes; showDust(); update(0);
+  }
+  setSun(sunDirection, '#ffbf80', .06, 1);
 
   // Bloom：场景先画进一张半浮点（HDR）的离屏画布，提取高亮部分模糊后叠回去，最后统一做 ACES 色调映射。
   // 用到时才创建；关闭时直接 renderer.render，一点额外开销都没有。
@@ -59,7 +68,7 @@ export function createEffects({ renderer, scene, camera }, sunDirection, still =
     update: still ? () => {} : update,                 // prefers-reduced-motion：微尘停在原地
     render() { if (bloom) composer.render(); else renderer.render(scene, camera); },
     resize(width, height) { if (composer) { composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(width, height); } },
-    setBloom, setDust(share) { dustGeometry.setDrawRange(0, Math.round(count * share)); },
+    setBloom, setSun, setDust(share) { dustShare = share; showDust(); },
     dispose() { composer?.dispose(); },
   };
 }

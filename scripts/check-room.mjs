@@ -23,6 +23,11 @@ const registry = readFileSync('dist/room/objects/index.js', 'utf8');
 for (const entry of objects) assert.ok(registry.includes(`./${entry.object}.js`), `${entry.object}: 没在 objects/index.js 登记`);
 assert.ok(readFileSync('dist/room/lights.js', 'utf8').includes(`${mood}:`), `lights.js 里没有 ${mood} 这个时刻预设`);
 
+// 每个时刻 / 天气预设都有切换图标。
+const lightsSource = readFileSync('dist/room/lights.js', 'utf8'), bar = readFileSync('dist/room/moodbar.js', 'utf8');
+const moodNames = [...lightsSource.slice(lightsSource.indexOf('export const MOODS'), lightsSource.indexOf('const LAMPS')).matchAll(/^  (\w+): \{$/gm)].map(m => m[1]);
+assert.ok(moodNames.length >= 6 && moodNames.includes(mood), '时刻预设不全');
+for (const name of moodNames) assert.ok(new RegExp(`^  ${name}: '`, 'm').test(bar), `moodbar.js 里没有 ${name} 的图标`);
 const vendor = 'dist/vendor/three-0.170.0';
 for (const file of ['three.module.min.js', 'LICENSE', 'addons/controls/OrbitControls.js', 'addons/postprocessing/EffectComposer.js', 'addons/postprocessing/UnrealBloomPass.js', 'addons/postprocessing/OutputPass.js']) assert.ok(existsSync(`${vendor}/${file}`), `${file}: 运行 node scripts/vendor-three.mjs`);
 const sources = [...readdirSync('dist/room').filter(f => f.endsWith('.js')).map(f => `dist/room/${f}`), ...readdirSync('dist/room/objects').map(f => `dist/room/objects/${f}`)];

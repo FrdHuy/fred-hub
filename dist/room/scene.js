@@ -2,7 +2,7 @@
 // 坐标约定：1 单位 ≈ 1 米；房间地板 y = 0，x / z 各从 -3 到 3；镜头在 +x +z 方向，所以
 // 左后墙在 x = -3，右后墙在 z = -3，朝向镜头的两面墙被「切掉」，只留一圈矮墙脚。
 import * as THREE from './three.js';
-import { mat, satin, box, cyl, ball, rod, group, paint, contact, rng, tilt } from './kit.js';
+import { mat, tone, satin, box, cyl, ball, rod, group, paint, contact, rng, tilt } from './kit.js';
 
 export const ROOM = { half: 3, wallHeight: 3.2, wallThick: .2 };
 export const GRASS = -.14;                                   // 草地比地板低一个门槛
@@ -43,7 +43,7 @@ export function skyTexture([top, middle, bottom], glow) {
 export function buildIsland() {
   const size = ISLAND.max - ISLAND.min, mid = (ISLAND.max + ISLAND.min) / 2, random = rng(7);
   const island = group(
-    box(size, .32, size, mat('#9cc462'), mid, GRASS - .32, mid),                       // 草皮
+    box(size, .32, size, tone('grass', '#9cc462'), mid, GRASS - .32, mid),                       // 草皮
     box(size - .14, .8, size - .14, mat('#94664a'), mid, GRASS - 1.12, mid),           // 泥土层
     box(size - .1, .1, size - .1, mat('#77503a'), mid, GRASS - .74, mid),              // 一条深色土纹
   );
@@ -111,6 +111,10 @@ export function buildHouse() {
   });
   house.add(...Object.values(walls), ...posts.map(post => post.part));
   house.userData.cutaway = { walls, posts };
+  // 冬天的积雪：四面墙顶梁上的一层白（放在各自的墙组里，墙隐去时跟着隐去），平时不显示。
+  const white = mat('#f4f7fa', { roughness: .9 }), snow = [box(T + .1, .07, R * 2, white, -far, H + .1, 0), box(R * 2, .07, T + .1, white, 0, H + .1, -far), box(T + .1, .07, R * 2, white, far, H + .1, 0), box(R * 2, .07, T + .1, white, 0, H + .1, far)];
+  ['west', 'north', 'east', 'south'].forEach((name, i) => { snow[i].castShadow = false; snow[i].visible = false; walls[name].add(snow[i]); });
+  house.userData.snow = snow;
   // 墙脚：墙隐去之后留下的一圈矮切口，南面留出门口。
   const cut = mat(WALL.cut), S = T + .03;
   house.add(

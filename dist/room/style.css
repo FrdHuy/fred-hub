@@ -13,7 +13,7 @@
 .room-view[data-state=failed] .r3-failed{display:grid}
 .r3-failed a{color:inherit}
 /* 列表视图：右下角的简笔图标，回到普通的 2D 收藏室 */
-.r3-list{position:absolute;right:max(5%,22px);bottom:26px;z-index:2;width:44px;height:44px;display:grid;place-items:center;color:#f6efe2;opacity:.72;transition:opacity .2s}
+.r3-list{position:absolute;right:max(5%,22px);bottom:26px;z-index:2;width:44px;height:44px;display:grid;place-items:center;color:var(--r3-ink,#f6efe2);opacity:.72;transition:opacity .2s}
 .r3-list:hover{opacity:1}
 .r3-list svg{width:22px;height:22px}
 @media(prefers-reduced-motion:reduce){.r3-canvas{transition:none}.r3-loading>span{animation:none}}
@@ -35,3 +35,13 @@
 .r3-flat nav{grid-area:1/1;align-self:end;justify-self:center;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:0 18px max(34px,6svh);z-index:1}
 .r3-flat a{padding:9px 16px 10px;border-radius:999px;background:rgba(253,250,244,.94);color:#343832;font:500 14px/1 var(--font-ui);letter-spacing:.08em;text-decoration:none;box-shadow:0 6px 18px rgba(30,20,10,.28)}
 .room-view[data-state=flat] .r3-loading{opacity:0}
+/* 天气切换：左下角一排简笔图标；选中的那个完全不透明，下面一个小点 */
+.r3-moods{position:absolute;left:max(5% - 9px,13px);bottom:26px;z-index:2;display:flex;gap:2px}
+.r3-moods button{position:relative;min-height:0;width:38px;height:44px;display:grid;place-items:center;color:var(--r3-ink,#f6efe2);opacity:.55;transition:opacity .2s}
+.r3-moods button:hover{opacity:.85}
+.r3-moods button[aria-checked=true]{opacity:1}
+.r3-moods button[aria-checked=true]:after{content:'';position:absolute;left:50%;bottom:5px;width:3px;height:3px;margin-left:-1.5px;border-radius:50%;background:currentColor}
+.r3-moods svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;}
+.room-view.is-turning .r3-canvas{opacity:0;transition-duration:.22s}
+.room-view[data-state=flat] .r3-moods{display:none}
+@media(max-width:420px){.r3-moods button{width:34px}}

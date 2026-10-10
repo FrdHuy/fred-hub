@@ -35,6 +35,25 @@
 3. ✅ Bloom 辉光（`effects.js`）、性能档位与自动降级（`quality.js`）、静态截图 + 2D 导航（`flat.js`）、先看设备再加载（`enter.js`）。
 4. 以后：昼夜与天气（雨、雪）。
 
+## 时刻与天气（Fred 2026-10-10）
+左下角一排简笔图标切换，选中的记在 localStorage `fred-room-mood`；默认仍是傍晚（`config.js` 的 `mood`）。静态版不变（始终是傍晚的截图）。
+
+| 预设 | 样子 |
+| --- | --- |
+| golden 傍晚 | 原来的黄金时刻 |
+| spring 春 | 明亮的上午，树开粉花，花瓣飘落，地上有落花 |
+| summer 夏 | 正午蓝天，太阳高、影子短，深绿 |
+| autumn 秋 | 更橙的斜阳，红黄的树，落叶飘、地上铺落叶，花只剩两成 |
+| winter 冬 | 阴天淡日，草地 / 树 / 灌木覆雪，墙顶、长椅、灯顶有积雪，下雪，没有花 |
+| rain 雨夜 | 深蓝夜色 + 月光，灯更亮，雨丝 + 落地水花，草和石板变光滑（湿润高光） |
+
+- 一条预设管到底：`lights.js` 的 `MOODS`（天空、雾、主光、天光、灯的倍数、曝光、光束、微尘、`garden` 花园配色、`weather` 落下的东西、`ink` 角落图标颜色）。`index.js` 的 `applyMood()` 依次调用 `lights.setMood` → `garden.setSeason` → `effects.setSun` → `weather.set`。
+- 加一种天气：往 `MOODS` 加一条，在 `moodbar.js` 的 `ICONS` 里加同名图标（check-room 会检查）。
+- 会换色的东西用 `kit.tone(名字, 颜色)` 建材质（grass、tree0–3、bush0–3、stone0–2、tuft、stem、petal、pollen、litter），`setSeason` 按名字改色；花、草丛、落叶是 InstancedMesh，用 `count` 控制数量。
+- 主光始终从西墙的窗照进来，各预设只改高度、颜色、强度；换预设时光束按新方向重算。
+- 雨雪只落在屋外（屋子没有顶）。数量随性能档位打折（档位 0 约三分之一）；`prefers-reduced-motion` 时停在半空不动。
+- 切换时画面先淡出 0.24 秒再亮起，没有做预设之间的连续渐变，也没有按真实时间 / 季节自动切换。
+
 ## 性能档位（`quality.js`）
 | 档位 | 内容 |
 | --- | --- |

@@ -8,6 +8,12 @@ export function mat(color, options = {}) {
   if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, roughness: .82, metalness: 0, flatShading: true, ...options }));
   return materials.get(key);
 }
+// 有名字的材质：颜色会跟着季节 / 天气变的东西（草、树叶、石头……）用它，lights.js 的预设按名字改色（见 garden.js 的 setSeason）。
+export const tones = new Map();
+export function tone(name, color, options = {}) {
+  if (!tones.has(name)) tones.set(name, new THREE.MeshStandardMaterial({ color, roughness: .82, metalness: 0, flatShading: true, ...options }));
+  return tones.get(name);
+}
 // 自发光材质（灯泡、屏幕、指示灯）。power > 1 的部分第 3 阶段会被 Bloom 拾取成光晕。
 export const glow = (color, power = 2, base = '#1a1410') => mat(base, { emissive: color, emissiveIntensity: power, roughness: .5 });
 // 缎面金属（把手、灯杆）；按 DESIGN.md 不做镜面。
