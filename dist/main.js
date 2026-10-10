@@ -1,10 +1,10 @@
-import { createInteraction } from './experience.js?v=56';
-import { soundOn, setSound, play as sound } from './sound.js?v=56';
-import { mountModule } from './modules/index.js?v=56';
-import { modules, getModule, createCover } from './catalog.js?v=56';
-import { CollectionGallery } from './gallery.js?v=56';
+import { createInteraction } from './experience.js?v=58';
+import { soundOn, setSound, play as sound } from './sound.js?v=58';
+import { mountModule } from './modules/index.js?v=58';
+import { modules, getModule, createCover } from './catalog.js?v=58';
+import { CollectionGallery } from './gallery.js?v=58';
 import { readRoute, navigate } from './router.js';
-import { attachSheen } from './sheen.js?v=56';
+import { attachSheen } from './sheen.js?v=58';
 
 const $ = selector => document.querySelector(selector);
 // Focus rings are for keyboard users. Script-moved focus after a click or tap stays invisible.
@@ -66,7 +66,7 @@ function showRoom(on, from) {
   if (!on) { roomScene?.stop(); return; }
   if (roomScene) { roomScene.start(from); return; }
   // enter.js 先看设备：能跑 3D 就加载场景，否则给静态截图 + 2D 链接（见 room/quality.js）。
-  roomLoading ??= import('./room/enter.js?v=56').then(({ enterRoom }) => enterRoom(room, {
+  roomLoading ??= import('./room/enter.js?v=58').then(({ enterRoom }) => enterRoom(room, {
       open(entry) { roomReturn = true; navigate(entry.module); },
       tint: id => getModule(id)?.theme === 'dark' ? '#100e0c' : '#f8f7f4',
       sound,
@@ -160,6 +160,17 @@ function closeMenu(restoreFocus = true) {
   menu.hidden = true; menuToggle.setAttribute('aria-expanded', 'false');
   if (restoreFocus) menuToggle.focus({ preventScroll: true });
 }
+// Two ways to walk through the collection: the shelf (#/) and the cabin (#/room). The switch sits at the top of the menu.
+const views = document.createElement('div'); views.className = 'view-switch'; views.setAttribute('role', 'group'); views.setAttribute('aria-label', '浏览方式');
+views.innerHTML = `<button type="button" data-view="home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15.5h14M5 15.5V9.5h3v6M10 15.5v-9h2.5v9M14.5 15.5v-4h2v4"/></svg><span>收藏</span></button><button type="button" data-view="room"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 4l7 5.5M5 8.5V16h10V8.5M8.5 16v-4h3v4"/></svg><span>小屋</span></button>`;
+const inRoom = () => activeRoute.type === 'room' || (activeRoute.type !== 'home' && roomReturn);
+const showView = () => views.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(inRoom() === (b.dataset.view === 'room'))));
+views.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  interaction.reset(); closeMenu(false);
+  if (b.dataset.view === 'room') location.hash = '#/room'; else navigate();
+});
+menu.append(views);
 for (const item of modules) {
   const button = document.createElement('button'); button.type = 'button'; button.className = 'module-thumbnail';
   const thumb = document.createElement('span'); thumb.className = 'module-thumbnail-image'; thumb.dataset.module = item.id; thumb.setAttribute('aria-hidden', 'true'); thumb.append(createCover(item));
@@ -172,7 +183,7 @@ for (const item of modules) {
 }
 menuToggle.addEventListener('click', () => {
   if (!menu.hidden) { closeMenu(); return; }
-  interaction.reset(); gallery.select(Math.round(gallery.position)); menu.hidden = false; menuToggle.setAttribute('aria-expanded','true');
+  interaction.reset(); gallery.select(Math.round(gallery.position)); showView(); menu.hidden = false; menuToggle.setAttribute('aria-expanded','true');
   if (!motion.matches) menu.animate([{opacity:0,transform:'translateY(-8px)'},{opacity:1,transform:'none'}],{duration:240,easing:'ease-out'});
   menu.querySelector('button').focus({preventScroll:true});
 });
