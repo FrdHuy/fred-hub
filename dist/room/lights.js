@@ -14,46 +14,47 @@ const GREEN = ['#7fae52', '#95bd60', '#6c9c4a', '#a6c86c'];
 //   beam      窗口光束的浓度（0 = 没有）；dust 光里微尘的多少（0–1）
 //   garden    花园：草、树、灌木、草丛的颜色；flowers 开花的比例；litter [颜色, 比例] 地上的落花 / 落叶；
 //             stone 石头的颜色（不写 = 原色）；wet 湿润反光；snow 积雪
-//   weather   飘落的东西：'rain' | 'snow' | 'petals' | 'leaves' | null（见 weather.js）
+//   weather   飘落 / 飞舞的东西：'rain' | 'snow' | 'petals' | 'leaves' | 'fireflies' | null（见 weather.js）
+//   clouds    低处有几朵云（0 = 没有云，高处那朵投影的云也不出现）；cloud 云的颜色（见 sky.js）；stars 天上有多少颗星
 export const MOODS = {
   // 傍晚黄金时刻：太阳低低地从左后方照来，在地板上拉出长长的窗格；屋里的灯刚点亮；暗部由偏冷的天光补上。
   golden: {
     label: '傍晚', ink: '#5e4d58', sky: ['#2f3a5c', '#8d6f8c', '#f2b483'], skyGlow: 'rgba(255,196,128,.55)', fog: ['#e2a988', .011],
     sun: { from: [-1, .6, -.25], color: '#ffb066', intensity: 5.2 },
     hemisphere: { sky: '#9fb4ea', ground: '#9a7350', intensity: .85 }, fill: { color: '#c3cbee', intensity: .55 },
-    lamps: 1, exposure: 1.1, beam: .06, dust: 1, weather: null,
+    lamps: 1, exposure: 1.1, beam: .06, dust: 1, weather: null, clouds: 3, cloud: '#ffd9c2',
     garden: { grass: '#9cc462', tree: GREEN, bush: GREEN, tuft: '#ffffff', flowers: 1 },
   },
-  // 春：明亮柔和的上午，树开满粉色的花，花瓣慢慢飘落。
+  // 春：清晨。低低的淡金色阳光穿过薄雾，影子很长，暗部偏青；树开满粉色的花，花瓣慢慢飘落。
   spring: {
-    label: '春', ink: '#56617a', sky: ['#6fa9de', '#bfdcf1', '#fde6ee'], skyGlow: 'rgba(255,244,226,.5)', fog: ['#eef3f4', .008],
-    sun: { from: [-1, .85, -.25], color: '#fff0d6', intensity: 4.3 },
-    hemisphere: { sky: '#bcd9f5', ground: '#a9b98c', intensity: .95 }, fill: { color: '#e2eaf6', intensity: .5 },
-    lamps: .3, exposure: .98, beam: .04, dust: .6, weather: 'petals',
-    garden: { grass: '#a6d36a', tree: ['#f6b6cd', '#fad0e0', '#f09dbf', '#fbe2ec'], bush: ['#8fc35a', '#a3d06b', '#7bb450', '#b5da7c'], tuft: '#ffffff', flowers: 1, litter: ['#f8c9da', .7] },
+    label: '春', ink: '#5e5560', sky: ['#5f97cf', '#c9d8ea', '#fbdcc0'], skyGlow: 'rgba(255,222,176,.6)', fog: ['#f1e2da', .007],
+    sun: { from: [-1, .42, -.25], color: '#ffd6a2', intensity: 4.6 },
+    hemisphere: { sky: '#a6c6e6', ground: '#8cab8c', intensity: .72 }, fill: { color: '#cddfee', intensity: .4 },
+    lamps: .7, exposure: 1, beam: .07, dust: 1, weather: 'petals', clouds: 4, cloud: '#fff1e6',
+    garden: { grass: '#a3d068', tree: ['#f6b6cd', '#fad0e0', '#f09dbf', '#fbe2ec'], bush: ['#8fc35a', '#a3d06b', '#7bb450', '#b5da7c'], tuft: '#ffffff', flowers: 1, litter: ['#f8c9da', .7] },
   },
-  // 夏：正午的蓝天，太阳高，影子短，一切都很绿。
+  // 夏：夏夜。深蓝的天、满天星，月光淡淡的，萤火虫在花园里一明一灭，屋里的灯亮着。
   summer: {
-    label: '夏', ink: '#4a5870', sky: ['#2b78cc', '#77b8ec', '#d6edfb'], skyGlow: 'rgba(255,255,240,.45)', fog: ['#dcedf9', .006],
-    sun: { from: [-1, 1.25, -.25], color: '#fff5e2', intensity: 4.6 },
-    hemisphere: { sky: '#a9d2ff', ground: '#9db57c', intensity: 1 }, fill: { color: '#e6f0ff', intensity: .5 },
-    lamps: .15, exposure: .95, beam: .03, dust: .4, weather: null,
+    label: '夏夜', sky: ['#070d2a', '#15224e', '#2c3c70'], skyGlow: 'rgba(120,150,235,.28)', stars: 220, fog: ['#17234c', .011],
+    sun: { from: [-1, .9, -.25], color: '#9db5f0', intensity: 1.15 },
+    hemisphere: { sky: '#4c62a2', ground: '#222a40', intensity: .58 }, fill: { color: '#4a5a90', intensity: .3 },
+    lamps: 1.5, exposure: 1.08, beam: .022, dust: .3, weather: 'fireflies', clouds: 3, cloud: '#55659c',
     garden: { grass: '#7cc04c', tree: ['#4f9a3c', '#63ad46', '#3f8a36', '#76bb52'], bush: ['#5aa340', '#6fb54c', '#4a9238', '#82c35a'], tuft: '#e8f7d8', flowers: .8 },
   },
-  // 秋：比傍晚更橙的斜阳，树是红的黄的，地上铺着落叶，花只剩零星几朵。
+  // 秋：晴朗的下午。天是清澈的蓝，和红黄的树互为补色；草还带着绿，灌木有绿有红，地上铺着落叶。
   autumn: {
-    label: '秋', ink: '#5e4d58', sky: ['#465680', '#c58c72', '#f6c88a'], skyGlow: 'rgba(255,170,92,.6)', fog: ['#e8b98a', .014],
-    sun: { from: [-1, .5, -.25], color: '#ff9d52', intensity: 5 },
-    hemisphere: { sky: '#a9b4d8', ground: '#9a6a40', intensity: .8 }, fill: { color: '#c9c0d8', intensity: .5 },
-    lamps: 1, exposure: 1.08, beam: .07, dust: 1, weather: 'leaves',
-    garden: { grass: '#b9ad5c', tree: ['#d9792b', '#e8a53a', '#c4532a', '#e6bf4c'], bush: ['#b98a3c', '#c9a04a', '#a5753a', '#d1b05a'], tuft: '#f0dc98', flowers: .22, litter: ['#d8782c', 1] },
+    label: '秋', ink: '#5e4d58', sky: ['#3d7cc2', '#8fbee6', '#f4dfbf'], skyGlow: 'rgba(255,212,150,.55)', fog: ['#ece3d3', .006],
+    sun: { from: [-1, .62, -.25], color: '#ffbf76', intensity: 5 },
+    hemisphere: { sky: '#a8c5ee', ground: '#a07a4a', intensity: .85 }, fill: { color: '#d4def0', intensity: .5 },
+    lamps: .6, exposure: 1.04, beam: .055, dust: .8, weather: 'leaves', clouds: 4, cloud: '#fff8ee',
+    garden: { grass: '#aab85a', tree: ['#d9662b', '#eda736', '#c4472a', '#e9c24a'], bush: ['#5f8a44', '#a8482c', '#6f9a4a', '#c98a34'], tuft: '#e6dc9a', flowers: .22, litter: ['#d8782c', 1] },
   },
   // 冬：阴天里一点淡淡的太阳，到处是雪，屋里的灯显得格外暖。
   winter: {
     label: '冬', ink: '#56617a', sky: ['#6f86a6', '#b4c4d6', '#e6ecf2'], skyGlow: 'rgba(255,236,214,.45)', fog: ['#dde6ef', .007],
     sun: { from: [-1, .55, -.25], color: '#ffdcb8', intensity: 3 },
     hemisphere: { sky: '#b9cbe8', ground: '#93a2b8', intensity: .62 }, fill: { color: '#d3deee', intensity: .3 },
-    lamps: 1.15, exposure: 1, beam: .035, dust: .5, weather: 'snow',
+    lamps: 1.15, exposure: 1, beam: .035, dust: .5, weather: 'snow', clouds: 4, cloud: '#dfe6ee',
     garden: { grass: '#dfe7ef', tree: ['#e3eaf2', '#d5dfe9', '#edf2f7', '#c9d5e1'], bush: ['#e3eaf2', '#d5dfe9', '#edf2f7', '#c9d5e1'], tuft: '#f2f6fa', flowers: 0, stone: '#d9e1ea', snow: true },
   },
   // 雨夜：深蓝的夜，只有月光和屋里的暖灯；雨丝落下，地面湿得反光。
@@ -103,7 +104,7 @@ export function createLights({ renderer, scene }) {
   // 换一个时刻 / 天气：只改灯和天空的数值，场景里的东西都不动。返回这条预设，其余部分（花园、光束、雨雪）由 index.js 接着处理。
   function setMood(name) {
     const mood = MOODS[name] ?? MOODS.golden;
-    scene.background?.dispose?.(); scene.background = skyTexture(mood.sky, mood.skyGlow);
+    scene.background?.dispose?.(); scene.background = skyTexture(mood.sky, mood.skyGlow, mood.stars);
     scene.fog.color.set(mood.fog[0]); scene.fog.density *= mood.fog[1] / scene.fog.userData.density; scene.fog.userData.density = mood.fog[1];
     renderer.toneMappingExposure = mood.exposure;
     hemisphere.color.set(mood.hemisphere.sky); hemisphere.groundColor.set(mood.hemisphere.ground); hemisphere.intensity = mood.hemisphere.intensity;

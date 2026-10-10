@@ -29,13 +29,15 @@ export function createStage(host) {
 }
 
 // 天空：一张竖向渐变（画布现画），太阳那一侧再叠一团暖光。
-export function skyTexture([top, middle, bottom], glow) {
-  return paint(256, 256, (c, w, h) => {
+export function skyTexture([top, middle, bottom], glow, stars = 0) {
+  const size = stars ? 1024 : 256;                          // 有星星时画大一点，星点才不会糊
+  return paint(size, size, (c, w, h) => {
     const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, top); g.addColorStop(.55, middle); g.addColorStop(1, bottom);
     c.fillStyle = g; c.fillRect(0, 0, w, h);
-    if (!glow) return;
-    const r = c.createRadialGradient(w * .12, h * .62, 0, w * .12, h * .62, w * .75); r.addColorStop(0, glow); r.addColorStop(1, 'rgba(0,0,0,0)');
-    c.fillStyle = r; c.fillRect(0, 0, w, h);
+    if (glow) { const r = c.createRadialGradient(w * .12, h * .62, 0, w * .12, h * .62, w * .75); r.addColorStop(0, glow); r.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = r; c.fillRect(0, 0, w, h); }
+    // 星星：越靠近天顶越密越亮，位置固定（每次都一样）。
+    const random = rng(5);
+    for (let i = 0; i < stars; i++) { const y = random() ** 1.6 * h * .8, bright = (.35 + random() * .65) * (1 - y / h); c.fillStyle = `rgba(232,238,255,${bright.toFixed(2)})`; c.beginPath(); c.arc(random() * w, y, random() < .12 ? 1.5 : .9, 0, 7); c.fill(); }
   });
 }
 

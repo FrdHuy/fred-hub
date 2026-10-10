@@ -6,7 +6,7 @@
 //   decor.js     不对应模块的摆设
 //   objects/     每件可点击的物件一个文件 + 注册表
 //   lights.js    灯光与「时刻 / 天气」预设（MOODS）
-//   weather.js   雨、雪、花瓣、落叶；moodbar.js 左下角的切换图标
+//   weather.js   雨、雪、花瓣、落叶、萤火虫；sky.js 云和云影；moodbar.js 左下角的切换图标
 //   effects.js   光束、微尘（第 3 阶段：Bloom）
 //   view.js      镜头：旋转 / 缩放限制、推近与拉回
 //   cutaway.js   挡住视线的墙自动隐去（所以能转到屋后）
@@ -22,6 +22,7 @@ import { placeObjects } from './objects/index.js';
 import { createLights, MOODS } from './lights.js';
 import { createWeather } from './weather.js';
 import { createMoodbar } from './moodbar.js';
+import { createSky } from './sky.js';
 import { createEffects } from './effects.js';
 import { createView } from './view.js';
 import { createCutaway } from './cutaway.js';
@@ -37,7 +38,7 @@ export function mountRoom(host, options = {}) {
   const placed = placeObjects(scene, objects);
   const lights = createLights(stage);                             // 要在物件之后：灯装在物件留下的灯位上
   lights.setMood(mood);
-  const weather = createWeather(scene, still);
+  const weather = createWeather(scene, still), sky = createSky(scene, still);
   const effects = createEffects(stage, lights.sunDirection, still);
   const view = createView(stage, host, still);
   const cutaway = createCutaway(house, decor.userData.onWall, placed);
@@ -50,7 +51,7 @@ export function mountRoom(host, options = {}) {
   // 性能档位：先按设备给一个起点，跑起来之后帧率不够再自动往下降。
   const quality = createQuality(options.quality ?? detect(), { renderer, sun: lights.sun, shadowLamps: lights.shadowLamps, effects: { setBloom: effects.setBloom, setDust(share) { effects.setDust(share); weather.setShare(share); } } }, fitCanvas);
   fitCanvas();
-  const render = () => { view.update(); cutaway.update(camera, view.look); interact.update(); const time = clock.getElapsedTime(); effects.update(time); weather.update(time); effects.render(); };
+  const render = () => { view.update(); cutaway.update(camera, view.look); interact.update(); const time = clock.getElapsedTime(); effects.update(time); weather.update(time); sky.update(time, camera); effects.render(); };
   let last = 0;
   const tick = now => { frame = requestAnimationFrame(tick); if (last) quality.sample(now - last); last = now; render(); };
   const sync = () => { cancelAnimationFrame(frame); frame = 0; last = 0; quality.rest(); if (wanted && !document.hidden) frame = requestAnimationFrame(tick); };
@@ -63,7 +64,7 @@ export function mountRoom(host, options = {}) {
   try { const saved = localStorage.getItem('fred-room-mood'); if (saved && MOODS[saved]) current = saved; } catch {}
   function applyMood(name) {
     const look = lights.setMood(name); current = name;
-    setSeason(garden, house, look.garden); effects.setSun(lights.sunDirection, look.sun.color, look.beam, look.dust); weather.set(look.weather);
+    setSeason(garden, house, look.garden); effects.setSun(lights.sunDirection, look.sun.color, look.beam, look.dust); weather.set(look.weather); sky.set(look, lights.sunDirection);
     host.style.background = look.sky[1]; host.style.setProperty('--r3-ink', look.ink ?? '#f6efe2');
     if (!frame) render();
   }
