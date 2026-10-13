@@ -1,15 +1,28 @@
 // Fred 的手记。由 node scripts/publish-notes.mjs 从 notes/ 生成——不要手改，改 notes/ 里的文章再发布一次。
 export default [
  {
+  "id": "2026-10-11-right-time",
+  "title": "对的时间",
+  "date": "2026-10-11",
+  "type": "letter",
+  "minutes": 1,
+  "sign": "Fred",
+  "locked": {
+   "salt": "ePzsWYUX+amWODY3Cfy9TA==",
+   "iv": "bvnyNI+JRonMXpCn",
+   "data": "O4JHd+fnBjgL306nG09Spy6VB1Un9tIUhmKoBmfknxy40hbrrrVyA+HYqfhbuSJ8f3okByCDAcVNJfZ8INl/RN54c5WsyZHNYiz3257mNl+LP5Fs02eWXZRQV+5sBZ9QdfAqjuJ8hhxWVQ0lilDazA5vKa7gixqgHkgw5ueiQlxVt6AChcP/fMbcbknyOz7BHOh065NeBTRGO1WkXtR0oK7z1MEqhiqlcy6Zi9n1TzTXMSPz9SzRB9I50Mlc+Xm7FjPFBvzyRfFVQ8LgbY4WlUciyKrWBmkoEzKIBAtUDPYOXSNcchkuwcfwC8YcEXv5BalcrD6MQ+m8X5CtwV/5SqiSkIzTuu7HYzusx33Mi+q28OD34yxBRtOdafavyzvjx5+6VM33L97m4gAJfptdNUVH8R5KgisbRKEfxj1i7o5ScWQvq609ln29sOiq4vDO7mcx856kVJWlseR1lIkBeRJsMW9cfP/4L1XKvfcSGsHoNYfejUZIKZzgmKE/3k+GhVjTwCTsupp6nRo5T5V4Xw0POE71Ty7DrqLQj0Vmv3DHqeEVOc+vDIYDhiGqgn+7DCsEfZa/Tp6ViY0E0/qhIz/yixV8q7odVGMWLfw5dZG67O06uFlhCO1n7QXnD9E5mhQ68r4knkzQmvL4SPjwBR6xWSNsj1/h8pRu9h+Tm9lEwfR/M89CGHBOjqPauPM/YslQKCALR1+Dv+mBKQ+WBXdQIumRJyp/jVqnITT1H+QbTWLkGXkZEjgaSCKUl5GO5tw0oEwBQd/5bB84a2ya/cIAviRGSuxWqT7DVSqt7lzbadqc+ts/4GSC7rbGlT0us3TK61hYxEMfa1gWudWePHTDFbpItvRg+Oz2yV8QrtRbEgOBNcwenBkbJZ9FWWwREJUolgFHoI2sZlgYCOpzKPWymYcSYEWaoB2OnF6ARHyDNz1BbS68+qMd6ayd2Eph6oLxxHI5sliUr+I5qMHJsI9HK5DRmwoRetGAH1DSLe4x8jZdzNVGp5jt8YjEMAhyb1LECYyIflzcwmfv4eVI2DF+lP0/vjveLwOYTdaRXyuFPz8/k7wxjEx9rF7Cl88WghI6GPZnDDZCvueHbGekacvCdOsxN2SxZAt10xV7X+oYZxnMF/srCNFM7b73vrKKAjSiUtRoMOOnXsjgCexsykkeYKyZLG/XNJmAMQ0hSzpECg4/CvqKLyQOUM3Ea3x7vlm3jKwzWFx1Wg6vmCqKngbTcyzKQ4U9JIjm821TzcqtTcv+5h8zG+dpiRad+DRltZ6tzU4cZqwEq0Yq28ssV+UPUFo0E4dOvn3f0DlMJL9jsayQuRtQO24Lq/lC1Sru0M29AYXRh9xx3N9zyDdqqwHrjRoUo6OuHpH1uWxwc7Kg4og0UQt9vE54dNhQ9msu3bB/q3toee+rO67KD/KvThFLvykG5EPxYAt8af89r3iQF9NzZuVCFsiTh0Zsxp2E0Kc/kSYfIS5c/2b69hjfR9tM2cUzGljYb5IeqfOSYvW5LPdnTSdW8rEmUfhW9EsRmR0vgm+fS/F+oPMrtG5zslfLLS2gTWPP+27Hw162QeNJ9i8caTfEBNg5DJdGNPQhbF1vF/EY/vqnWRkpg75MTqjwlrI6GE9m6aWEPLe4pYwJXo37g2v6Zz7lEXPU2roKyx+dX7tXTHHwcABX786kMGrCG8YcadX9EOJytmgq6p35Tcmzk/yiwJHb0qszCU8Bh+gqDJkXEt6alYIpN4hoAd4uzB6P3Vylvkz5K3lAf2c6coOlZa3+yMnyY+Z8SER1Z/zvJDEYpok7DmxFYAA/Q5K31btj70oORA6tCDWBlGNwWNKx+wvfbXjgR8mQLYhzw8auztgdzNFMnA/kGXmIx8trrktZz8IGLMad6gpQw/wGcdtF1HxcnQc+2CWtRrUX/hszdYidfqatAeMXWDhiD36XhUIGyK3FQlmbwAs="
+  }
+ },
+ {
   "id": "2026-01-01-to-future-me",
   "title": "写给以后的自己",
   "date": "2026-01-01",
   "type": "chapter",
   "minutes": 1,
   "locked": {
-   "salt": "9JjrY0jtGGQlE5zlunFg8A==",
-   "iv": "oETKSFS1JSOjTIGt",
-   "data": "3xYG2pYHGLpfYyuTU5pecw1gDDV0r71aD30MUxxgGrV8PcsCK6o2ctuUXVYcGhoQHbVsYUDPk68N6YpRMvQxKQVt3cG0Ae2aodVD1jqNE0GKpUZa91uuqay4FuNbXWw5KtUjmzICx8cX7QuQNb3646KddAvTzGIIKcxJkZdEkgTekN/89LZDDaQPL47s1J7MHZONqtJfaAeYmgJqDqfkmo/6YEjfp3CljPt4kX2OSGC9GEJOs5WrufbTy9QtMNEGKrDSFp1jGRBhifW5E+9vEQrVBKmcQcHiiuUVelb42zyMuqnWXWYAQYWG53YI++guVbCn3jJ97bjwxrsZ+J2Rxok2w3Kc7nLhaePP0ysM5NIKSJCQftm+LV1xFmyisydtCxOEZkbNaGicsCcpS1otO3BgnD3wI0YyXhoFbwbPmkaPbQpDx6kDGzJIgGXZ3z7qOrh3RJcFamBuYlUmFTSLOYp+ruUkilcJxeCZL4SDDJshyJJo2MEngfku04cSFgCIqNRSFTbGhte9eA=="
+   "salt": "q7+7LlsJ6aA+4aoLBmqLAg==",
+   "iv": "hPQSMfe/liE93Rhb",
+   "data": "hymDB/OHyAqMZHQlXzg1ARQ/HnLNPt5WlZ/Kqjtlo30Sc0YqjtSZ8Hz4FmqD/9qaZzKA5QSsy7Y8yb3YLRrSq8v/N4YasXF6Rxi7HGmptC/LsYMp3D90xwbm1xxDGoAk2FOsRSesP+ciK1K6aVZGFQnaIVmE4IhI4oLQyFEHQF6eQRjNl6fEux8shiw7WcEgLERO7sEv+XGSJFm+PCE7L9aj2UmXmUMrqpWP5B1X9rSHHWDqTBqNCT4hoPe70CHcJGx+OsC79AUp5d7a8FfjqYqLR/gcmPeBCx/zJ2hmA+T9Iad1pdzPoxDIa3GWTFq0mfiBAFE5MdHydsspX6e5V2g0Z8ttar1j0MLNmQL9SzoMXla7BprpChIa7e89LBVjM5tawQRzoDtaatfn+0ggUd25ylT2sktPkV0oLJ9gOq7UzHbjFKsG9da4wKULk6WOHqaCRsIkfjTIabizEcjYkP01Vq3tTZmy0Nuz/qoY+Dhg9OMYfD3tjmQbooAJ7l7wHdadyxlNWNpOAQ=="
   }
  },
  {

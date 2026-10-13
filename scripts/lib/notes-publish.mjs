@@ -1,7 +1,7 @@
 // notes/*.md → entries for dist/modules/stories/data.js. Pure functions; the script does the files.
 import { TYPE_WORDS, DATE_PATTERN, minutes } from '../../dist/modules/stories/notes.js';
 
-const FIELDS = { title: 'title', 标题: 'title', date: 'date', 日期: 'date', type: 'type', 类型: 'type', place: 'place', 地点: 'place', trip: 'trip', 旅行: 'trip', milestone: 'milestone', 大事件: 'milestone', password: 'password', 暗号: 'password' };
+const FIELDS = { title: 'title', 标题: 'title', date: 'date', 日期: 'date', type: 'type', 类型: 'type', place: 'place', 地点: 'place', trip: 'trip', 旅行: 'trip', milestone: 'milestone', 大事件: 'milestone', password: 'password', 暗号: 'password', sign: 'sign', 落款: 'sign' };
 const escape = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const IMAGE = /^!\[([^\]]*)\]\(([^)\s]+)\)$/;
 
@@ -14,13 +14,13 @@ export function parseNote(source, file) {
     if (!line.trim() || line.trim().startsWith('#')) continue;
     const field = /^\s*([^:：]+?)\s*[:：]\s*(.*)$/.exec(line);
     const key = field && FIELDS[field[1].trim().toLowerCase()] || field && FIELDS[field[1].trim()];
-    if (!key) { problems.push(`${file}：看不懂「${line.trim()}」（可用：标题、日期、类型、地点、旅行、大事件、暗号）`); continue; }
+    if (!key) { problems.push(`${file}：看不懂「${line.trim()}」（可用：标题、日期、类型、地点、旅行、大事件、暗号、落款）`); continue; }
     if (field[2].trim()) meta[key] = field[2].trim();
   }
   if (!meta.title) problems.push(`${file}：缺少「标题」`);
   if (!DATE_PATTERN.test(meta.date ?? '') || Number.isNaN(Date.parse(meta.date))) problems.push(`${file}：「日期」写成 2024-10-12`);
   const type = TYPE_WORDS[(meta.type ?? '').toLowerCase()] ?? TYPE_WORDS[meta.type ?? ''];
-  if (!type) problems.push(`${file}：「类型」只能是 游记 / 阶段 / 随笔 / 短记`);
+  if (!type) problems.push(`${file}：「类型」只能是 游记 / 阶段 / 随笔 / 短记 / 信`);
   if (meta.trip && !/^[A-Za-z]{3}$/.test(meta.trip)) problems.push(`${file}：「旅行」写那一趟的机场三字码，如 KEF`);
   return { problems, meta: { ...meta, type, trip: meta.trip?.toUpperCase() }, body: match[2] };
 }

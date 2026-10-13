@@ -37,7 +37,7 @@ for (const file of files) {
   const { meta } = note, id = file.replace(/\.md$/, '');
   const rendered = renderMarkdown(note.body, src => publishImage(src, file));
   const entry = { id, title: meta.title, date: meta.date, type: meta.type, minutes: rendered.minutes };
-  for (const key of ['place', 'trip', 'milestone']) if (meta[key]) entry[key] = meta[key];
+  for (const key of ['place', 'trip', 'milestone', 'sign']) if (meta[key]) entry[key] = meta[key];
   if (meta.password) entry.locked = await seal({ html: rendered.html, excerpt: rendered.excerpt }, meta.password);
   else Object.assign(entry, { excerpt: rendered.excerpt, html: rendered.html });
   entries.push(entry);

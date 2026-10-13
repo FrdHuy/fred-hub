@@ -9,3 +9,5 @@ scripts/.cache/
 *.swo
 # what belongs to the two of them stays on this machine (the site only carries ciphertext)
 notes/couple-*.txt
+# a private note's source: only its ciphertext (dist/modules/stories/data.js) is in the repo
+notes/2026-10-11-right-time.md
