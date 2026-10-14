@@ -54,6 +54,7 @@ export function mountRoom(host, options = {}) {
   let interact = null;
   const plots = createPlots(scene, garden, list => interact?.setPlants(list));
   interact = createInteract({ stage, view, placed, host, still, memory, plots, sound: options.sound });
+  plots.set(null);                                                // 先登记花园木牌（锁着时点它会提示去拿钥匙）
   const clock = new THREE.Clock();
 
   // 渲染循环：只有「在小屋这一页」并且「标签页可见」时才跑，其余时间完全停下，不耗电。

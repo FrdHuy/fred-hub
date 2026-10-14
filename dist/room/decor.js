@@ -10,8 +10,7 @@ function rug(x, z) {
 function table(x, z) {
   const wood = mat('#b98a5e'), t = group(contact(1.2, 1.2, .4), cyl(.42, .42, .04, wood, 0, .3, 0, 14), ...[0, 2.1, 4.2].map(a => tilt(cyl(.025, .018, .3, mat('#7d5237'), Math.cos(a) * .28, 0, Math.sin(a) * .28, 6), 0, 0, 0)),
     cyl(.045, .035, .07, mat('#f1e5d0'), .12, .34, .1, 8), cyl(.038, .038, .004, mat('#8a5a3c'), .12, .4, .1, 8),                 // 一杯茶
-    tilt(box(.24, .03, .17, mat('#5f7f8a'), -.14, .34, -.08), 0, .5, 0), cyl(.04, .05, .11, mat('#e9e4d8'), -.1, .34, .2, 7),
-    ball(.045, mat('#f4c95d'), -.1, .55, .2, 0), ball(.04, mat('#e56b6f'), -.06, .5, .23, 0), ball(.04, mat('#f6e7c1'), -.14, .51, .17, 0));
+    tilt(box(.24, .03, .17, mat('#5f7f8a'), -.14, .34, -.08), 0, .5, 0));                                   // 花瓶是单独的物件（objects/vase.js）
   t.position.set(x, 0, z);
   return t;
 }
@@ -62,7 +61,7 @@ export function buildDecor() {
   // 两个人住的痕迹：门口两双拖鞋、矮桌上的第二只杯子——开锁后才出现。
   const slipper = (x, z, color, turn) => { const s = group(box(.11, .03, .26, mat(color, { roughness: 1 })), box(.12, .06, .12, mat(color, { roughness: 1 }), 0, .02, -.06)); s.position.set(x, 0, z); s.rotation.y = turn; return s; };
   const home = group(slipper(.62, 2.62, '#e9b0b8', .1), slipper(.78, 2.6, '#e9b0b8', -.08), slipper(1.08, 2.62, '#8fa9c4', .06), slipper(1.25, 2.64, '#8fa9c4', -.12),
-    cyl(.045, .035, .07, mat('#e9b0b8'), 1.2, .34, .62, 8), cyl(.038, .038, .004, mat('#8a5a3c'), 1.2, .4, .62, 8));
+    cyl(.045, .035, .07, mat('#e9b0b8'), 1.56, .34, .32, 8), cyl(.038, .038, .004, mat('#8a5a3c'), 1.56, .4, .32, 8));
   home.visible = false; decor.add(home); decor.userData.setUnlocked = data => { home.visible = !!data; };
   decor.userData.onWall = { north: [lights] };
   return decor;

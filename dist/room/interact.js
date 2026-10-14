@@ -2,6 +2,7 @@
 // 所有 2D 的东西（标签、面板、过渡幕、键盘用的按钮列表）都是 HTML，叠在画布上面，不在 canvas 里画。
 import * as THREE from './three.js';
 import { createPanel } from './panel.js';
+import { unseenFor, levelOf, UNLOCKS } from './growth.js';
 
 const WARM = new THREE.Color('#ffb066');
 
@@ -45,7 +46,16 @@ export function createInteract({ stage, view, placed, host, memory, plots, sound
   name(); memory.onChange(name);
   // 开着、连上了线、这台设备还没说过自己是谁：问一次。
   const askWho = () => { const data = memory.data; if (data && memory.online && !memory.me && data.people?.length && !panel.open) panel.askWho(data.people); };
-  memory.onChange(() => { if (!busy) askWho(); });
+  memory.onChange(() => { if (!busy) askWho(); greet(); });
+  // 打开小屋时的小纸条：有人送了花（点一下去花瓶那里看）；花园升级了（每台设备记着自己看到的等级）。
+  let greeted = '';
+  function greet() {
+    const data = memory.data, me = memory.me; if (!data || !memory.online || !me) return;
+    const gifts = unseenFor(data, me), key = `${me}:${gifts.map(b => b.id).join()}`;
+    if (gifts.length && key !== greeted) { greeted = key; panel.notice(`${gifts[0].from} 给你留了一束花`, { label: '去看看', run: () => { const vase = placed.find(o => o.userData.entry.memory === 'bouquets'); if (vase) activate(vase); } }); return; }
+    const level = levelOf(data); let seen = 0; try { seen = Number(localStorage.getItem('fred-cabin-level') ?? 0); localStorage.setItem('fred-cabin-level', String(level)); } catch {}
+    if (seen && level > seen) { const got = UNLOCKS.filter(([at]) => at > seen && at <= level).map(u => u[3]).join('、'); panel.notice(`花园升到 ${level} 级${got ? ` · 解锁了${got}` : ''}`); }
+  }
   const pointer = new THREE.Vector2(), raycaster = new THREE.Raycaster(), spot = new THREE.Vector3();
   const aim = e => { const r = canvas.getBoundingClientRect(); pointer.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1); };
   // 指针下面是哪件物件：射线打到的第一个网格，顺着父节点往上找到带配置的那一层。随墙隐去的东西不算。
@@ -86,6 +96,7 @@ export function createInteract({ stage, view, placed, host, memory, plots, sound
     const facing = entry.turn || 0, azimuth = (entry.view ?? facing + (45 - facing) * .35) * Math.PI / 180;       // 从物件正面偏向默认视角的方向看过去
     await view.closeUp(center, Math.max(radius, entry.memory ? 1.5 : entry.plant ? .75 : 1), azimuth, entry.wall ? 77 : 64, !isKey(object));       // 挂在墙上的东西平着看；给面板让出位置
     if (isKey(object)) { if (memory.data) panel.askLock(() => memory.lock(), leave(object)); else panel.askKey(async phrase => { const right = await memory.unlock(phrase); sound?.(right ? 'ok' : 'error'); return right; }, leave(object)); }
+    else if (entry.garden) panel.showGarden(leave(object));
     else if (entry.plant) panel.showPlant(entry.plant, memory.data, () => { sound?.('ok'); plots.watered(object); }, leave(object));
     else panel.showMemory(entry, memory.data, leave(object));
   }

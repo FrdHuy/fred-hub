@@ -14,7 +14,8 @@ export function createMemory() {
   let sealed = null, data = null, held = null, timer = 0;  // held：开着时手里的密钥（解照片、连线上用）
   const cloud = createCloud();
   const pictures = new Map();                              // 已经解开的照片：'id.t' / 'id.f' → Promise<blob 地址>
-  const listeners = new Set(), tell = () => { for (const listener of listeners) listener(data); };
+  // 一个监听出错（比如画花园时）不能连累开锁和保存：各自 try 住，错误记到控制台。
+  const listeners = new Set(), tell = () => { for (const listener of listeners) try { listener(data); } catch (error) { console.error('room:', error); } };
   const load = async () => sealed ??= (await import('./memories/sealed.js')).default;
   const forget = () => { try { localStorage.removeItem(KEY); } catch {} };
   const drop = () => { for (const url of pictures.values()) url.then(u => u && URL.revokeObjectURL(u)); pictures.clear(); held = null; };

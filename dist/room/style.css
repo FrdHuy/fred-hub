@@ -161,3 +161,24 @@ button.r3m-count:hover{background:#f6f1e4}
 .r3m-form-note,.r3m-uploading{font:13px var(--font-ui);color:#90928a}
 .r3m-uploading{margin:0 0 10px}
 .r3-panel:has(.r3m-form) .r3m-add{display:none}
+/* 花园木牌：经验条、三格数字、种花时的品种选择；送花按钮；花瓶里的花束 */
+.r3m-xp{height:6px;border-radius:3px;background:#ece6d8;overflow:hidden;margin:2px 0 8px}
+.r3m-xp i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#9fcf6a,#6f9a4a)}
+.r3m-stats{display:grid;grid-template-columns:repeat(3,1fr);margin:10px 0 14px;border-top:1px solid #e8e3d6;border-bottom:1px solid #e8e3d6}
+.r3m-stats div{display:grid;justify-items:center;padding:10px 0}
+.r3m-stats div+div{border-left:1px solid #e8e3d6}
+.r3m-stats b{font:400 26px/1.1 var(--font-literary)}
+.r3m-stats span{font:11px var(--font-mono);letter-spacing:.14em;color:#90928a}
+.r3m-give{min-height:0;margin-top:10px;padding:8px 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #d9d1bf;font:14px var(--font-ui);letter-spacing:.1em;color:#3f6472;transition:background .2s}
+.r3m-give:hover{background:#f6f1e4}
+.r3m-chips{display:flex;flex-wrap:wrap;gap:8px}
+.r3m-chip{min-height:0;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;box-shadow:inset 0 0 0 1px #e0d8c6;font:13px var(--font-ui);color:#6f716a}
+.r3m-chip i,.r3m-bouquets i{width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);display:inline-block}
+.r3m-chip.is-on{background:#343832;color:#fdfaf3;box-shadow:none}
+.r3m-bouquets strong{display:inline-flex;align-items:center;gap:8px}
+.r3m-bouquets li.is-new strong:after{content:'';width:6px;height:6px;border-radius:50%;background:#b34934}
+/* 小纸条：屏幕上方居中，几秒后自己消失 */
+.r3-notice{position:absolute;z-index:5;left:50%;top:max(96px,12svh);display:flex;align-items:center;gap:14px;padding:10px 12px 10px 18px;border-radius:999px;background:#fdfaf3;color:#343832;font:14px var(--font-ui);letter-spacing:.06em;box-shadow:0 14px 36px rgba(20,14,10,.36);opacity:0;transform:translate(-50%,-8px);transition:opacity .3s,transform .4s var(--ease,ease-out)}
+.r3-notice.is-on{opacity:1;transform:translate(-50%,0)}
+.r3-notice button{min-height:0;padding:5px 12px;border-radius:999px;background:#343832;color:#fdfaf3;font:13px var(--font-ui)}
+@media(prefers-reduced-motion:reduce){.r3-notice{transition:none}}

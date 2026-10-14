@@ -5,10 +5,11 @@ import { build as fridge } from './fridge.js';
 import { build as tv } from './tv.js';
 import { build as calendar } from './calendar.js';
 import { build as doormat } from './doormat.js';
+import { build as vase } from './vase.js';
 import { build as polaroids } from './polaroids.js';
 import { build as poster } from './poster.js';
 
-export const builders = { desk, fridge, tv, calendar, polaroids, poster, doormat };
+export const builders = { desk, fridge, tv, calendar, polaroids, poster, doormat, vase };
 
 // 按配置把物件摆进场景。每个物件组上记着自己的配置（userData.entry），悬停 / 点击靠它认物件（interact.js）。
 export function placeObjects(scene, entries) {
