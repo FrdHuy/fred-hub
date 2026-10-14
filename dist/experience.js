@@ -1,8 +1,8 @@
 import { ticketContact, discContact } from './contact.js';
-import { createPanel } from './modules/bucketlist/panel-home.js?v=62';
-import { createTypewriter } from './modules/stories/typewriter-home.js?v=62';
-import { createGacha } from './modules/gacha/machine-home.js?v=62';
-import { play as sound } from './sound.js?v=62';
+import { createPanel } from './modules/bucketlist/panel-home.js?v=63';
+import { createTypewriter } from './modules/stories/typewriter-home.js?v=63';
+import { createGacha } from './modules/gacha/machine-home.js?v=63';
+import { play as sound } from './sound.js?v=63';
 
 export function createInteraction(gallery, enter) {
   const shell=document.querySelector('.gallery-shell'), hint=shell.querySelector('.interaction-hint');
@@ -33,7 +33,7 @@ export function createInteraction(gallery, enter) {
   let panel=null;
   // Number of films in the cinema list, shown by the drive after reading.
   let titles=0;
-  import('./modules/cinema/data.js?v=62').then(module=>{titles=Array.isArray(module.default)?module.default.filter(entry=>entry&&entry.title).length:0;},()=>{});
+  import('./modules/cinema/data.js?v=63').then(module=>{titles=Array.isArray(module.default)?module.default.filter(entry=>entry&&entry.title).length:0;},()=>{});
   // EJECT: with a disc in the slot it pushes it back out; otherwise the light just blinks.
   receivers.get('cinema').querySelector('.drive-eject').addEventListener('click',e=>{
     e.stopPropagation();const drive=receivers.get('cinema');
