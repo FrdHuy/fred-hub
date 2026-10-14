@@ -1,4 +1,4 @@
-import { modules, categories, createCover } from './catalog.js?v=61';
+import { modules, categories, createCover } from './catalog.js?v=62';
 
 export class CollectionGallery {
   constructor({ stage, nav = document.createElement("nav"), dots = document.createElement("div"), previous = document.createElement("button"), next = document.createElement("button"), onSelect, onOpen }) {
@@ -21,7 +21,7 @@ export class CollectionGallery {
     this.stage.addEventListener('pointermove', e => this.pointerMove(e));
     this.stage.addEventListener('pointerup', e => this.pointerEnd(e));
     this.stage.addEventListener('pointercancel', e => this.pointerEnd(e, true));
-    this.stage.addEventListener('lostpointercapture', e => { if (this.drag?.id === e.pointerId) this.pointerEnd(e, true); });
+    this.stage.addEventListener('lostpointercapture', e => { if (e.target === this.stage && this.drag?.id === e.pointerId) this.pointerEnd(e, true); });   // not the touched child's own loss when the stage takes the capture
     this.stage.addEventListener('wheel', e => {
       const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.shiftKey ? e.deltaY : 0;
       if (!delta || this.layout === 'desk') return;

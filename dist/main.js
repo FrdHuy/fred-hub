@@ -1,10 +1,10 @@
-import { createInteraction } from './experience.js?v=61';
-import { soundOn, setSound, play as sound } from './sound.js?v=61';
-import { mountModule } from './modules/index.js?v=61';
-import { modules, getModule, createCover } from './catalog.js?v=61';
-import { CollectionGallery } from './gallery.js?v=61';
+import { createInteraction } from './experience.js?v=62';
+import { soundOn, setSound, play as sound } from './sound.js?v=62';
+import { mountModule } from './modules/index.js?v=62';
+import { modules, getModule, createCover } from './catalog.js?v=62';
+import { CollectionGallery } from './gallery.js?v=62';
 import { readRoute, navigate } from './router.js';
-import { attachSheen } from './sheen.js?v=61';
+import { attachSheen } from './sheen.js?v=62';
 
 const $ = selector => document.querySelector(selector);
 // Focus rings are for keyboard users. Script-moved focus after a click or tap stays invisible.
@@ -18,7 +18,7 @@ let activeRoute = { type: 'home' }, routeSequence = 0, routeAnimations = [], fly
 
 let interaction;
 const gallery = new CollectionGallery({
-  stage: $('.collection-stage'),
+  stage: $('.collection-stage'), previous: $('.rail-arrow[data-dir="-1"]'), next: $('.rail-arrow[data-dir="1"]'),
   onSelect(item, index) {
     interaction?.setItem(item);
     const title=$('.selection-title');
@@ -31,6 +31,8 @@ const gallery = new CollectionGallery({
   onOpen(item) { interaction.activate(item); },
 });
 interaction = createInteraction(gallery, item => navigate(item.id));
+// The arrows beside the title (touch screens): whatever is in hand is put back before the rail moves.
+for (const arrow of document.querySelectorAll('.rail-arrow')) arrow.addEventListener('click', () => interaction.reset(), true);
 attachSheen(gallery.stage, motion);
 interaction.setItem(gallery.current);
 gallery.setLayout('rail');
@@ -66,7 +68,7 @@ function showRoom(on, from) {
   if (!on) { roomScene?.stop(); return; }
   if (roomScene) { roomScene.start(from); return; }
   // enter.js 先看设备：能跑 3D 就加载场景，否则给静态截图 + 2D 链接（见 room/quality.js）。
-  roomLoading ??= import('./room/enter.js?v=61').then(({ enterRoom }) => enterRoom(room, {
+  roomLoading ??= import('./room/enter.js?v=62').then(({ enterRoom }) => enterRoom(room, {
       open(entry) { roomReturn = true; navigate(entry.module); },
       tint: id => getModule(id)?.theme === 'dark' ? '#100e0c' : '#f8f7f4',
       sound,

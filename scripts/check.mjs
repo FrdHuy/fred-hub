@@ -34,6 +34,8 @@ assert.deepEqual([...moduleIds].sort(), modules.map(x => x.id).sort());
 assert.ok(html.includes('Fred'));
 assert.equal(modules.find(x=>x.id==='bucketlist').cover, 'list');
 assert.ok(!modules.some(x=>x.id==='wheel'));
+// The home page's import graph is preloaded in one round; the list must match the imports (node scripts/preload.mjs).
+{ const { preloadBlock, currentBlock } = await import('./preload.mjs'); assert.equal(currentBlock(), preloadBlock(), 'index.html modulepreload list is out of date — run node scripts/preload.mjs'); }
 console.log('PASS: module registry, search, routes, local assets and JavaScript syntax');
 
 assert.ok(!existsSync('dist/wheel.js') && !existsSync('dist/assets/compass.png'), 'the wheel was retired (Fred, 2026-09-30)');

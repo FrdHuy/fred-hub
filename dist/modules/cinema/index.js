@@ -1,6 +1,6 @@
-import { parseFilms, filmMeta, starCells, viewFilms, seriesLabel, screening, report, byYear, overlap, TYPES } from './films.js?v=61';
-import { pose } from './flow.js?v=61';
-import { play as sound } from '../../sound.js?v=61';
+import { parseFilms, filmMeta, starCells, viewFilms, seriesLabel, screening, report, byYear, overlap, TYPES } from './films.js?v=62';
+import { pose } from './flow.js?v=62';
+import { play as sound } from '../../sound.js?v=62';
 
 const poster = name => new URL(`./posters/${name}`, import.meta.url).href;
 const pad = number => String(number).padStart(2, '0');
@@ -356,7 +356,7 @@ export function mount({ container, item }) {
   }
 
   // A fresh URL each visit so edits to data.js show after a normal refresh.
-  import(`./data.js?t=${Date.now()}`).then(module => { if (!signal.aborted) render(module.default); }, error => {
+  import('./data.js?v=62').then(module => { if (!signal.aborted) render(module.default); }, error => {
     if (signal.aborted) return;
     notice.textContent = `data.js 读取失败（多半是少了逗号、引号或括号）。运行 node scripts/check-cinema.mjs 查看出错位置。${error.message ? ` ${error.message}` : ''}`;
     render([]);

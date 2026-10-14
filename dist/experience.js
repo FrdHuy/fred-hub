@@ -1,8 +1,8 @@
 import { ticketContact, discContact } from './contact.js';
-import { createPanel } from './modules/bucketlist/panel-home.js?v=61';
-import { createTypewriter } from './modules/stories/typewriter-home.js?v=61';
-import { createGacha } from './modules/gacha/machine-home.js?v=61';
-import { play as sound } from './sound.js?v=61';
+import { createPanel } from './modules/bucketlist/panel-home.js?v=62';
+import { createTypewriter } from './modules/stories/typewriter-home.js?v=62';
+import { createGacha } from './modules/gacha/machine-home.js?v=62';
+import { play as sound } from './sound.js?v=62';
 
 export function createInteraction(gallery, enter) {
   const shell=document.querySelector('.gallery-shell'), hint=shell.querySelector('.interaction-hint');
@@ -33,7 +33,7 @@ export function createInteraction(gallery, enter) {
   let panel=null;
   // Number of films in the cinema list, shown by the drive after reading.
   let titles=0;
-  import('./modules/cinema/data.js?t='+Date.now()).then(module=>{titles=Array.isArray(module.default)?module.default.filter(entry=>entry&&entry.title).length:0;},()=>{});
+  import('./modules/cinema/data.js?v=62').then(module=>{titles=Array.isArray(module.default)?module.default.filter(entry=>entry&&entry.title).length:0;},()=>{});
   // EJECT: with a disc in the slot it pushes it back out; otherwise the light just blinks.
   receivers.get('cinema').querySelector('.drive-eject').addEventListener('click',e=>{
     e.stopPropagation();const drive=receivers.get('cinema');
@@ -145,15 +145,14 @@ export function createInteraction(gallery, enter) {
     }
     tx=px;ty=py;follow();
   }
-  // A press on the object. With a mouse it is never ambiguous: the object under the pointer is grabbed (the rail is dragged on the
-  // empty stage, or moved with the arrows / menu). With touch the first ~7px decide: mostly sideways → the rail swipes;
-  // mostly up/down (disc into the drive, ticket into the slot, lever, RETURN key) → the object is picked up.
+  // A press on the object is never ambiguous, with a mouse or a finger: the object under it is grabbed. The rail is moved with
+  // the arrows beside the title (touch screens), the menu, the arrow keys, or by dragging the empty stage.
   gallery.stage.addEventListener('pointerdown',e=>{
     pending=null;
     if(!e.target.closest('.ticket-paper,.silver-disc,.panel,.tw,.gc')||!gallery.settled||e.button!==0||!['travel','cinema','bucketlist','stories','gacha'].includes(item?.id)||e.target.closest('.collection-slot')!==gallery.currentElement)return;
     e.preventDefault();if(busy){e.stopImmediatePropagation();return;}
     pending={id:e.pointerId,x:e.clientX,y:e.clientY,mouse:e.pointerType==='mouse'};
-    if(pending.mouse)e.stopImmediatePropagation();
+    e.stopImmediatePropagation();
   },true);
   function pickUp(e){
     gallery.freeze();clearTimeout(idleTimer);returning=false;
@@ -164,7 +163,6 @@ export function createInteraction(gallery, enter) {
     if(pending?.id===e.pointerId){
       const dx=e.clientX-pending.x,dy=e.clientY-pending.y;
       if(Math.hypot(dx,dy)<(pending.mouse?3:7)){e.stopImmediatePropagation();return;}
-      if(!pending.mouse&&Math.abs(dx)>Math.abs(dy)){pending=null;return;}
       e.stopImmediatePropagation();pickUp(e);
     }
     move(e);
@@ -199,7 +197,9 @@ export function createInteraction(gallery, enter) {
   }
   gallery.stage.addEventListener('pointerup',e=>release(e),true);
   gallery.stage.addEventListener('pointercancel',e=>release(e,true),true);
-  gallery.stage.addEventListener('lostpointercapture',e=>{if(drag?.id===e.pointerId)release(e,true);},true);
+  // Only when the stage itself loses the pointer. A finger is captured by whatever it first touched; taking the capture for the
+  // stage makes that element report a loss too — that one is our own doing, not a cancelled gesture.
+  gallery.stage.addEventListener('lostpointercapture',e=>{if(e.target===gallery.stage&&drag?.id===e.pointerId)release(e,true);},true);
   addEventListener('resize',reset);reduced.addEventListener('change',reset);
   document.addEventListener('keydown',e=>{if(e.key==='Escape')reset();});
   return {setItem,activate,reset};

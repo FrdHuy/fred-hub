@@ -91,3 +91,13 @@
 .view-switch svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
 .view-switch button:hover{color:#565b50}
 .view-switch button[aria-pressed=true]{background:#fbfaf6;color:#343832;box-shadow:0 0 0 .5px #3d3f2a1f,0 1px 2px #3d3f2a1f}
+/* touch screens: the object under the finger is always the object; these arrows move the rail */
+.rail-arrow{display:none;width:44px;height:44px;min-height:0;flex:none;place-items:center;border-radius:50%;color:#8a8d82;transition:color .2s,opacity .2s,background .2s}
+.rail-arrow svg{width:24px;height:24px}
+.rail-arrow:active{background:#3d3f2a0f;color:#343832}
+.rail-arrow:disabled{opacity:.22}
+@media (hover:none),(max-width:700px){
+  .selection-info{display:flex;align-items:center;justify-content:center;gap:10px}
+  .selection-title{min-width:7.5em;text-align:center}
+  .rail-arrow{display:grid}
+}

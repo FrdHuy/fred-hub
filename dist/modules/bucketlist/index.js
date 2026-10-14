@@ -1,9 +1,9 @@
-import { parseItems, itemLines } from './items.js?v=61';
-import { loadEntries } from './storage.js?v=61';
-import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=61';
-import { play as sound } from '../../sound.js?v=61';
-import notes from '../stories/data.js?v=61';
-import { noteForItem } from '../stories/notes.js?v=61';
+import { parseItems, itemLines } from './items.js?v=62';
+import { loadEntries } from './storage.js?v=62';
+import { lampStates, litCount, markCount, yearSpan, knobSteps, pad, SLOTS } from './panel.js?v=62';
+import { play as sound } from '../../sound.js?v=62';
+import notes from '../stories/data.js?v=62';
+import { noteForItem } from '../stories/notes.js?v=62';
 import { collectionPath } from '../../router.js';
 
 const DETENT = 24;
@@ -199,7 +199,7 @@ export function mount({ container, item, route }) {
   }, { signal });
 
   // A fresh URL each visit so edits to data.js show after a normal refresh.
-  import(`./data.js?t=${Date.now()}`).then(module => {
+  import('./data.js?v=62').then(module => {
     if (signal.aborted) return;
     build(module.default);
     if (legacy.length && notice.hidden) { say(`这台浏览器里还存着 ${legacy.length} 条以前在网页上写的清单，其他人看不到。复制后粘贴进 data.js 即可公开。`); copy.hidden = false; }

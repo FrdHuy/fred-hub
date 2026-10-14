@@ -1,9 +1,9 @@
-import data from './data.js?v=61';
-import { parseTapes, runtime, sideLength, offsetOf, locate, counter, clock } from './tapes.js?v=61';
-import { walkmanMarkup, cassetteMarkup } from './walkman.js?v=61';
-import { createDeck } from './deck.js?v=61';
+import data from './data.js?v=62';
+import { parseTapes, runtime, sideLength, offsetOf, locate, counter, clock } from './tapes.js?v=62';
+import { walkmanMarkup, cassetteMarkup } from './walkman.js?v=62';
+import { createDeck } from './deck.js?v=62';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=61';
+import { play as sound } from '../../sound.js?v=62';
 
 const esc = text => String(text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const pad2 = n => String(n).padStart(2, '0');

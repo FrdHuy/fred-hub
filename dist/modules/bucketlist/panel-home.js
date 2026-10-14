@@ -1,6 +1,6 @@
-import { parseItems } from './items.js?v=61';
-import { play as sound } from '../../sound.js?v=61';
-import { lampStates, litCount, leverPosition, LEVER_THRESHOLD, pad, SLOTS } from './panel.js?v=61';
+import { parseItems } from './items.js?v=62';
+import { play as sound } from '../../sound.js?v=62';
+import { lampStates, litCount, leverPosition, LEVER_THRESHOLD, pad, SLOTS } from './panel.js?v=62';
 
 // Home controller: drag the lever up past its threshold (or tap) → self-test → lamps settle on real progress.
 export function createPanel(cover, { reduced }) {
@@ -8,7 +8,7 @@ export function createPanel(cover, { reduced }) {
   let states = null, epoch = 0, on = false, lever = 0;
   const timers = new Set(), frames = new Set();
   const wait = ms => new Promise(resolve => { const id = setTimeout(() => { timers.delete(id); resolve(); }, reduced() ? 0 : ms); timers.add(id); });
-  const loading = import(`./data.js?t=${Date.now()}`).then(module => parseItems(module.default).items, () => []).then(items => {
+  const loading = import('./data.js?v=62').then(module => parseItems(module.default).items, () => []).then(items => {
     const now = new Date().getFullYear();
     states = lampStates(items, now, now);
     lamps.forEach((lamp, i) => lamp.classList.toggle('is-empty', states[i] === 'empty'));
