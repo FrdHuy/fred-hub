@@ -56,7 +56,7 @@ function fairyLights() {
 
 // north：挂在北墙上的摆设，交给 cutaway.js 跟着北墙一起隐去。
 export function buildDecor() {
-  const lights = fairyLights(), decor = group(rug(.5, 1.05), table(1.35, .45), cat(.25, 1.5, -.5), floorLamp(2.5, -1.2), bookshelf(-2.84, 2.48, Math.PI / 2), plant(1.48, -2.6), lights,
+  const lights = fairyLights(), napping = cat(.25, 1.5, -.5), decor = group(rug(.5, 1.05), table(1.35, .45), napping, floorLamp(2.5, -1.2), bookshelf(-2.84, 2.48, Math.PI / 2), plant(1.48, -2.6), lights,
     cyl(.3, .32, .12, mat('#d98a5f', { roughness: 1 }), 2.1, 0, .9, 12), contact(.9, .9, .34, 2.1, .9));
   // 两个人住的痕迹：门口两双拖鞋、矮桌上的第二只杯子——开锁后才出现。
   const slipper = (x, z, color, turn) => { const s = group(box(.11, .03, .26, mat(color, { roughness: 1 })), box(.12, .06, .12, mat(color, { roughness: 1 }), 0, .02, -.06)); s.position.set(x, 0, z); s.rotation.y = turn; return s; };
@@ -64,5 +64,6 @@ export function buildDecor() {
     cyl(.045, .035, .07, mat('#e9b0b8'), 1.56, .34, .32, 8), cyl(.038, .038, .004, mat('#8a5a3c'), 1.56, .4, .32, 8));
   home.visible = false; decor.add(home); decor.userData.setUnlocked = data => { home.visible = !!data; };
   decor.userData.onWall = { north: [lights] };
+  decor.userData.cat = napping;                                   // 猫出门晒太阳那天（花园的访客是猫），屋里这只就不在坐垫上
   return decor;
 }

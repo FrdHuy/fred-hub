@@ -97,6 +97,7 @@ export function createInteract({ stage, view, placed, host, memory, plots, sound
     await view.closeUp(center, Math.max(radius, entry.memory ? 1.5 : entry.plant ? .75 : 1), azimuth, entry.wall ? 77 : 64, !isKey(object));       // 挂在墙上的东西平着看；给面板让出位置
     if (isKey(object)) { if (memory.data) panel.askLock(() => memory.lock(), leave(object)); else panel.askKey(async phrase => { const right = await memory.unlock(phrase); sound?.(right ? 'ok' : 'error'); return right; }, leave(object)); }
     else if (entry.garden) panel.showGarden(leave(object));
+    else if (entry.visitor) panel.showVisitor(entry.visitor, leave(object));
     else if (entry.plant) panel.showPlant(entry.plant, memory.data, () => { sound?.('ok'); plots.watered(object); }, leave(object));
     else panel.showMemory(entry, memory.data, leave(object));
   }

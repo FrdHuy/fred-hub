@@ -4,7 +4,7 @@
 //   · askLock(lock)            已经开着时点门垫：把小屋锁上
 // 每种回忆怎么排版，写在下面的 SHOW 里（config.js 里物件的 memory 字段 → 这里的同名函数）。
 import { dayCount, nextAnniversary } from './memory.js';
-import { STAGE_NAME, SPECIES, wateredBy, water, recall, progressOf, speciesFor, plant as sow, cut, unseenFor, markSeen, bloomColor } from './growth.js';
+import { STAGE_NAME, SPECIES, SEASONAL, wateredBy, water, recall, progressOf, speciesFor, plant as sow, cut, unseenFor, markSeen, bloomColor, journalOf, claimGift } from './growth.js';
 import { toParagraphs } from './edits.js';
 
 const el = (tag, className, text) => { const node = document.createElement(tag); if (className) node.className = className; if (text != null) node.textContent = text; return node; };
@@ -113,6 +113,34 @@ const SHOW = {
       row.querySelector('strong').prepend(dot); list.append(row);
     }
     body.append(list);
+  },
+  // 手账：上面两个标签——「这些天」是两个人在小屋里的样子，「图鉴」是种过、开过花的品种和颜色。
+  journal(ctx) {
+    const { body, memory } = ctx, j = journalOf(memory.data), tabs = el('div', 'r3m-tabs'), page = el('div');
+    const pages = {
+      这些天() {
+        const list = el('ol', 'r3m-rows r3m-journal'), line = (title, note) => { const row = el('li'); row.append(el('strong', '', title)); if (note) row.append(el('span', '', note)); list.append(row); };
+        if (j.days) line(`在一起第 ${j.days} 天`);
+        line(`花园 ${j.level} 级`, `种了 ${j.planted} 株 · 送出 ${j.given} 束花${j.gifts ? ` · 小动物送了 ${j.gifts} 颗种子` : ''}`);
+        for (const [name, n] of Object.entries(j.watered)) line(`${name} 浇了 ${n} 次水`, j.lastSeen[name] ? `最近一次 ${dots(j.lastSeen[name])}` : '还没浇过');
+        line(`一起浇了 ${j.together} 次`, '同一天浇了同一株');
+        line(`图鉴 ${j.catalog.seen} / ${j.catalog.total}`);
+        return list;
+      },
+      图鉴() {
+        const list = el('ol', 'r3m-rows r3m-catalog');
+        for (const entry of j.catalog.entries) {
+          const row = el('li'), name = el('strong', '', entry.name), dotsRow = el('span', 'r3m-swatches');
+          if (entry.season) name.append(el('em', '', `${entry.season}限定`));
+          for (const c of entry.colors) { const dot = el('i', `${c.seen ? 'is-seen' : ''} ${c.rare ? 'is-rare' : ''}`); dot.style.setProperty('--c', c.color); dot.title = c.rare ? '稀有色' : ''; dotsRow.append(dot); }
+          row.append(name, dotsRow); list.append(row);
+        }
+        const tip = el('p', 'r3m-note r3m-small', '开过花（或剪过一束）的颜色会亮起来。带星的是稀有色：两个人同一天给同一株浇满 3 次，就有机会开出来。');
+        const box = el('div'); box.append(list, tip); return box;
+      },
+    };
+    for (const name of Object.keys(pages)) { const tab = el('button', 'r3m-tab', name); tab.type = 'button'; tab.addEventListener('click', () => { tabs.querySelectorAll('button').forEach(b => b.classList.toggle('is-on', b === tab)); page.replaceChildren(pages[name]()); }); tabs.append(tab); }
+    body.append(tabs, page); tabs.firstChild.click();
   },
   // 照片：按月份排的一格格小图（滚到才解密）；点一张放大看，左右键 / 两侧的箭头翻页。
   // 能改的时候：右上角「+」从这台设备选照片放进来；看大图时右上角的笔可以改那句话、日期，或者删掉。
@@ -252,6 +280,20 @@ export function createPanel(host, memory) {
         });
       };
       render(); panel.append(x, head, body); show(panel, done); x.focus({ preventScroll: true });
+    },
+    // 今天来花园的小动物：说一句它在干嘛；带着种子的话可以收下（每天一颗，谁先收下算谁的）。
+    showVisitor(visitor, done) {
+      const panel = el('section', 'r3-panel is-plant'); panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-label', visitor.name);
+      const head = el('h2', '', `今天来的是${visitor.name}`), body = el('div', 'r3m-body'), x = closer('关上');
+      body.append(el('p', 'r3m-note', { bird: '一只小鸟落在花园里，东看看西看看。', hedgehog: '一只刺猬在花圃边上慢慢地走。', rabbit: '一只兔子蹲在草地上，耳朵一动一动。', cat: '屋里的猫出门晒太阳了。' }[visitor.kind] ?? '它来花园里转了转。'));
+      const slot = el('div', 'r3m-water'); body.append(slot);
+      const paint = v => {
+        if (!v.gift) slot.replaceChildren(el('p', 'r3m-plant', '它今天只是来转转。'));
+        else if (v.claimedBy) slot.replaceChildren(el('p', 'r3m-plant', `${v.claimedBy} 已经收下了它带来的种子。`));
+        else if (!memory.online || !memory.me) slot.replaceChildren(el('p', 'r3m-offline', '它带着一颗种子。连上小屋、说一下你是谁，就能收下。'));
+        else { const take = el('button', 'r3m-give', '收下它带来的种子'); take.type = 'button'; take.addEventListener('click', async () => { take.disabled = true; try { await memory.change(state => claimGift(state, memory.me) ?? state); slot.replaceChildren(el('p', 'r3m-note', '收下了。花园木牌上多了一颗种子。')); } catch { take.disabled = false; } }); slot.replaceChildren(take); }
+      };
+      paint(visitor); panel.append(x, head, body); show(panel, done); x.focus({ preventScroll: true });
     },
     // 角落里的一张小纸条：升级了、有人送花了……几秒后自己消失。action：{ label, run } 一个按钮。
     notice(text, action) {

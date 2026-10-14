@@ -98,7 +98,7 @@ export function buildGarden() {
   const carpet = instances(new THREE.BoxGeometry(.14, .01, .09), tone('carpet', '#ffffff'), under.length, (d, i) => { const [x, z, tint] = under[i]; d.position.set(x, GRASS + .016, z); d.rotation.set(0, random() * 6.28, 0); d.scale.set(1, 1, 1); return tint; });
   carpet.castShadow = false; carpet.count = 0; garden.add(carpet);
   // 冬天的积雪：长椅、庭院灯顶、石头上各一小堆，平时不显示。
-  const white = mat('#f4f7fa', { roughness: .9 }), snow = group(box(1.42, .06, .42, white, -1.2, GRASS + .46, 3.75), box(1.42, .05, .1, white, -1.2, GRASS + .84, 3.49), box(.34, .05, .34, white, 2.3, GRASS + 1.6, 5.1),
+  const white = mat('#f4f7fa', { roughness: .9 }), snow = group(box(.95, .06, .42, white, -.97, GRASS + .46, 3.75), box(1.42, .05, .1, white, -1.2, GRASS + .84, 3.49), box(.34, .05, .34, white, 2.3, GRASS + 1.6, 5.1),
     ...[[5.2, 4.6, .2], [-3.5, 6.5, .18], [6.4, -1.6, .16]].map(([x, z, r]) => { const cap = ball(r, white, x, GRASS + r * 1.05, z, 0); cap.scale.y = .5; return cap; }));
   snow.traverse(o => { o.castShadow = false; }); snow.visible = false; garden.add(snow);
   const meshes = garden.children.filter(o => o.isInstancedMesh);

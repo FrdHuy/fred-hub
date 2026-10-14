@@ -5,7 +5,9 @@
 //   养成花圃  你们俩亲手种的花：用种子种、浇水、开花后剪一束送给对方。花圃随花园等级一块块解锁。
 //   心意      每人每天给每株浇一次水 +1；两个人同一天浇了同一株，再 +1。
 //   花园等级  经验 = 心意 + 每条回忆 3 + 每在一起 10 天 1；升到 n 级要 10·n·(n−1)（2 级 20、3 级 60、4 级 120……）。
-//   种子      开局 3 颗，每升一级 +1，每攒 15 心意 +1（小动物送的之后再加）；种一株用掉一颗。
+//   种子      开局 3 颗，每升一级 +1，每攒 15 心意 +1，来访的小动物有时也送一颗；种一株用掉一颗。
+//   图鉴      种过、开过花的品种和颜色。两个人同一天浇同一株满 3 次的花，有机会开出稀有色；有三种花只在对应的季节能种。
+//   小动物    每天来一位（按花园等级解锁：小鸟 → 刺猬 → 兔子 → 猫），两个人看到的是同一位；有的日子它带着一颗种子。
 import { dayCount } from './memory.js';
 
 // ── 花圃和坑 ─────────────────────────────────────────────────────────────────
@@ -31,16 +33,23 @@ export const grownStage = grown => grown < 2 ? 'mound' : grown < 5 ? 'sprout' : 
 export const REBLOOM = 10;                                  // 剪下一束之后，回到花苞，10 天后再开
 export const yearsOf = days => Math.max(0, Math.floor((days - 1) / 365));
 
-export const SPECIES = { daisy: '雏菊', tulip: '郁金香', sunflower: '向日葵', rose: '玫瑰', lavender: '薰衣草', hydrangea: '绣球' };
+export const SPECIES = { daisy: '雏菊', tulip: '郁金香', sunflower: '向日葵', rose: '玫瑰', lavender: '薰衣草', hydrangea: '绣球', primrose: '樱草', cosmos: '波斯菊', hellebore: '圣诞玫瑰' };
+const CLASSIC = ['daisy', 'tulip', 'sunflower', 'rose', 'lavender', 'hydrangea'];          // 纪念花只从这六种里挑
+// 季节限定：只在这几个月（按访客本地的日期）能种；种下以后一直在。
+export const SEASONAL = { primrose: { months: [3, 4, 5], season: '春' }, cosmos: { months: [9, 10, 11], season: '秋' }, hellebore: { months: [12, 1, 2], season: '冬' } };
 const hash = text => { let h = 2166136261; for (const c of text) h = Math.imul(h ^ c.codePointAt(0), 16777619); return h >>> 0; };
 export function speciesOf(plant) {
   if (plant.species && SPECIES[plant.species]) return plant.species;
   for (const [key, name] of Object.entries(SPECIES)) if (plant.title.includes(name)) return key;
-  return Object.keys(SPECIES)[hash(plant.date + plant.title) % 6];
+  return CLASSIC[hash(plant.date + plant.title) % CLASSIC.length];
 }
 // 花的颜色：同一株永远同一种颜色（花瓶里的那束也用它）。
-const PALETTE = { sunflower: ['#f6c12e'], tulip: ['#e5484d', '#f2a3bd', '#f6c945', '#fdf6ec', '#b98bd9'], rose: ['#d1343f', '#e6657a', '#f1b2c0'], lavender: ['#b49be0'], daisy: ['#fffaf0'], hydrangea: ['#8fb2e6', '#e6a3c4', '#b7a4e6'] };
-export const bloomColor = (species, id) => { const list = PALETTE[species] ?? ['#f2a3bd']; return list[hash(id) % list.length]; };
+export const PALETTE = { sunflower: ['#f6c12e'], tulip: ['#e5484d', '#f2a3bd', '#f6c945', '#fdf6ec', '#b98bd9'], rose: ['#d1343f', '#e6657a', '#f1b2c0'], lavender: ['#b49be0'], daisy: ['#fffaf0'], hydrangea: ['#8fb2e6', '#e6a3c4', '#b7a4e6'], primrose: ['#f6d74a', '#f2a3bd'], cosmos: ['#f08fb4', '#fdf6ec', '#c2416b'], hellebore: ['#f4f1e6', '#d9a3b6'] };
+// 稀有色：每种花一种。
+export const RARE = { sunflower: '#c8462e', tulip: '#2f2a5e', rose: '#4f8fd8', lavender: '#fdf6ec', daisy: '#f6b6cd', hydrangea: '#f4f1e6', primrose: '#7a4fc4', cosmos: '#e8a33a', hellebore: '#4a6b3c' };
+export const bloomColor = (species, id, rare = false) => { if (rare && RARE[species]) return RARE[species]; const list = PALETTE[species] ?? ['#f2a3bd']; return list[hash(id) % list.length]; };
+// 稀有：两个人一起浇过 3 次以上的那些里，大约三株有一株。
+export const isRare = p => (p.together ?? 0) >= 3 && hash(`${p.id} rare`) % 3 === 0;
 
 // 纪念花圃：时间线里已经到了的日子；坑不够时最早的和最新的都留着，中间均匀让位。
 export function memorialPlants(data, today = new Date()) {
@@ -61,7 +70,8 @@ export function gardenPlants(data, today = new Date()) {
     if (!slot) { slot = holes.find(h => !taken.has(h.slot))?.slot; if (!slot) continue; taken.add(slot); }
     const days = dayCount(p.date, today), grown = days + (p.cared ?? 0) / 2, sinceCut = p.cut ? dayCount(p.cut, today) - 1 : Infinity;
     const stage = sinceCut < REBLOOM ? 'bud' : grownStage(grown), species = speciesOf(p), id = p.id ?? `${p.date} ${p.title}`;
-    out.push({ ...p, id, days, grown, stage, years: yearsOf(days), species, color: bloomColor(species, id), slot, at: holes.find(h => h.slot === slot).at, rebloomIn: sinceCut < REBLOOM ? REBLOOM - sinceCut : 0 });
+    const rare = isRare({ ...p, id });
+    out.push({ ...p, id, days, grown, stage, years: yearsOf(days), species, rare, color: bloomColor(species, id, rare), slot, at: holes.find(h => h.slot === slot).at, rebloomIn: sinceCut < REBLOOM ? REBLOOM - sinceCut : 0 });
   }
   return out;
 }
@@ -84,7 +94,7 @@ export const UNLOCKS = [
   [7, 'decor', 'greenhouse', '温室'],
   [8, 'bed', 'g3', '西墙外的花圃'],
 ];
-export const speciesFor = level => UNLOCKS.filter(([at, kind]) => kind === 'species' && level >= at).flatMap(([, , list]) => list);
+export const speciesFor = (level, today = new Date()) => [...UNLOCKS.filter(([at, kind]) => kind === 'species' && level >= at).flatMap(([, , list]) => list), ...Object.entries(SEASONAL).filter(([, s]) => s.months.includes(today.getMonth() + 1)).map(([key]) => key)];
 export const decorFor = level => UNLOCKS.filter(([at, kind]) => kind === 'decor' && level >= at).map(([, , key]) => key);
 export const bedsFor = level => BEDS.filter(b => level >= b.level);
 export const nextUnlock = level => UNLOCKS.find(([at]) => at > level) ?? null;
@@ -114,12 +124,13 @@ export function water(state, id, who, today = new Date()) {
   mine.push(id);
   const totals = state.totals ??= {}; totals[who] = (totals[who] ?? 0) + 1; if (others.length) totals.together = (totals.together ?? 0) + 1;
   const grown = (state.garden ?? []).find(p => p.id === id); if (grown && !others.length) grown.cared = (grown.cared ?? 0) + 1;
+  if (grown && others.length) grown.together = (grown.together ?? 0) + 1;                      // 两个人同一天都浇了：稀有色看这个
   const cut = stamp(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 90)); for (const old of Object.keys(log)) if (old < cut) delete log[old];
   return state;
 }
 // 种一株：用一颗种子，种进第一个空坑。没种子、没空坑、品种还没解锁时返回 null（什么都不改）。
 export function plant(state, { species, title }, who, today = new Date()) {
-  if (!speciesFor(levelOf(state, today)).includes(species) || seedsOf(state, today) < 1) return null;
+  if (!speciesFor(levelOf(state, today), today).includes(species) || seedsOf(state, today) < 1) return null;
   const taken = new Set(gardenPlants(state, today).map(p => p.slot)), hole = gardenHoles(levelOf(state, today)).find(h => !taken.has(h.slot));
   if (!hole) return null;
   (state.garden ??= []).push({ id: [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(16).padStart(2, '0')).join(''), date: stamp(today), title, species, slot: hole.slot, by: who, at: Date.now() });
@@ -133,6 +144,44 @@ export function cut(state, id, who, to, note, today = new Date()) {
   (state.bouquets ??= []).unshift({ id: `${id}-${stamp(today)}`, from: who, to, species: shown.species, color: shown.color, flower: shown.title, note, date: stamp(today), seen: false });
   return state;
 }
+// ── 图鉴：每种花的每种颜色（加一种稀有色），开过花（或剪过）的就算见过 ─────────────
+export function catalogOf(data, today = new Date()) {
+  const seen = new Set();
+  for (const p of gardenPlants(data, today)) if (p.stage === 'bloom' || p.cut) seen.add(`${p.species} ${p.color}`);
+  for (const b of data?.bouquets ?? []) seen.add(`${b.species} ${b.color}`);
+  const entries = Object.keys(SPECIES).map(species => ({ species, name: SPECIES[species], season: SEASONAL[species]?.season ?? '', colors: [...PALETTE[species].map(color => ({ color, rare: false })), { color: RARE[species], rare: true }].map(c => ({ ...c, seen: seen.has(`${species} ${c.color}`) })) }));
+  const all = entries.flatMap(e => e.colors);
+  return { entries, seen: all.filter(c => c.seen).length, total: all.length };
+}
+
+// ── 小动物：今天来的是谁、在哪、带没带种子（两个人看到的都一样）───────────────
+export const ANIMALS = [[1, 'bird', '小鸟'], [3, 'hedgehog', '刺猬'], [5, 'rabbit', '兔子'], [7, 'cat', '猫']];
+const SPOTS = [[3.0, 4.0], [1.95, 4.45], [-.55, 4.6], [5.55, 1.45], [2.45, 6.35], [-3.2, 3.85], [6.3, 5.6]];
+export function visitorOf(data, today = new Date()) {
+  const day = stamp(today), kinds = ANIMALS.filter(([at]) => levelOf(data, today) >= at), [, kind, name] = kinds[hash(`${day} who`) % kinds.length];
+  return { kind, name, day, at: SPOTS[hash(`${day} where`) % SPOTS.length], gift: hash(`${day} gift`) % 2 === 0, claimedBy: data?.giftDays?.[day] ?? '' };
+}
+// 收下小动物带来的种子：每天一颗，谁先收下算谁的。
+export function claimGift(state, who, today = new Date()) {
+  const visitor = visitorOf(state, today);
+  if (!visitor.gift || visitor.claimedBy) return null;
+  (state.giftDays ??= {})[visitor.day] = who; state.gifts = (state.gifts ?? 0) + 1;
+  return state;
+}
+
+// ── 手账：这些天的样子 ──────────────────────────────────────────────────────
+export function journalOf(data, today = new Date()) {
+  const lastSeen = {};
+  for (const [day, byName] of Object.entries(data?.water ?? {})) for (const [name, ids] of Object.entries(byName)) if (ids.length && (!lastSeen[name] || day > lastSeen[name])) lastSeen[name] = day;
+  const totals = data?.totals ?? {};
+  return {
+    days: data?.days?.since ? dayCount(data.days.since, today) : 0, level: levelOf(data, today),
+    watered: Object.fromEntries((data?.people ?? []).map(name => [name, totals[name] ?? 0])), together: totals.together ?? 0,
+    planted: data?.garden?.length ?? 0, given: data?.bouquets?.length ?? 0, gifts: data?.gifts ?? 0,
+    catalog: catalogOf(data, today), lastSeen,
+  };
+}
+
 // 收到的、还没看过的花束。
 export const unseenFor = (data, who) => (data?.bouquets ?? []).filter(b => b.to === who && !b.seen);
 export function markSeen(state, who) { for (const b of state.bouquets ?? []) if (b.to === who) b.seen = true; return state; }

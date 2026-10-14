@@ -4,7 +4,7 @@
 //
 //   object  用哪个物件造型（dist/room/objects/ 里的文件名，注册表见 objects/index.js）
 //   memory  它装着哪一类回忆：letters 信 / photos 照片 / days 纪念日 / places 去过的地方 /
-//           watched 一起看过的 / wishes 想去的地方 / things 小物件 / bouquets 互相送的花。
+//           watched 一起看过的 / wishes 想去的地方 / things 小物件 / bouquets 互相送的花 / journal 手账（统计和图鉴）。
 //           内容来自 memories/（加密后是 memories/sealed.js），排版在 panel.js 的 SHOW 里
 //   action  'unlock' = 这是门垫下的钥匙：点它输入暗号（开着时点它是锁门）
 //   label   悬停时显示的名字
@@ -15,7 +15,7 @@
 //           镜头转到那面墙背后时，墙会隐去，挂在上面的东西跟着一起隐去
 //   view    （选填）推近时从哪个方位角看它，单位度；不写就按 turn 推算
 // ─────────────────────────────────────────────────────────────────────────────
-export const MEMORIES = ['letters', 'photos', 'days', 'places', 'watched', 'wishes', 'things', 'bouquets'];
+export const MEMORIES = ['letters', 'photos', 'days', 'places', 'watched', 'wishes', 'things', 'bouquets', 'journal'];
 
 export const objects = [
   { object: 'desk', memory: 'letters', label: '信', at: [-2.55, 0, -1.85], turn: 90 },
@@ -24,6 +24,7 @@ export const objects = [
   { object: 'fridge', memory: 'places', label: '去过的地方', at: [2.3, 0, -2.58] },
   { object: 'tv', memory: 'watched', label: '一起看过的', at: [0.3, 0, -2.68] },
   { object: 'poster', memory: 'wishes', label: '想去的地方', at: [-2.99, 2.05, -1.9], turn: 90, wall: 'west' },
+  { object: 'notebook', memory: 'journal', label: '手账', at: [-1.68, 0.32, 3.76], turn: 15 },
   { object: 'vase', memory: 'bouquets', label: '花瓶', at: [1.25, 0.34, 0.65] },
   { object: 'doormat', action: 'unlock', label: '钥匙', at: [0.9, -0.09, 3.72], view: 20 },
 ];

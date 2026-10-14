@@ -52,7 +52,7 @@ export function mountRoom(host, options = {}) {
   memory.onChange(data => { for (const object of lived) object.userData.setUnlocked?.(data, memory, () => { if (!frame) render(); }); plots.set(data); host.dataset.home = data ? 'open' : 'locked'; if (!frame) render(); });
   // 花圃：锁着时是空的土；开锁后按日期长出植物。可以点的植物变了就告诉 interact。
   let interact = null;
-  const plots = createPlots(scene, garden, list => interact?.setPlants(list));
+  const plots = createPlots(scene, garden, list => interact?.setPlants(list), decor);
   interact = createInteract({ stage, view, placed, host, still, memory, plots, sound: options.sound });
   plots.set(null);                                                // 先登记花园木牌（锁着时点它会提示去拿钥匙）
   const clock = new THREE.Clock();

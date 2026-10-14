@@ -8,7 +8,8 @@
 import * as THREE from './three.js';
 import { mat, glow, box, cyl, ball, rod, group, contact, own, tilt, paint, picture } from './kit.js';
 import { GRASS } from './scene.js';
-import { BEDS, memorialPlants, gardenPlants, milestonesOf, wateredToday, levelOf, bedsFor, decorFor } from './growth.js';
+import { BEDS, memorialPlants, gardenPlants, milestonesOf, wateredToday, levelOf, bedsFor, decorFor, visitorOf } from './growth.js';
+import { animalModel, idle } from './animals.js';
 import { dayCount } from './memory.js';
 
 const TOP = GRASS + .045, green = () => mat('#5f9a48'), leafy = () => mat('#7fb857');
@@ -20,6 +21,10 @@ const BLOOM = {
   rose: color => { const red = mat(color); return group(cyl(.012, .015, .32, green(), 0, 0, 0, 5), tilt(ball(.05, leafy(), .05, .16, 0, 0), 0, 0, .9), ball(.068, red, 0, .37, 0, 1), ball(.04, red, .01, .42, .01, 0)); },
   lavender: () => group(cyl(.01, .012, .26, green(), 0, 0, 0, 4), ...[0, 1, 2, 3].map(i => ball(.034 - i * .004, mat(i % 2 ? '#9b7fd1' : '#b49be0'), 0, .26 + i * .05, 0, 0))),
   daisy: () => group(cyl(.01, .013, .24, green(), 0, 0, 0, 5), tilt(cyl(.075, .075, .012, mat('#fffaf0'), 0, .24, .01, 8), .8, 0, 0), tilt(ball(.03, mat('#f2b632'), 0, .25, .02, 0), .8, 0, 0)),
+  // 季节限定的三种。
+  primrose: color => group(...[0, 1.6, 3.2, 4.7].map(a => { const leaf = ball(.06, leafy(), Math.cos(a) * .06, .02, Math.sin(a) * .06, 0); leaf.scale.y = .35; return leaf; }), ...[[0, .1, 0], [.05, .09, .04], [-.05, .085, -.03]].map(([x, y, z]) => cyl(.035, .035, .012, mat(color), x, y, z, 6)), ball(.012, mat('#f2b632'), 0, .11, 0, 0)),
+  cosmos: color => group(cyl(.008, .01, .55, green(), 0, 0, 0, 4), tilt(cyl(.085, .085, .01, mat(color), 0, .55, .02, 8), .6, 0, 0), tilt(ball(.022, mat('#f2b632'), 0, .555, .025, 0), .6, 0, 0)),
+  hellebore: color => group(cyl(.012, .014, .24, green(), 0, 0, 0, 5), ball(.07, mat('#4f7a3c'), 0, .08, 0, 0), tilt(cyl(.065, .022, .055, mat(color), .03, .2, .03, 6), 2.5, 0, 0), tilt(cyl(.055, .02, .05, mat(color), -.04, .18, -.02, 6), 2.6, 1, 0)),
   hydrangea: color => { const blue = [color, color]; return group(cyl(.014, .017, .22, green(), 0, 0, 0, 5), ball(.09, leafy(), 0, .14, 0, 0), ...[[0, .3, 0], [.07, .27, .02], [-.06, .27, -.03], [.01, .26, .07]].map(([x, y, z], i) => ball(.062, mat(blue[i % 2]), x, y, z, 0))); },
 };
 const stake = () => group(box(.014, .17, .03, mat('#a8794f'), .15, 0, .13), box(.1, .065, .012, mat('#f6efe2'), .15, .13, .145));
@@ -62,7 +67,8 @@ function signpost() {
 }
 
 // garden：garden.js 的 buildGarden()（要用到里面那棵大树）。onChange(list)：可以点的东西变了（交给 interact.js）。
-export function createPlots(scene, garden, onChange) {
+// decor：屋里的摆设（猫出门那天，坐垫上的猫要不在）。
+export function createPlots(scene, garden, onChange, decor) {
   const root = group(), beds = group(); scene.add(root); root.add(beds);
   // 花圃：深色的土 + 一圈石头。已经解锁的才翻好土（锁着时按 1 级显示：纪念花圃 + 第一块）。
   function lay(level) {
@@ -79,11 +85,11 @@ export function createPlots(scene, garden, onChange) {
   // 浇过水的微光：一小团慢慢浮动的亮点。
   const sparkle = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ color: new THREE.Color(2.4, 2.6, 1.8), size: .05, transparent: true, opacity: .9, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
   sparkle.frustumCulled = false; sparkle.renderOrder = 5; root.add(sparkle);
-  let data = null, dormant = false, things = [], lit = [], pour = null;
+  let data = null, dormant = false, things = [], lit = [], pour = null, guest = null;
 
   function rebuild() {
     for (const old of [...growing.children]) { growing.remove(old); old.traverse(o => o.geometry?.dispose()); }
-    things = [sign]; tree.scale.setScalar(1); delete tree.userData.entry; delete tree.userData.baseScale;
+    things = [sign]; guest = null; tree.scale.setScalar(1); delete tree.userData.entry; delete tree.userData.baseScale;
     const level = data ? levelOf(data) : 1; lay(level);
     if (data) {
       for (const plant of [...memorialPlants(data), ...gardenPlants(data)]) {
@@ -91,6 +97,12 @@ export function createPlots(scene, garden, onChange) {
         model.userData.entry = { label: plant.title, plant, view: 45 }; model.userData.materials = own(model); growing.add(model); things.push(model);
       }
       for (const key of decorFor(level)) growing.add(EXTRA[key]());
+      // 今天的访客：站在它今天的位置，点它看看它带没带种子。
+      const visitor = visitorOf(data), animal = animalModel(visitor.kind);
+      animal.position.set(visitor.at[0], GRASS, visitor.at[1]); animal.rotation.y = Math.PI / 4 + Math.sin(visitor.at[0] * 3) * .5;      // 大致朝着默认镜头，脸看得见
+      animal.scale.setScalar(1.7);                                 // 比真实比例大一些，全景里也认得出来
+      animal.userData = { ground: GRASS, turn: animal.rotation.y, size: 1.7, baseScale: 1.7, kind: visitor.kind, entry: { label: visitor.name, visitor, view: 45 } };
+      animal.userData.materials = own(animal); growing.add(animal); things.push(animal); guest = animal;
       const since = data.days?.since;
       if (since) {
         const days = dayCount(since), years = Math.max(0, Math.floor((days - 1) / 365));
@@ -100,6 +112,7 @@ export function createPlots(scene, garden, onChange) {
         for (const key of milestonesOf(days)) growing.add(EXTRA[key]());
       }
     }
+    if (decor?.userData.cat) decor.userData.cat.visible = guest?.userData.kind !== 'cat';
     glint(); onChange?.(things);
   }
   // 今天浇过水的那些：算好微光的位置。
@@ -108,6 +121,7 @@ export function createPlots(scene, garden, onChange) {
     sparkle.geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(lit.length * 9), 3)); sparkle.visible = lit.length > 0; update(0);
   }
   function update(time) {
+    if (guest) idle(guest, guest.userData.kind, time);
     if (!lit.length && !pour) return;
     const a = sparkle.geometry.attributes.position?.array;
     lit.forEach((object, i) => { const tall = object === tree ? 3.3 : .5; for (let k = 0; k < 3; k++) { const t = time * .7 + i * 1.7 + k * 2.1; a[i * 9 + k * 3] = object.position.x + Math.sin(t) * .13; a[i * 9 + k * 3 + 1] = object.position.y + tall * (.55 + .25 * Math.sin(t * 1.3 + k)); a[i * 9 + k * 3 + 2] = object.position.z + Math.cos(t * .9) * .13; } });
