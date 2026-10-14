@@ -1,14 +1,16 @@
 // 回忆的状态：锁着 / 打开。打开 = 用暗号解出 memories/sealed.js 里的内容。
 // 「记住」：解锁后把密钥存在这台设备上（localStorage），7 天后失效，要重新输入暗号。
-import { deriveKey, exportKey, importKey, openJSON } from './vault.js';
+import { deriveKey, exportKey, importKey, openJSON, openBytes, toBase64 } from './vault.js';
 
 const KEY = 'fred-cabin-key', REMEMBER = 7 * 24 * 3600 * 1000;
 
 export function createMemory() {
-  let sealed = null, data = null;
+  let sealed = null, data = null, held = null;             // held：开着时手里的密钥（解照片用）
+  const pictures = new Map();                              // 已经解开的照片：'id.t' / 'id.f' → Promise<blob 地址>
   const listeners = new Set(), tell = () => { for (const listener of listeners) listener(data); };
   const load = async () => sealed ??= (await import('./memories/sealed.js')).default;
   const forget = () => { try { localStorage.removeItem(KEY); } catch {} };
+  const drop = () => { for (const url of pictures.values()) url.then(u => u && URL.revokeObjectURL(u)); pictures.clear(); held = null; };
   return {
     get data() { return data; },                        // null = 锁着
     onChange(listener) { listeners.add(listener); },
@@ -18,9 +20,9 @@ export function createMemory() {
         const saved = JSON.parse(localStorage.getItem(KEY) ?? 'null');
         if (!saved) return false;
         if (!(saved.until > Date.now())) { forget(); return false; }
-        const opened = await openJSON(await importKey(saved.key), await load());
+        const key = await importKey(saved.key), opened = await openJSON(key, await load());
         if (!opened) { forget(); return false; }       // 换过暗号：旧钥匙作废
-        data = opened; tell(); return true;
+        held = key; data = opened; tell(); return true;
       } catch { return false; }
     },
     // 用暗号开锁。对了返回 true 并记住 7 天；错了返回 false。
@@ -28,9 +30,20 @@ export function createMemory() {
       const box = await load(), key = await deriveKey(phrase, box.salt, box.iterations), opened = await openJSON(key, box);
       if (!opened) return false;
       try { localStorage.setItem(KEY, JSON.stringify({ key: await exportKey(key), until: Date.now() + REMEMBER })); } catch {}
-      data = opened; tell(); return true;
+      held = key; data = opened; tell(); return true;
     },
-    lock() { forget(); data = null; tell(); },
+    lock() { forget(); drop(); data = null; tell(); },
+    // 一张照片：size 't' 小图（墙上、相册格子）/ 'f' 大图。取回密文、解开、给一个只在这个页面里有效的地址。
+    photo(id, size = 't') {
+      const name = `${id}.${size}`;
+      if (!pictures.has(name)) pictures.set(name, (async key => {
+        if (!key) return null;
+        const file = new Uint8Array(await (await fetch(new URL(`./memories/p/${name}.bin`, import.meta.url))).arrayBuffer());
+        const bytes = await openBytes(key, toBase64(file.subarray(0, 12)), file.subarray(12));     // 文件 = 12 字节 iv + 密文
+        return bytes && URL.createObjectURL(new Blob([bytes], { type: 'image/jpeg' }));
+      })(held).catch(() => null));
+      return pictures.get(name);
+    },
   };
 }
 

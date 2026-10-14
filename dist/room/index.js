@@ -47,7 +47,7 @@ export function mountRoom(host, options = {}) {
   const cutaway = createCutaway(house, decor.userData.onWall, placed);
   // 回忆：锁着时屋子是空的；开锁后每件物件把自己「住进人」的样子显出来（物件上的 userData.setUnlocked）。
   const memory = createMemory(), lived = [...placed, decor];
-  memory.onChange(data => { for (const object of lived) object.userData.setUnlocked?.(data); host.dataset.home = data ? 'open' : 'locked'; if (!frame) render(); });
+  memory.onChange(data => { for (const object of lived) object.userData.setUnlocked?.(data, memory, () => { if (!frame) render(); }); host.dataset.home = data ? 'open' : 'locked'; if (!frame) render(); });
   const interact = createInteract({ stage, view, placed, host, still, memory, sound: options.sound });
   const clock = new THREE.Clock();
 

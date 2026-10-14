@@ -13,7 +13,7 @@ export function createInteract({ stage, view, placed, host, memory, sound, still
   // 键盘 / 读屏用的导航：每个物件一个真正的按钮（看不见，但能 Tab 到）。聚焦 = 悬停，回车 = 点击。
   const nav = Object.assign(document.createElement('nav'), { className: 'r3-nav' }); nav.setAttribute('aria-label', '小屋里的物件');
   host.append(label, veil, nav);
-  const panel = createPanel(host);
+  const panel = createPanel(host, memory);
 
   // 每个物件量一次：包围球（推近用）和头顶的位置（放标签用）。场景是静止的，不用每帧重算。
   scene.updateMatrixWorld(true);
@@ -72,7 +72,7 @@ export function createInteract({ stage, view, placed, host, memory, sound, still
     if (!isKey(object) && !memory.data) { hot = placed.find(isKey) ?? object; byKey = false; linger = performance.now() + 1800; return; }
     hot = object; busy = true; sound?.('key'); canvas.style.cursor = '';
     const facing = entry.turn || 0, azimuth = (entry.view ?? facing + (45 - facing) * .35) * Math.PI / 180;       // 从物件正面偏向默认视角的方向看过去
-    await view.closeUp(center, Math.max(radius, entry.memory ? 1.5 : 1), azimuth, entry.wall ? 77 : 64);       // 挂在墙上的东西平着看
+    await view.closeUp(center, Math.max(radius, entry.memory ? 1.5 : 1), azimuth, entry.wall ? 77 : 64, !isKey(object));       // 挂在墙上的东西平着看；给面板让出位置
     if (isKey(object)) { if (memory.data) panel.askLock(() => memory.lock(), leave(object)); else panel.askKey(async phrase => { const right = await memory.unlock(phrase); sound?.(right ? 'ok' : 'error'); return right; }, leave(object)); }
     else panel.showMemory(entry, memory.data, leave(object));
   }

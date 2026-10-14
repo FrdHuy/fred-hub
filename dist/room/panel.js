@@ -46,10 +46,37 @@ const SHOW = {
   watched: (body, data) => body.append(rows(data.watched, '还没有一起看过的。')),
   wishes: (body, data) => body.append(rows(data.wishes, '还没有想去的地方。')),
   things: (body, data) => body.append(rows(data.things, '还没有小物件。')),
-  photos: body => body.append(el('p', 'r3m-empty', '照片墙还在布置。')),          // 第 2 步
+  // 照片：按月份排的一格格小图（滚到才解密）；点一张放大看，左右键 / 两侧的箭头翻页，左上角回到格子。
+  photos(body, data, head, { memory, panel }) {
+    const photos = data.photos ?? [];
+    panel.classList.add('is-wide');
+    if (!photos.length) { body.append(el('p', 'r3m-empty', '还没有照片。')); return; }
+    const wall = el('div', 'r3m-album'), seen = new IntersectionObserver(entries => { for (const entry of entries) if (entry.isIntersecting) { seen.unobserve(entry.target); memory.photo(entry.target.dataset.id, 't').then(url => { if (url) entry.target.style.backgroundImage = `url(${url})`; }); } }, { root: body, rootMargin: '200px' });
+    let month = '', grid;
+    photos.forEach((photo, index) => {
+      const key = photo.date.slice(0, 7);
+      if (key !== month || !grid) { month = key; wall.append(el('h3', '', key ? key.replace('-', ' · ') : '没写日期的')); grid = el('div', 'r3m-grid'); wall.append(grid); }
+      const cell = el('button', 'r3m-photo'); cell.type = 'button'; cell.dataset.id = photo.id; cell.setAttribute('aria-label', photo.caption || `照片 ${dots(photo.date)}`);
+      cell.addEventListener('click', () => look(index)); grid.append(cell); seen.observe(cell);
+    });
+    function look(index) {
+      const photo = photos[index], back = el('button', 'r3m-back'), figure = el('figure', 'r3m-look'), image = el('img'), turn = step => look((index + step + photos.length) % photos.length);
+      back.type = 'button'; back.innerHTML = BACK; back.setAttribute('aria-label', '回到相册');
+      back.addEventListener('click', () => { body.replaceChildren(wall); head.textContent = '照片'; wall.querySelectorAll('.r3m-photo')[index]?.focus(); });
+      image.alt = photo.caption || '照片'; image.style.aspectRatio = `${photo.w} / ${photo.h}`;
+      memory.photo(photo.id, 't').then(url => { if (url && !image.dataset.full) image.src = url; });          // 先放小图，大图解开后换上
+      memory.photo(photo.id, 'f').then(url => { if (url) { image.dataset.full = '1'; image.src = url; } });
+      const caption = el('figcaption'); if (photo.caption) caption.append(el('span', '', photo.caption)); caption.append(el('time', '', dots(photo.date)));
+      figure.append(image, caption);
+      if (photos.length > 1) for (const [step, name, cls] of [[-1, '上一张', 'is-prev'], [1, '下一张', 'is-next']]) { const arrow = el('button', `r3m-turn ${cls}`); arrow.type = 'button'; arrow.innerHTML = BACK; arrow.setAttribute('aria-label', name); arrow.addEventListener('click', () => turn(step)); figure.append(arrow); }
+      figure.tabIndex = -1; figure.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { e.stopPropagation(); turn(-1); } else if (e.key === 'ArrowRight') { e.stopPropagation(); turn(1); } });
+      body.replaceChildren(back, figure); head.textContent = `${index + 1} / ${photos.length}`; body.scrollTop = 0; figure.focus({ preventScroll: true });
+    }
+    body.append(wall);
+  },
 };
 
-export function createPanel(host) {
+export function createPanel(host, memory) {
   let open = null;                                           // { node, done }：当前开着的那一块
   function close() { if (!open) return; const { node, done } = open; open = null; node.remove(); done?.(); }
   function show(node, done) { close(); host.append(node); open = { node, done }; requestAnimationFrame(() => node.classList.add('is-on')); }
@@ -69,7 +96,7 @@ export function createPanel(host) {
     showMemory(entry, data, done) {
       const panel = el('section', 'r3-panel'); panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-label', entry.label);
       const head = el('h2', '', entry.label), body = el('div', 'r3m-body'), x = closer('关上');
-      panel.append(x, head, body); (SHOW[entry.memory] ?? SHOW.things)(body, data, head);
+      panel.append(x, head, body); (SHOW[entry.memory] ?? SHOW.things)(body, data, head, { memory, panel });
       show(panel, done); x.focus({ preventScroll: true });
     },
     // tryPhrase(暗号) → Promise<boolean>。错了：纸条抖一下、清空；对了：关上（done 里接着拉回镜头）。
