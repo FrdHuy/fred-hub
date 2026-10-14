@@ -160,3 +160,4 @@ button.r3m-count:hover{background:#f6f1e4}
 .r3m-drop.is-sure{color:#b34934}
 .r3m-form-note,.r3m-uploading{font:13px var(--font-ui);color:#90928a}
 .r3m-uploading{margin:0 0 10px}
+.r3-panel:has(.r3m-form) .r3m-add{display:none}
