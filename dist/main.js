@@ -1,10 +1,10 @@
-import { createInteraction } from './experience.js?v=63';
-import { soundOn, setSound, play as sound } from './sound.js?v=63';
-import { mountModule } from './modules/index.js?v=63';
-import { modules, getModule, createCover } from './catalog.js?v=63';
-import { CollectionGallery } from './gallery.js?v=63';
+import { createInteraction } from './experience.js?v=64';
+import { soundOn, setSound, play as sound } from './sound.js?v=64';
+import { mountModule } from './modules/index.js?v=64';
+import { modules, getModule, createCover } from './catalog.js?v=64';
+import { CollectionGallery } from './gallery.js?v=64';
 import { readRoute, navigate } from './router.js';
-import { attachSheen } from './sheen.js?v=63';
+import { attachSheen } from './sheen.js?v=64';
 
 const $ = selector => document.querySelector(selector);
 // Focus rings are for keyboard users. Script-moved focus after a click or tap stays invisible.
@@ -68,7 +68,7 @@ function showRoom(on, from) {
   if (!on) { roomScene?.stop(); return; }
   if (roomScene) { roomScene.start(from); return; }
   // enter.js 先看设备：能跑 3D 就加载场景，否则给静态截图 + 2D 链接（见 room/quality.js）。
-  roomLoading ??= import('./room/enter.js?v=63').then(({ enterRoom }) => enterRoom(room, {
+  roomLoading ??= import('./room/enter.js?v=64').then(({ enterRoom }) => enterRoom(room, {
       open(entry) { roomReturn = true; navigate(entry.module); },
       tint: id => getModule(id)?.theme === 'dark' ? '#100e0c' : '#f8f7f4',
       sound,

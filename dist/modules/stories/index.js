@@ -1,13 +1,13 @@
-import data from './data.js?v=63';
-import { TYPES, dotDate, sortNotes, years } from './notes.js?v=63';
-import { unseal } from './seal.js?v=63';
-import { typewriterMarkup } from './typewriter.js?v=63';
-import { strike as strikeKey, setCarriage, carriageReturn, feed } from './carriage.js?v=63';
-import travelData from '../travel/data.js?v=63';
-import { parseTravel, localNow, flight } from '../travel/trips.js?v=63';
+import data from './data.js?v=64';
+import { TYPES, dotDate, sortNotes, years } from './notes.js?v=64';
+import { unseal } from './seal.js?v=64';
+import { typewriterMarkup } from './typewriter.js?v=64';
+import { strike as strikeKey, setCarriage, carriageReturn, feed } from './carriage.js?v=64';
+import travelData from '../travel/data.js?v=64';
+import { parseTravel, localNow, flight } from '../travel/trips.js?v=64';
 import { collectionPath } from '../../router.js';
-import { play as sound } from '../../sound.js?v=63';
-import { getGuest } from './guest.js?v=63';
+import { play as sound } from '../../sound.js?v=64';
+import { getGuest } from './guest.js?v=64';
 
 const esc = text => String(text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const pad3 = n => String(n).padStart(3, '0');
