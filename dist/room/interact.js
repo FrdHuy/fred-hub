@@ -43,6 +43,9 @@ export function createInteract({ stage, view, placed, host, memory, plots, sound
 
   let hot = null, shown = null, byKey = false, busy = false, dirty = false, down = null, linger = 0;
   name(); memory.onChange(name);
+  // 开着、连上了线、这台设备还没说过自己是谁：问一次。
+  const askWho = () => { const data = memory.data; if (data && memory.online && !memory.me && data.people?.length && !panel.open) panel.askWho(data.people); };
+  memory.onChange(() => { if (!busy) askWho(); });
   const pointer = new THREE.Vector2(), raycaster = new THREE.Raycaster(), spot = new THREE.Vector3();
   const aim = e => { const r = canvas.getBoundingClientRect(); pointer.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1); };
   // 指针下面是哪件物件：射线打到的第一个网格，顺着父节点往上找到带配置的那一层。随墙隐去的东西不算。
@@ -71,7 +74,7 @@ export function createInteract({ stage, view, placed, host, memory, plots, sound
   }, { signal });
 
   // 面板关上之后：镜头拉回全景，焦点还给刚才那件物件。
-  const leave = object => () => { hot = null; view.back().then(() => { busy = false; dirty = true; }); if (byKey) info.get(object).item.focus({ preventScroll: true }); };
+  const leave = object => () => { hot = null; view.back().then(() => { busy = false; dirty = true; askWho(); }); if (byKey) info.get(object)?.item.focus({ preventScroll: true }); };
   // 点中物件。
   //   门垫：锁着 → 递上钥匙（输入暗号）；开着 → 问要不要锁门。
   //   别的物件：锁着 → 不打开，把目光引到门垫上；开着 → 镜头推近，打开它装着的回忆。

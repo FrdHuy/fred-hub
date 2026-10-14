@@ -7,7 +7,7 @@
 import * as THREE from './three.js';
 import { mat, glow, box, cyl, ball, rod, group, contact, own, tilt } from './kit.js';
 import { GRASS } from './scene.js';
-import { BEDS, plantsFrom, milestonesOf, watered } from './growth.js';
+import { BEDS, plantsFrom, milestonesOf, wateredToday } from './growth.js';
 import { dayCount } from './memory.js';
 
 const TOP = GRASS + .045, green = () => mat('#5f9a48'), leafy = () => mat('#7fb857');
@@ -82,7 +82,7 @@ export function createPlots(scene, garden, onChange) {
   }
   // 今天浇过水的那些：算好微光的位置。
   function glint() {
-    const wet = watered(); lit = things.filter(o => wet.has(o.userData.entry.plant.id));
+    const wet = wateredToday(data); lit = things.filter(o => wet.has(o.userData.entry.plant.id));          // 今天有人浇过就有微光
     sparkle.geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(lit.length * 9), 3)); sparkle.visible = lit.length > 0; update(0);
   }
   function update(time) {

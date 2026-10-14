@@ -123,3 +123,13 @@
 .r3m-recall p{margin:8px 0 0;font:11px/1.6 var(--font-mono);letter-spacing:.08em;color:#90928a}
 @keyframes r3-recall{from{opacity:0;transform:translateY(6px)}}
 @media(prefers-reduced-motion:reduce){.r3m-recall{animation:none}}
+/* 今天谁浇过：名字前一个小水滴，浇过的是实心 */
+.r3m-today{display:flex;gap:16px;margin:0 0 4px;font:12px var(--font-ui);letter-spacing:.06em;color:#90928a}
+.r3m-today span:before{content:'';display:inline-block;width:7px;height:9px;margin-right:6px;border:1.2px solid currentColor;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;vertical-align:-1px}
+.r3m-today span.is-done{color:#3f6472}.r3m-today span.is-done:before{background:currentColor}
+.r3m-offline{margin:4px 0;font:13px var(--font-ui);color:#90928a}
+.r3-key-lock.is-quiet{color:#90928a;font-size:13px}
+.r3-who{gap:6px;padding-right:20px}
+.r3-who-ask{font:14px var(--font-ui);letter-spacing:.1em;color:#90928a;margin-right:6px}
+.r3-who .r3-key-lock{padding:6px 12px;border-radius:999px;box-shadow:inset 0 0 0 1px #e0d8c6}
+.r3-who .r3-key-lock:hover{background:#f6f1e4}

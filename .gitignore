@@ -13,3 +13,5 @@ notes/couple-*.txt
 notes/2026-10-11-right-time.md
 # the cabin belongs to the two of them: their memories stay on this machine (the site only carries ciphertext)
 /memories/
+.vercel
+.env*

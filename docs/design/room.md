@@ -23,6 +23,13 @@
   - 在一起满 100 / 365 / 520 / 1000 天自动多出：鸟屋 / 秋千 / 花圃上的一串灯 / 许愿井。
   - 点一株 → 小纸牌：名字、第几天、日期、品种与阶段、一句话。**浇水**：每株每天一次，那株点两下头、当天头顶有微光，并带出一段回忆（照片 / 信里的一段 / 时间线等，同一株同一天固定）。只记在本机 localStorage `fred-cabin-water`，**两个人的设备不同步**；不浇没有任何后果。
   - 植物是动态的可点物件：`interact.setPlants()` 登记 / 注销，键盘导航里也有。
+- **线上（两个人共用）**（Fred 2026-10-14：用 Vercel；名字 Fred / Michelle，写在 `memories/我们.txt` 里，属于加密内容；Michelle 可以添加、修改、删除）：
+  - 存储：项目连接的 Upstash Redis（Vercel 后台 Storage → Upstash for Redis，变量 `KV_REST_API_URL` / `KV_REST_API_TOKEN`，只配在 Preview / Production）。接口 `dist/api/cabin.js`（Vercel 函数，Root Directory 是 dist 所以放在 dist/api；`dist/package.json` 只为声明 ES 模块，没有依赖；直接调 Upstash REST，不引入代码库）。键名前缀线上 `cabin:`，本地 `dev:`。
+  - 只存密文：整个小屋的状态（回忆 + 浇水 + 之后的养成）在浏览器里用同一把密钥加密成一份，`version` 每写一次加 1；PUT 时版本号对不上返回 409 和最新的一份，`cloud.js` 拿最新的重做一次改动（最多 4 次）。照片之后单独存 `cabin:photo:<id>`。
+  - 谁能读写：请求带 `writeToken(密钥)`（`vault.js`），它的 SHA-256 必须等于 `sealed.js` 里的 `lock`。所以**知道暗号 = 能读写**；换暗号需要把线上那份用新密钥重新加密（还没做，换暗号前要先做这一步）。
+  - 导入：第一次有人开锁且线上是空的，就把 `sealed.js` 的内容导入线上；**之后以线上为准**，`memories/` 文件再改也不会自动同步（只用于第一次导入、连不上线时的只读备份）。
+  - 「我是谁」：每台设备第一次开锁后选一次（localStorage `fred-cabin-me`）；门垫的锁门卡片里可以「我不是 X」。浇水记在 `data.water[日期][名字]`，彼此都看得到；累计在 `data.totals`。小屋开着时每 45 秒、回到标签页时各刷新一次。
+  - 本地测试：`node scripts/serve.mjs 57124`（.claude/launch.json 的 fred-hub-cabin）——静态文件 + 运行 dist/api 的函数；Upstash 的密钥是敏感变量下载不下来，所以默认连本地假存储（`.vercel/dev-kv.json`）。check-room 里也用假存储跑一遍真实的接口。
 - 分步：1 ✅ 骨架（钥匙、加密脚本、面板、物件改造、占位内容）；2 ✅ 照片（加密图片、墙上的相纸显示真照片、相册）；3 信与纪念日打磨；4 冰箱贴与小物件（摆在屋里、点开是来历）。全部满意后再上线。
 - 遗留：main.js 里 `roomReturn` / mountRoom 的 `open`、`tint` 还在但小屋不再使用（没有删，避免动共享文件）。
 

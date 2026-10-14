@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ITERATIONS, toBase64, deriveKey, sealJSON, openJSON, sealBytes, fromBase64 } from '../dist/room/vault.js';
+import { ITERATIONS, toBase64, deriveKey, sealJSON, openJSON, sealBytes, fromBase64, writeToken, sha256 } from '../dist/room/vault.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url)), real = join(root, 'memories'), example = join(root, 'memories.example');
 const source = existsSync(real) ? real : example, out = join(root, 'dist/room/memories');
@@ -67,8 +67,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const phrase = lines(read('暗号.txt'))[0];
   if (!phrase) { console.error(`✗ ${source}/暗号.txt 里没有暗号（第一行非 # 开头的文字）`); process.exit(1); }
   if (source === real && phrase.length < 8) console.warn('! 暗号少于 8 个字：密文是公开的，短暗号很容易被试出来，建议换成一句话。');
+  const people = lines(read('我们.txt')).slice(0, 2);
+  if (people.length < 2) { console.error(`✗ ${source}/我们.txt 要写两行：你们俩在小屋里的名字`); process.exit(1); }
   const letterDir = join(source, '信');
   const payload = {
+    people,
     letters: (existsSync(letterDir) ? readdirSync(letterDir).filter(f => f.endsWith('.md')).sort() : []).map(f => parseLetter(readFileSync(join(letterDir, f), 'utf8'), f)).sort((a, b) => b.date.localeCompare(a.date)),
     days: parseDays(read('纪念日.md')),
     garden: parseList(read('花园.md')).filter(item => item.date),
@@ -79,7 +82,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const file = join(out, 'sealed.js'), previous = existsSync(file) ? readFileSync(file, 'utf8').match(/"salt":"([^"]+)"/)?.[1] : null;
   const salt = previous ?? toBase64(crypto.getRandomValues(new Uint8Array(16))), key = await deriveKey(phrase, salt);
   const album = await sealPhotos(key); payload.photos = album.photos;
-  const sealed = { salt, iterations: ITERATIONS, ...await sealJSON(key, payload) };
+  // lock：写入凭证的指纹。线上服务用它判断「这个人知道暗号」，见 dist/api/cabin.js。
+  const sealed = { salt, iterations: ITERATIONS, lock: await sha256(await writeToken(key)), ...await sealJSON(key, payload) };
   if (!(await openJSON(key, sealed))) throw new Error('seal round trip failed');
   writeFileSync(file, `// 你们的回忆（AES-GCM 密文）。原文在 memories/，改完运行 node scripts/seal-memories.mjs。不要手改。\nexport default ${JSON.stringify(sealed)};\n`);
   console.log(`✓ ${source === real ? 'memories/' : 'memories.example/（占位内容，暗号 cabin）'} → dist/room/memories/sealed.js`);

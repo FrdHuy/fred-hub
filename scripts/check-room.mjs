@@ -6,7 +6,7 @@ import { readRoute } from '../dist/router.js';
 import { objects, mood, MEMORIES } from '../dist/room/config.js';
 import { deriveKey, sealJSON, openJSON, exportKey, importKey } from '../dist/room/vault.js';
 import { dayCount, nextAnniversary } from '../dist/room/memory.js';
-import { SLOTS, BEDS, inBed, stageOf, yearsOf, speciesOf, plantsFrom, milestonesOf, recall } from '../dist/room/growth.js';
+import { SLOTS, BEDS, inBed, stageOf, yearsOf, speciesOf, plantsFrom, milestonesOf, recall, water, wateredBy, wateredToday } from '../dist/room/growth.js';
 import { parseList, parseLetter, parseDays } from './seal-memories.mjs';
 
 assert.deepEqual(readRoute('#/room'), { type: 'room' });
@@ -73,8 +73,30 @@ assert.equal(many.length, 24); assert.equal(new Set(many.map(p => String(p.at)))
 assert.deepEqual(milestonesOf(99), []); assert.deepEqual(milestonesOf(520), ['birdhouse', 'swing', 'lights']);
 const pool = { photos: [{ id: 'a' }], letters: [{ from: 'F', date: '', paragraphs: ['一', '二'] }], days: { timeline: [{ title: 't' }] } };
 assert.deepEqual(recall(pool, 'x', day), recall(pool, 'x', day), '同一株同一天带出同一段回忆'); assert.equal(recall({}, 'x', day), null);
+// 浇水记在两个人共用的状态里：每人每株每天一次；两个人都浇了算一次「一起」；只留 90 天明细。
+let shared = { water: { '2025-01-01': { Fred: ['old'] } } };
+shared = water(shared, 'rose', 'Fred', day); shared = water(shared, 'rose', 'Fred', day); shared = water(shared, 'rose', 'M', day);
+assert.deepEqual(wateredBy(shared, 'rose', day), ['Fred', 'M']); assert.deepEqual(shared.totals, { Fred: 1, M: 1, together: 1 }); assert.ok(wateredToday(shared, day).has('rose'));
+assert.ok(!shared.water['2025-01-01'], '90 天以前的明细会被清掉');
+// 线上接口：带对凭证才能读写；版本号不对时拒绝并交回最新的那份。（用本地的假存储跑一遍真正的 dist/api/cabin.js）
+{
+  const store = new Map(), realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => { const [command, ...args] = JSON.parse(init.body); const h = store.get(command === 'EVAL' ? args[2] : args[0]) ?? {}; let result;
+    if (command === 'HMGET') result = args.slice(1).map(f => h[f] ?? null); else if (command === 'EVAL') { const v = Number(h.v ?? 0); if (v !== Number(args[3])) result = [v, h.d ?? '']; else { store.set(args[2], { v: v + 1, d: args[4] }); result = [v + 1]; } } else if (command === 'SET') { store.set(args[0], args[1]); result = 'OK'; } else if (command === 'GET') result = store.get(args[0]) ?? null; else result = 1;
+    return new Response(JSON.stringify({ result })); };
+  process.env.KV_REST_API_URL = 'https://fake.local'; process.env.KV_REST_API_TOKEN = 'x';
+  const api = await import('../dist/api/cabin.js'), sealedBox = (await import('../dist/room/memories/sealed.js')).default;
+  const token = await (await import('../dist/room/vault.js')).writeToken(await deriveKey('cabin', sealedBox.salt, sealedBox.iterations));
+  const call = async (method, body, auth = token, query = '') => { const r = await api[method](new Request(`http://x/api/cabin${query}`, { method, headers: { authorization: `Bearer ${auth}` }, body: body && JSON.stringify(body) })); return [r.status, await r.json()]; };
+  assert.equal((await call('GET', undefined, 'wrong'))[0], 401, '没有凭证不能读');
+  assert.deepEqual(await call('GET'), [200, { version: 0, data: null }]);
+  assert.deepEqual(await call('PUT', { version: 0, data: 'a' }), [200, { version: 1 }]);
+  assert.deepEqual(await call('PUT', { version: 0, data: 'b' }), [409, { version: 1, data: 'a' }], '版本过期时拒绝并交回最新的');
+  assert.deepEqual(await call('PUT', { data: 'p' }, token, '?photo=abc123'), [200, { ok: true }]); assert.deepEqual(await call('GET', undefined, token, '?photo=abc123'), [200, { data: 'p' }]);
+  globalThis.fetch = realFetch;
+}
 const box = readFileSync('dist/room/memories/sealed.js', 'utf8');
 assert.ok(/"salt":"[^"]+","iterations":600000,"iv":"[^"]+","data":"[^"]+"/.test(box), 'memories/sealed.js 应该只有密文');
 assert.ok(readFileSync('.gitignore', 'utf8').split('\n').includes('/memories/'), '根目录的 memories/ 必须被 git 忽略（dist/room/memories/ 里的密文要进仓库）');
 if (existsSync('memories/暗号.txt')) { const phrase = readFileSync('memories/暗号.txt', 'utf8').split('\n').map(l => l.trim()).find(l => l && !l.startsWith('#')); for (const file of sources) assert.ok(!readFileSync(file, 'utf8').includes(phrase), `${file}: 暗号不能出现在 dist/ 里`); }
-console.log(`PASS: room config (${objects.length} objects), sealed memories round trip, garden rules, vendored three@0.170.0, no external sources`);
+console.log(`PASS: room config (${objects.length} objects), sealed memories round trip, garden rules, shared watering, online API, vendored three@0.170.0, no external sources`);

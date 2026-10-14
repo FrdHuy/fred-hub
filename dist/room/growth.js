@@ -41,15 +41,22 @@ export function plantsFrom(data, today = new Date()) {
 export const MILESTONES = [[100, 'birdhouse', '鸟屋'], [365, 'swing', '秋千'], [520, 'lights', '花圃上的一串灯'], [1000, 'well', '许愿井']];
 export const milestonesOf = days => MILESTONES.filter(([at]) => days >= at).map(([, key]) => key);
 
-// 浇水：每株每天一次，记在这台设备上（两个人各记各的，不同步）。不浇没有任何后果。
-const WATER = 'fred-cabin-water', stamp = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-export function watered(today = new Date()) {
-  try { const saved = JSON.parse(localStorage.getItem(WATER) ?? 'null'); return saved?.date === stamp(today) ? new Set(saved.ids) : new Set(); } catch { return new Set(); }
-}
-export function water(id, today = new Date()) {
-  const ids = watered(today); ids.add(id);
-  try { localStorage.setItem(WATER, JSON.stringify({ date: stamp(today), ids: [...ids] })); } catch {}
-  return ids;
+// 浇水：每人每株每天一次。记在两个人共用的那份状态里（data.water[日期][名字] = [植物]），所以彼此都看得到。
+// 不浇没有任何后果。只保留最近 90 天的明细；累计次数在 data.totals（之后算「心意」用）。
+export const stamp = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+// 今天给这株浇过水的人（名字列表）。
+export const wateredBy = (data, id, today = new Date()) => Object.entries(data?.water?.[stamp(today)] ?? {}).filter(([, ids]) => ids.includes(id)).map(([name]) => name);
+// 今天有人浇过的所有植物。
+export const wateredToday = (data, today = new Date()) => new Set(Object.values(data?.water?.[stamp(today)] ?? {}).flat());
+// 浇一次：返回改好的状态（给 memory.change 用）。同一个人同一株今天已经浇过就原样返回。
+export function water(state, id, who, today = new Date()) {
+  const day = stamp(today), log = state.water ??= {}, mine = (log[day] ??= {})[who] ??= [];
+  if (mine.includes(id)) return state;
+  const together = Object.entries(log[day]).some(([name, ids]) => name !== who && ids.includes(id));
+  mine.push(id);
+  const totals = state.totals ??= {}; totals[who] = (totals[who] ?? 0) + 1; if (together) totals.together = (totals.together ?? 0) + 1;
+  const cut = stamp(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 90)); for (const old of Object.keys(log)) if (old < cut) delete log[old];
+  return state;
 }
 // 浇水带出的那段回忆：从照片、信里的一段、时间线、去过的地方……里挑一条。同一株同一天挑到的是同一条。
 export function recall(data, id, today = new Date()) {

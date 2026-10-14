@@ -4,7 +4,7 @@
 //   · askLock(lock)            已经开着时点门垫：把小屋锁上
 // 每种回忆怎么排版，写在下面的 SHOW 里（config.js 里物件的 memory 字段 → 这里的同名函数）。
 import { dayCount, nextAnniversary } from './memory.js';
-import { STAGE_NAME, SPECIES, watered, water, recall } from './growth.js';
+import { STAGE_NAME, SPECIES, wateredBy, water, recall } from './growth.js';
 
 const el = (tag, className, text) => { const node = document.createElement(tag); if (className) node.className = className; if (text != null) node.textContent = text; return node; };
 const dots = date => date ? date.replaceAll('-', '.') : '';
@@ -102,10 +102,14 @@ export function createPanel(host, memory) {
     },
     // 一株植物的小纸牌：名字、第几天、当时的一句话；可以浇水（每株每天一次），浇完带出一段回忆。
     showPlant(plant, data, onWater, done) {
+      const who = memory.me;
       const panel = el('section', 'r3-panel is-plant'); panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-label', plant.title);
       const head = el('h2', '', plant.title), body = el('div', 'r3m-body'), x = closer('关上');
       body.append(el('p', 'r3m-plant', [`第 ${plant.days} 天`, dots(plant.date), plant.stage === 'tree' ? '' : `${SPECIES[plant.species]} · ${STAGE_NAME[plant.stage]}`].filter(Boolean).join('  ·  ')));
       if (plant.note) body.append(el('p', 'r3m-note', plant.note));
+      // 今天谁浇过：每个人一个小水滴，浇过的是实心的。
+      const today = el('p', 'r3m-today'), paintToday = () => { today.replaceChildren(...(memory.data?.people ?? []).map(name => { const mark = el('span', wateredBy(memory.data, plant.id).includes(name) ? 'is-done' : '', name); return mark; })); };
+      paintToday(); body.append(today);
       const slot = el('div', 'r3m-water'); body.append(slot);
       // 浇水带出的那段回忆：一张照片、信里的一段，或者时间线上的一件事。
       const remember = () => {
@@ -115,8 +119,10 @@ export function createPanel(host, memory) {
         else if (found.kind === 'letter') card.append(el('blockquote', '', found.text), el('p', '', [found.from && `来自 ${found.from}`, dots(found.date)].filter(Boolean).join(' · ')));
         else card.append(el('strong', '', found.title), el('p', '', [found.note, dots(found.date)].filter(Boolean).join(' · ')));
       };
-      if (watered().has(plant.id)) remember();
-      else { const can = el('button', 'r3m-can'); can.type = 'button'; can.innerHTML = '<svg viewBox="0 0 28 20" aria-hidden="true"><path d="M8 7.5h10v9.5H8zM18 9.5l6.5-4.5M24.5 5l1.8 1.8M8 9.5H5.2a2.6 2.6 0 0 0 0 5.2H8M10.5 7.5a2.6 2.6 0 0 1 5 0"/></svg><span>浇水</span>'; can.addEventListener('click', () => { water(plant.id); onWater?.(); remember(); x.focus(); }); slot.append(can); }
+      if (!memory.online) slot.append(el('p', 'r3m-offline', '现在连不上小屋，浇水要等一会儿。'));
+      else if (!who) slot.append(el('p', 'r3m-offline', '先在门垫那里说一下你是谁。'));
+      else if (wateredBy(memory.data, plant.id).includes(who)) remember();
+      else { const can = el('button', 'r3m-can'); can.type = 'button'; can.innerHTML = '<svg viewBox="0 0 28 20" aria-hidden="true"><path d="M8 7.5h10v9.5H8zM18 9.5l6.5-4.5M24.5 5l1.8 1.8M8 9.5H5.2a2.6 2.6 0 0 0 0 5.2H8M10.5 7.5a2.6 2.6 0 0 1 5 0"/></svg><span>浇水</span>'; can.addEventListener('click', async () => { can.disabled = true; try { await memory.change(state => water(state, plant.id, who)); onWater?.(); paintToday(); remember(); x.focus(); } catch { can.disabled = false; } }); slot.append(can); }
       panel.append(x, head, body); show(panel, done); x.focus({ preventScroll: true });
     },
     // tryPhrase(暗号) → Promise<boolean>。错了：纸条抖一下、清空；对了：关上（done 里接着拉回镜头）。
@@ -136,7 +142,16 @@ export function createPanel(host, memory) {
     askLock(lock, done) {
       const card = el('div', 'r3-key'); card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true'); card.setAttribute('aria-label', '锁门');
       const button = el('button', 'r3-key-lock', '把小屋锁上'); button.type = 'button'; button.addEventListener('click', () => { lock(); close(); });
-      card.append(button, closer('不锁')); show(card, done); button.focus({ preventScroll: true });
+      card.append(button);
+      if (memory.me) { const swap = el('button', 'r3-key-lock is-quiet', `我不是 ${memory.me}`); swap.type = 'button'; swap.addEventListener('click', () => { memory.me = ''; close(); }); card.append(swap); }
+      card.append(closer('不锁')); show(card, done); button.focus({ preventScroll: true });
+    },
+    // 我是谁：每台设备选一次。
+    askWho(names, done) {
+      const card = el('div', 'r3-key r3-who'); card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true'); card.setAttribute('aria-label', '我是谁');
+      card.append(el('span', 'r3-who-ask', '我是'));
+      for (const name of names) { const pick = el('button', 'r3-key-lock', name); pick.type = 'button'; pick.addEventListener('click', () => { memory.me = name; close(); }); card.append(pick); }
+      show(card, done); card.querySelector('button').focus({ preventScroll: true });
     },
   };
 }

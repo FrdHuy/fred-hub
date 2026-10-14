@@ -16,6 +16,12 @@ export async function deriveKey(phrase, salt, iterations = ITERATIONS) {
 export const exportKey = async key => toBase64(await crypto.subtle.exportKey('raw', key));
 export const importKey = raw => crypto.subtle.importKey('raw', fromBase64(raw), 'AES-GCM', true, ['encrypt', 'decrypt']);
 
+// 写入凭证：从密钥派生的一串字符，线上服务认它才允许写（见 dist/api/cabin.js）。
+// 服务器只知道它的指纹（lock = SHA-256(凭证)，写在 sealed.js 里）；从指纹推不回凭证，凭证也推不回暗号。
+const hex = bytes => [...new Uint8Array(bytes)].map(b => b.toString(16).padStart(2, '0')).join('');
+export const sha256 = async textValue => hex(await crypto.subtle.digest('SHA-256', text.encode(textValue)));
+export async function writeToken(key) { return sha256(`cabin-write:${await exportKey(key)}`); }
+
 export async function sealBytes(key, bytes) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   return { iv: toBase64(iv), data: new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes)) };
