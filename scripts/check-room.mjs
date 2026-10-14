@@ -96,7 +96,7 @@ assert.ok(!shared.water['2025-01-01'], '90 天以前的明细会被清掉');
   globalThis.fetch = realFetch;
 }
 const box = readFileSync('dist/room/memories/sealed.js', 'utf8');
-assert.ok(/"salt":"[^"]+","iterations":600000,"iv":"[^"]+","data":"[^"]+"/.test(box), 'memories/sealed.js 应该只有密文');
+assert.ok(/"salt":"[^"]+","iterations":600000,"lock":"[0-9a-f]{64}","iv":"[^"]+","data":"[^"]+"/.test(box), 'memories/sealed.js 应该只有密文');
 assert.ok(readFileSync('.gitignore', 'utf8').split('\n').includes('/memories/'), '根目录的 memories/ 必须被 git 忽略（dist/room/memories/ 里的密文要进仓库）');
 if (existsSync('memories/暗号.txt')) { const phrase = readFileSync('memories/暗号.txt', 'utf8').split('\n').map(l => l.trim()).find(l => l && !l.startsWith('#')); for (const file of sources) assert.ok(!readFileSync(file, 'utf8').includes(phrase), `${file}: 暗号不能出现在 dist/ 里`); }
 console.log(`PASS: room config (${objects.length} objects), sealed memories round trip, garden rules, shared watering, online API, vendored three@0.170.0, no external sources`);
