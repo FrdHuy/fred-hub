@@ -4,8 +4,19 @@
     {
       "name": "fred-hub",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["scripts/preview.py"],
+      "runtimeArgs": [
+        "scripts/preview.py"
+      ],
       "port": 57123
+    },
+    {
+      "name": "fred-hub-cabin",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "../Fred-Personal-Site-cabin/scripts/preview.py",
+        "57124"
+      ],
+      "port": 57124
     }
   ]
 }
