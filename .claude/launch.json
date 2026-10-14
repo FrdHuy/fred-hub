@@ -11,9 +11,9 @@
     },
     {
       "name": "fred-hub-cabin",
-      "runtimeExecutable": "python3",
+      "runtimeExecutable": "node",
       "runtimeArgs": [
-        "../Fred-Personal-Site-cabin/scripts/preview.py",
+        "../Fred-Personal-Site-cabin/scripts/serve.mjs",
         "57124"
       ],
       "port": 57124
