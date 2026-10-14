@@ -121,15 +121,17 @@ assert.ok(!shared.water['2025-01-01'], '90 天以前的明细会被清掉');
     if (command === 'HMGET') result = args.slice(1).map(f => h[f] ?? null); else if (command === 'EVAL') { const v = Number(h.v ?? 0); if (v !== Number(args[3])) result = [v, h.d ?? '']; else { store.set(args[2], { v: v + 1, d: args[4] }); result = [v + 1]; } } else if (command === 'SET') { store.set(args[0], args[1]); result = 'OK'; } else if (command === 'GET') result = store.get(args[0]) ?? null; else result = 1;
     return new Response(JSON.stringify({ result })); };
   process.env.KV_REST_API_URL = 'https://fake.local'; process.env.KV_REST_API_TOKEN = 'x';
-  const api = await import('../dist/api/cabin.js'), sealedBox = (await import('../dist/room/memories/sealed.js')).default;
-  const token = await (await import('../dist/room/vault.js')).writeToken(await deriveKey('cabin', sealedBox.salt, sealedBox.iterations));
+  // 测试不知道真正的暗号：用一个测试暗号派生凭证，再通过 CABIN_TEST_LOCK 告诉接口它的指纹。
+  const vaultModule = await import('../dist/room/vault.js'), token = await vaultModule.writeToken(await deriveKey('test phrase', 'AAAAAAAAAAAAAAAAAAAAAA==', 1000));
+  process.env.CABIN_TEST_LOCK = await vaultModule.sha256(token);
+  const api = await import('../dist/api/cabin.js');
   const call = async (method, body, auth = token, query = '') => { const r = await api[method](new Request(`http://x/api/cabin${query}`, { method, headers: { authorization: `Bearer ${auth}` }, body: body && JSON.stringify(body) })); return [r.status, await r.json()]; };
   assert.equal((await call('GET', undefined, 'wrong'))[0], 401, '没有凭证不能读');
   assert.deepEqual(await call('GET'), [200, { version: 0, data: null }]);
   assert.deepEqual(await call('PUT', { version: 0, data: 'a' }), [200, { version: 1 }]);
   assert.deepEqual(await call('PUT', { version: 0, data: 'b' }), [409, { version: 1, data: 'a' }], '版本过期时拒绝并交回最新的');
   assert.deepEqual(await call('PUT', { data: 'p' }, token, '?photo=abc123'), [200, { ok: true }]); assert.deepEqual(await call('GET', undefined, token, '?photo=abc123'), [200, { data: 'p' }]);
-  globalThis.fetch = realFetch;
+  globalThis.fetch = realFetch; delete process.env.CABIN_TEST_LOCK;
 }
 const box = readFileSync('dist/room/memories/sealed.js', 'utf8');
 assert.ok(/"salt":"[^"]+","iterations":600000,"lock":"[0-9a-f]{64}","iv":"[^"]+","data":"[^"]+"/.test(box), 'memories/sealed.js 应该只有密文');

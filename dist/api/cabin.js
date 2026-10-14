@@ -33,7 +33,9 @@ const reply = (body, status = 200) => Response.json(body, { status, headers: { '
 async function handle(request) {
   if (!process.env.KV_REST_API_URL) return reply({ error: 'storage not connected' }, 503);
   const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
-  if (!box.lock || !token || await sha256(token) !== box.lock) return reply({ error: 'locked' }, 401);
+  // CABIN_TEST_LOCK 只给 scripts/check-room.mjs 用（它不知道真正的暗号）；线上不设置它。
+  const lock = process.env.CABIN_TEST_LOCK || box.lock;
+  if (!lock || !token || await sha256(token) !== lock) return reply({ error: 'locked' }, 401);
   const url = new URL(request.url), photo = url.searchParams.get('photo');
   if (photo !== null) {
     if (!/^[\w-]{6,64}$/.test(photo)) return reply({ error: 'bad photo id' }, 400);
