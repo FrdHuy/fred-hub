@@ -45,3 +45,50 @@
 .room-view.is-turning .r3-canvas{opacity:0;transition-duration:.22s}
 .room-view[data-state=flat] .r3-moods{display:none}
 @media(max-width:420px){.r3-moods button{width:34px}}
+/* ── 两个人的小屋：回忆面板、钥匙 ─────────────────────────────────────────── */
+/* 锁着的回忆：标签后面一把小锁 */
+.r3-label.is-locked{background:rgba(253,250,244,.78);color:#6f716a}
+.r3-label.is-locked:after{content:'';display:inline-block;width:9px;height:11px;margin-left:8px;vertical-align:-1px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 11'%3E%3Cpath d='M1 5h7v5.5H1zM2.5 5V3.2a2 2 0 0 1 4 0V5' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 11'%3E%3Cpath d='M1 5h7v5.5H1zM2.5 5V3.2a2 2 0 0 1 4 0V5' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat}
+/* 回忆面板：一张暖白的纸，电脑上靠右，手机上从底部升起；左边还看得见推近后的物件 */
+.r3-panel{position:absolute;z-index:4;right:max(4%,18px);top:50%;width:min(430px,92vw);max-height:min(76svh,680px);display:flex;flex-direction:column;padding:26px 28px 22px;border-radius:6px;background:#fdfaf3;color:#343832;box-shadow:0 24px 60px rgba(20,14,10,.42),0 2px 6px rgba(20,14,10,.2);opacity:0;transform:translateY(-50%) translateX(18px);transition:opacity .32s,transform .42s var(--ease,ease-out)}
+.r3-panel.is-on{opacity:1;transform:translateY(-50%)}
+.r3-panel>h2{margin:0 44px 16px 0;font:400 22px/1.3 var(--font-literary);letter-spacing:.06em}
+.r3m-body{overflow-y:auto;margin:0 -8px;padding:0 8px 4px;font:15px/1.8 var(--font-ui)}
+.r3m-close,.r3m-back{min-height:0;width:40px;height:40px;display:grid;place-items:center;color:#6f716a;opacity:.75;transition:opacity .2s}
+.r3m-close{position:absolute;right:12px;top:14px}
+.r3m-close:hover,.r3m-back:hover{opacity:1}
+.r3m-close svg,.r3m-back svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.r3m-back{margin:-6px 0 4px -10px}
+.r3m-empty{margin:18px 0;color:#90928a}
+.r3m-rows{list-style:none;margin:0;padding:0}
+.r3m-rows li{display:grid;grid-template-columns:auto 1fr;column-gap:14px;padding:11px 0;border-top:1px solid #e8e3d6}
+.r3m-rows li:first-child{border-top:0}
+.r3m-rows time{grid-row:1/3;padding-top:4px;font:11px/1.4 var(--font-mono);letter-spacing:.12em;color:#90928a}
+.r3m-rows strong{font-weight:500}
+.r3m-rows span{grid-column:2;color:#6f716a;font-size:14px;line-height:1.7}
+.r3m-rows li:not(:has(time)) strong,.r3m-rows li:not(:has(time)) span{grid-column:1/3}
+.r3m-count{display:grid;justify-items:center;padding:6px 0 2px}
+.r3m-count small{font:11px var(--font-mono);letter-spacing:.3em;color:#b34934}
+.r3m-count b{font:400 76px/1.05 var(--font-literary)}
+.r3m-count span{font:11px var(--font-mono);letter-spacing:.14em;color:#90928a}
+.r3m-next{margin:8px 0 14px;text-align:center;color:#6f716a;font-size:14px}
+.r3m-letters{display:grid;gap:10px;padding:2px 0 6px}
+.r3m-envelope{min-height:0;display:grid;gap:4px;padding:14px 16px;text-align:left;border-radius:4px;background:#f6f1e4;box-shadow:inset 0 0 0 1px #e8e0cc;transition:transform .2s,box-shadow .2s}
+.r3m-envelope:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px #dcd2b8,0 6px 14px rgba(60,40,20,.12)}
+.r3m-envelope strong{font:400 17px/1.4 var(--font-literary)}
+.r3m-envelope span{font:11px var(--font-mono);letter-spacing:.1em;color:#90928a}
+.r3m-letter h3{margin:0 0 14px;font:400 20px/1.4 var(--font-literary)}
+.r3m-letter p{margin:0 0 1em;font:16px/2 var(--font-literary)}
+.r3m-letter footer{margin-top:20px;text-align:right;font:11px var(--font-mono);letter-spacing:.12em;color:#90928a}
+/* 钥匙：一张小纸条，上面一把钥匙的线稿和一个输入框 */
+.r3-key{position:absolute;z-index:4;left:50%;bottom:max(15svh,96px);display:flex;align-items:center;gap:14px;padding:14px 54px 14px 20px;border-radius:999px;background:#fdfaf3;color:#343832;box-shadow:0 18px 44px rgba(20,14,10,.42);opacity:0;transform:translate(-50%,12px);transition:opacity .28s,transform .36s var(--ease,ease-out)}
+.r3-key.is-on{opacity:1;transform:translate(-50%,0)}
+.r3-key-icon{width:40px;height:20px;flex:none;fill:none;stroke:#b98a3c;stroke-width:1.5;stroke-linecap:round}
+.r3-key input{width:min(52vw,230px);border:0;border-bottom:1px solid #cfc8b6;background:none;padding:5px 2px;font:16px var(--font-mono);letter-spacing:.2em;color:inherit;outline:none}
+.r3-key .r3m-close{right:8px;top:50%;margin-top:-20px}
+.r3-key.is-busy input{opacity:.45}
+.r3-key.is-wrong{animation:r3-shake .38s}
+.r3-key-lock{min-height:0;padding:6px 4px;font:14px var(--font-ui);letter-spacing:.1em;color:inherit}
+@keyframes r3-shake{20%{transform:translate(calc(-50% - 9px),0)}40%{transform:translate(calc(-50% + 8px),0)}60%{transform:translate(calc(-50% - 5px),0)}80%{transform:translate(calc(-50% + 3px),0)}}
+@media(max-width:700px){.r3-panel{left:0;right:0;top:auto;bottom:0;width:auto;max-height:62svh;padding:22px 22px 26px;border-radius:14px 14px 0 0;transform:translateY(24px)}.r3-panel.is-on{transform:none}}
+@media(prefers-reduced-motion:reduce){.r3-panel,.r3-key{transition:none}.r3-key.is-wrong{animation:none}}

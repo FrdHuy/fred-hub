@@ -1,6 +1,7 @@
 // 3D 小屋的入口。main.js 在进入 #/room 时才动态加载这个文件（以及 Three.js），其他页面不受影响。
 //
-//   config.js    物件 ↔ 模块映射（增删模块改这里）
+//   config.js    物件 ↔ 回忆的对应（增删物件改这里）
+//   memory.js    回忆锁着还是开着（暗号、记住 7 天）；vault.js 加解密；panel.js 回忆面板和钥匙；memories/ 密文
 //   scene.js     渲染器、天空、悬浮地块、小屋
 //   garden.js    花园
 //   decor.js     不对应模块的摆设
@@ -28,6 +29,7 @@ import { createEffects } from './effects.js';
 import { createView } from './view.js';
 import { createCutaway } from './cutaway.js';
 import { createInteract } from './interact.js';
+import { createMemory } from './memory.js';
 import { detect, createQuality } from './quality.js';
 
 // options：{ open(entry), tint(moduleId), sound(name) }，由 main.js 提供（见 interact.js）。
@@ -43,7 +45,10 @@ export function mountRoom(host, options = {}) {
   const effects = createEffects(stage, lights.sunDirection, still);
   const view = createView(stage, host, still);
   const cutaway = createCutaway(house, decor.userData.onWall, placed);
-  const interact = createInteract({ stage, view, placed, host, still, open: () => {}, tint: () => '#100e0c', ...options });
+  // 回忆：锁着时屋子是空的；开锁后每件物件把自己「住进人」的样子显出来（物件上的 userData.setUnlocked）。
+  const memory = createMemory(), lived = [...placed, decor];
+  memory.onChange(data => { for (const object of lived) object.userData.setUnlocked?.(data); host.dataset.home = data ? 'open' : 'locked'; if (!frame) render(); });
+  const interact = createInteract({ stage, view, placed, host, still, memory, sound: options.sound });
   const clock = new THREE.Clock();
 
   // 渲染循环：只有「在小屋这一页」并且「标签页可见」时才跑，其余时间完全停下，不耗电。
@@ -78,10 +83,11 @@ export function mountRoom(host, options = {}) {
     host.classList.add('is-turning'); turning = setTimeout(() => { applyMood(name); host.classList.remove('is-turning'); }, 240);
   });
   applyMood(current);
+  host.dataset.home = 'locked'; memory.resume();                  // 这台设备 7 天内开过锁：直接打开
   render();                                                       // 先画一帧（顺便编译着色器），main.js 再把画布淡入
 
   return {
-    stage, view, placed, quality, applyMood,
+    stage, view, placed, quality, applyMood, memory,
     // from：来处页面的底色（幕布从这个颜色淡开）。
     start(from) { wanted = true; fitCanvas(); interact.arrive(from); sync(); },
     stop() { wanted = false; sync(); },

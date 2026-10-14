@@ -59,6 +59,11 @@ function fairyLights() {
 export function buildDecor() {
   const lights = fairyLights(), decor = group(rug(.5, 1.05), table(1.35, .45), cat(.25, 1.5, -.5), floorLamp(2.5, -1.2), bookshelf(-2.84, 2.48, Math.PI / 2), plant(1.48, -2.6), lights,
     cyl(.3, .32, .12, mat('#d98a5f', { roughness: 1 }), 2.1, 0, .9, 12), contact(.9, .9, .34, 2.1, .9));
+  // 两个人住的痕迹：门口两双拖鞋、矮桌上的第二只杯子——开锁后才出现。
+  const slipper = (x, z, color, turn) => { const s = group(box(.11, .03, .26, mat(color, { roughness: 1 })), box(.12, .06, .12, mat(color, { roughness: 1 }), 0, .02, -.06)); s.position.set(x, 0, z); s.rotation.y = turn; return s; };
+  const home = group(slipper(.62, 2.62, '#e9b0b8', .1), slipper(.78, 2.6, '#e9b0b8', -.08), slipper(1.08, 2.62, '#8fa9c4', .06), slipper(1.25, 2.64, '#8fa9c4', -.12),
+    cyl(.045, .035, .07, mat('#e9b0b8'), 1.2, .34, .62, 8), cyl(.038, .038, .004, mat('#8a5a3c'), 1.2, .4, .62, 8));
+  home.visible = false; decor.add(home); decor.userData.setUnlocked = data => { home.visible = !!data; };
   decor.userData.onWall = { north: [lights] };
   return decor;
 }

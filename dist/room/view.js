@@ -34,10 +34,10 @@ export function createView({ camera, scene, renderer }, host, still = false) {
     } else if (!saved) controls.update();
   }
   // 推近到一个物件：center / radius 是它的包围球，azimuth 是从哪个方向看它。
-  function closeUp(center, radius, azimuth) {
+  function closeUp(center, radius, azimuth, polar = 64) {
     saved ??= pose(); controls.enabled = false;
     const distance = Math.min(fit * .8, Math.max(radius * 6.5, 5.5) * Math.max(1, .9 / camera.aspect));
-    return fly({ target: center, azimuth, polar: rad(64), distance }, 950);
+    return fly({ target: center, azimuth, polar: rad(polar), distance }, 950);
   }
   // 拉回全景（回到推近前用户自己转到的角度），然后把镜头交还给 OrbitControls。
   function back(ms = 900) {
