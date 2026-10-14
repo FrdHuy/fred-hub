@@ -66,6 +66,7 @@ async function sealPhotos(key) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const phrase = lines(read('暗号.txt'))[0];
   if (!phrase) { console.error(`✗ ${source}/暗号.txt 里没有暗号（第一行非 # 开头的文字）`); process.exit(1); }
+  if (source === real && /在这里写/.test(phrase)) { console.error('✗ memories/暗号.txt 里还是占位文字：先写上你们真正的暗号'); process.exit(1); }
   if (source === real && phrase.length < 8) console.warn('! 暗号少于 8 个字：密文是公开的，短暗号很容易被试出来，建议换成一句话。');
   const people = lines(read('我们.txt')).slice(0, 2);
   if (people.length < 2) { console.error(`✗ ${source}/我们.txt 要写两行：你们俩在小屋里的名字`); process.exit(1); }
