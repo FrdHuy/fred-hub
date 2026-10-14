@@ -269,12 +269,12 @@ export function createPanel(host, memory) {
         start.addEventListener('click', () => {
           const form = el('form', 'r3m-form'), chips = el('div', 'r3m-chips'), words = el('input'); let chosen = '';
           for (const key of speciesFor(p.level)) { const chip = el('button', 'r3m-chip', SPECIES[key]); chip.type = 'button'; const dot = el('i'); dot.style.background = bloomColor(key, key); chip.prepend(dot); chip.addEventListener('click', () => { chosen = key; chips.querySelectorAll('.r3m-chip').forEach(c => c.classList.toggle('is-on', c === chip)); }); chips.append(chip); }
-          Object.assign(words, { type: 'text', placeholder: '种下这株时想说的话', required: true }); words.setAttribute('aria-label', '想说的话');
+          Object.assign(words, { type: 'text', placeholder: '想说的话（可以不写）' }); words.setAttribute('aria-label', '想说的话');
           const sowIt = el('button', 'r3m-save', '种下'), note = el('span', 'r3m-form-note'), row = el('div', 'r3m-form-row'); sowIt.type = 'submit'; row.append(sowIt, note);
           form.append(chips, words, row); start.replaceWith(form); chips.querySelector('button').click(); words.focus();
           form.addEventListener('submit', async e => {
             e.preventDefault(); sowIt.disabled = true;
-            try { await memory.change(state => sow(state, { species: chosen, title: words.value.trim() }, who) ?? state); render(); body.prepend(el('p', 'r3m-note', '种下了。去花圃里看看它吧。')); }
+            try { await memory.change(state => sow(state, { species: chosen, title: words.value.trim() || SPECIES[chosen] }, who) ?? state); render(); body.prepend(el('p', 'r3m-note', '种下了。去花圃里看看它吧。')); }
             catch { note.textContent = '没种上，再试一次'; sowIt.disabled = false; }
           });
         });

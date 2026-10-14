@@ -16,11 +16,11 @@ const TOP = GRASS + .045, green = () => mat('#5f9a48'), leafy = () => mat('#7fb8
 
 // 每个品种开花时的样子：返回一朵花（原点在茎的底部）。
 const BLOOM = {
-  sunflower: () => group(cyl(.014, .018, .6, green(), 0, 0, 0, 5), tilt(ball(.07, leafy(), .08, .3, 0, 0), 0, 0, .6), tilt(cyl(.11, .11, .028, mat('#f6c12e'), 0, .6, .02, 9), 1.0, 0, 0), tilt(cyl(.055, .055, .034, mat('#7a4a22'), 0, .602, .024, 8), 1.0, 0, 0)),
+  sunflower: (color = '#f6c12e') => group(cyl(.014, .018, .6, green(), 0, 0, 0, 5), tilt(ball(.07, leafy(), .08, .3, 0, 0), 0, 0, .6), tilt(cyl(.11, .11, .028, mat(color), 0, .6, .02, 9), 1.0, 0, 0), tilt(cyl(.055, .055, .034, mat('#7a4a22'), 0, .602, .024, 8), 1.0, 0, 0)),
   tulip: color => group(cyl(.012, .015, .3, green(), 0, 0, 0, 5), tilt(ball(.06, leafy(), .05, .1, 0, 0), 0, 0, 1.1), cyl(.058, .03, .095, mat(color), 0, .3, 0, 6)),
   rose: color => { const red = mat(color); return group(cyl(.012, .015, .32, green(), 0, 0, 0, 5), tilt(ball(.05, leafy(), .05, .16, 0, 0), 0, 0, .9), ball(.068, red, 0, .37, 0, 1), ball(.04, red, .01, .42, .01, 0)); },
-  lavender: () => group(cyl(.01, .012, .26, green(), 0, 0, 0, 4), ...[0, 1, 2, 3].map(i => ball(.034 - i * .004, mat(i % 2 ? '#9b7fd1' : '#b49be0'), 0, .26 + i * .05, 0, 0))),
-  daisy: () => group(cyl(.01, .013, .24, green(), 0, 0, 0, 5), tilt(cyl(.075, .075, .012, mat('#fffaf0'), 0, .24, .01, 8), .8, 0, 0), tilt(ball(.03, mat('#f2b632'), 0, .25, .02, 0), .8, 0, 0)),
+  lavender: (color = '#b49be0') => group(cyl(.01, .012, .26, green(), 0, 0, 0, 4), ...[0, 1, 2, 3].map(i => ball(.034 - i * .004, mat(color), 0, .26 + i * .05, 0, 0))),
+  daisy: (color = '#fffaf0') => group(cyl(.01, .013, .24, green(), 0, 0, 0, 5), tilt(cyl(.075, .075, .012, mat(color), 0, .24, .01, 8), .8, 0, 0), tilt(ball(.03, mat('#f2b632'), 0, .25, .02, 0), .8, 0, 0)),
   // 季节限定的三种。
   primrose: color => group(...[0, 1.6, 3.2, 4.7].map(a => { const leaf = ball(.06, leafy(), Math.cos(a) * .06, .02, Math.sin(a) * .06, 0); leaf.scale.y = .35; return leaf; }), ...[[0, .1, 0], [.05, .09, .04], [-.05, .085, -.03]].map(([x, y, z]) => cyl(.035, .035, .012, mat(color), x, y, z, 6)), ball(.012, mat('#f2b632'), 0, .11, 0, 0)),
   cosmos: color => group(cyl(.008, .01, .55, green(), 0, 0, 0, 4), tilt(cyl(.085, .085, .01, mat(color), 0, .55, .02, 8), .6, 0, 0), tilt(ball(.022, mat('#f2b632'), 0, .555, .025, 0), .6, 0, 0)),
@@ -28,7 +28,7 @@ const BLOOM = {
   hydrangea: color => { const blue = [color, color]; return group(cyl(.014, .017, .22, green(), 0, 0, 0, 5), ball(.09, leafy(), 0, .14, 0, 0), ...[[0, .3, 0], [.07, .27, .02], [-.06, .27, -.03], [.01, .26, .07]].map(([x, y, z], i) => ball(.062, mat(blue[i % 2]), x, y, z, 0))); },
 };
 const stake = () => group(box(.014, .17, .03, mat('#a8794f'), .15, 0, .13), box(.1, .065, .012, mat('#f6efe2'), .15, .13, .145));
-function plantModel(plant, dormant) {
+export function plantModel(plant, dormant) {
   const p = group(stake());
   if (dormant) { const snow = ball(.11, mat('#f4f7fa', { roughness: .9 }), 0, .02, 0, 0); snow.scale.y = .5; p.add(snow); return p; }            // 冬天：雪下面睡着
   if (plant.stage === 'mound') { const soil = ball(.09, mat('#5d3d28', { roughness: 1 }), 0, .01, 0, 0); soil.scale.y = .45; p.add(soil); }
