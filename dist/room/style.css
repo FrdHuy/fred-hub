@@ -45,3 +45,151 @@
 .room-view.is-turning .r3-canvas{opacity:0;transition-duration:.22s}
 .room-view[data-state=flat] .r3-moods{display:none}
 @media(max-width:420px){.r3-moods button{width:34px}}
+/* ── 两个人的小屋：回忆面板、钥匙 ─────────────────────────────────────────── */
+/* 锁着的回忆：标签后面一把小锁 */
+.r3-label.is-locked{background:rgba(253,250,244,.78);color:#6f716a}
+.r3-label.is-locked:after{content:'';display:inline-block;width:9px;height:11px;margin-left:8px;vertical-align:-1px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 11'%3E%3Cpath d='M1 5h7v5.5H1zM2.5 5V3.2a2 2 0 0 1 4 0V5' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 11'%3E%3Cpath d='M1 5h7v5.5H1zM2.5 5V3.2a2 2 0 0 1 4 0V5' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat}
+/* 回忆面板：一张暖白的纸，电脑上靠右，手机上从底部升起；左边还看得见推近后的物件 */
+.r3-panel{position:absolute;z-index:4;right:max(4%,18px);top:50%;width:min(430px,92vw);max-height:min(76svh,680px);display:flex;flex-direction:column;padding:26px 28px 22px;border-radius:6px;background:#fdfaf3;color:#343832;box-shadow:0 24px 60px rgba(20,14,10,.42),0 2px 6px rgba(20,14,10,.2);opacity:0;transform:translateY(-50%) translateX(18px);transition:opacity .32s,transform .42s var(--ease,ease-out)}
+.r3-panel.is-on{opacity:1;transform:translateY(-50%)}
+.r3-panel>h2{margin:0 44px 16px 0;font:400 22px/1.3 var(--font-literary);letter-spacing:.06em}
+.r3m-body{overflow-y:auto;margin:0 -8px;padding:0 8px 4px;font:15px/1.8 var(--font-ui)}
+.r3m-close,.r3m-back{min-height:0;width:40px;height:40px;display:grid;place-items:center;color:#6f716a;opacity:.75;transition:opacity .2s}
+.r3m-close{position:absolute;right:12px;top:14px}
+.r3m-close:hover,.r3m-back:hover{opacity:1}
+.r3m-close svg,.r3m-back svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.r3m-back{margin:-6px 0 4px -10px}
+.r3m-empty{margin:18px 0;color:#90928a}
+.r3m-rows{list-style:none;margin:0;padding:0}
+.r3m-rows li{display:grid;grid-template-columns:auto 1fr;column-gap:14px;padding:11px 0;border-top:1px solid #e8e3d6}
+.r3m-rows li:first-child{border-top:0}
+.r3m-rows time{grid-row:1/3;padding-top:4px;font:11px/1.4 var(--font-mono);letter-spacing:.12em;color:#90928a}
+.r3m-rows strong{font-weight:500}
+.r3m-rows span{grid-column:2;color:#6f716a;font-size:14px;line-height:1.7}
+.r3m-rows li:not(:has(time)) strong,.r3m-rows li:not(:has(time)) span{grid-column:1/3}
+.r3m-count{display:grid;justify-items:center;padding:6px 0 2px}
+.r3m-count small{font:11px var(--font-mono);letter-spacing:.3em;color:#b34934}
+.r3m-count b{font:400 76px/1.05 var(--font-literary)}
+.r3m-count span{font:11px var(--font-mono);letter-spacing:.14em;color:#90928a}
+.r3m-next{margin:8px 0 14px;text-align:center;color:#6f716a;font-size:14px}
+.r3m-letters{display:grid;gap:10px;padding:2px 0 6px}
+.r3m-envelope{min-height:0;display:grid;gap:4px;padding:14px 16px;text-align:left;border-radius:4px;background:#f6f1e4;box-shadow:inset 0 0 0 1px #e8e0cc;transition:transform .2s,box-shadow .2s}
+.r3m-envelope:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px #dcd2b8,0 6px 14px rgba(60,40,20,.12)}
+.r3m-envelope strong{font:400 17px/1.4 var(--font-literary)}
+.r3m-envelope span{font:11px var(--font-mono);letter-spacing:.1em;color:#90928a}
+.r3m-letter h3{margin:0 0 14px;font:400 20px/1.4 var(--font-literary)}
+.r3m-letter p{margin:0 0 1em;font:16px/2 var(--font-literary)}
+.r3m-letter footer{margin-top:20px;text-align:right;font:11px var(--font-mono);letter-spacing:.12em;color:#90928a}
+/* 钥匙：一张小纸条，上面一把钥匙的线稿和一个输入框 */
+.r3-key{position:absolute;z-index:4;left:50%;bottom:max(15svh,96px);display:flex;align-items:center;gap:14px;padding:14px 54px 14px 20px;border-radius:999px;background:#fdfaf3;color:#343832;box-shadow:0 18px 44px rgba(20,14,10,.42);opacity:0;transform:translate(-50%,12px);transition:opacity .28s,transform .36s var(--ease,ease-out)}
+.r3-key.is-on{opacity:1;transform:translate(-50%,0)}
+.r3-key-icon{width:40px;height:20px;flex:none;fill:none;stroke:#b98a3c;stroke-width:1.5;stroke-linecap:round}
+.r3-key input{width:min(52vw,230px);border:0;border-bottom:1px solid #cfc8b6;background:none;padding:5px 2px;font:16px var(--font-mono);letter-spacing:.2em;color:inherit;outline:none}
+.r3-key .r3m-close{right:8px;top:50%;margin-top:-20px}
+.r3-key.is-busy input{opacity:.45}
+.r3-key.is-wrong{animation:r3-shake .38s}
+.r3-key-lock{min-height:0;padding:6px 4px;font:14px var(--font-ui);letter-spacing:.1em;color:inherit}
+@keyframes r3-shake{20%{transform:translate(calc(-50% - 9px),0)}40%{transform:translate(calc(-50% + 8px),0)}60%{transform:translate(calc(-50% - 5px),0)}80%{transform:translate(calc(-50% + 3px),0)}}
+@media(max-width:700px){.r3-panel{left:0;right:0;top:auto;bottom:0;width:auto;max-height:62svh;padding:22px 22px 26px;border-radius:14px 14px 0 0;transform:translateY(24px)}.r3-panel.is-on{transform:none}}
+@media(prefers-reduced-motion:reduce){.r3-panel,.r3-key{transition:none}.r3-key.is-wrong{animation:none}}
+/* 相册：面板加宽；按月份分组的小图格子；点开后一张大图、左右翻页 */
+.r3-panel.is-wide{width:min(620px,92vw)}
+.r3m-album h3{margin:16px 0 8px;font:11px var(--font-mono);letter-spacing:.2em;color:#90928a;font-weight:400}
+.r3m-album h3:first-child{margin-top:2px}
+.r3m-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.r3m-photo{min-height:0;aspect-ratio:1;border-radius:3px;background:#ece6d8 center/cover no-repeat;box-shadow:inset 0 0 0 1px rgba(60,40,20,.08);transition:transform .2s,box-shadow .2s}
+.r3m-photo:hover{transform:scale(1.03);box-shadow:0 6px 14px rgba(60,40,20,.2)}
+.r3m-look{position:relative;margin:0;outline:none}
+.r3m-look img{display:block;width:100%;max-height:52svh;object-fit:contain;border-radius:3px;background:#ece6d8}
+.r3m-look figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:12px 2px 0;font:15px/1.7 var(--font-literary)}
+.r3m-look time{margin-left:auto;font:11px var(--font-mono);letter-spacing:.12em;color:#90928a;white-space:nowrap}
+.r3m-turn{position:absolute;top:calc(50% - 40px);min-height:0;width:36px;height:44px;display:grid;place-items:center;border-radius:4px;background:rgba(253,250,244,.82);color:#343832;opacity:.7;transition:opacity .2s}
+.r3m-turn:hover{opacity:1}
+.r3m-turn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.r3m-turn.is-prev{left:6px}.r3m-turn.is-next{right:6px}.r3m-turn.is-next svg{transform:scaleX(-1)}
+/* 植物的小纸牌：比回忆面板窄一点；浇水按钮是一只水壶的线稿 */
+.r3-panel.is-plant{width:min(340px,92vw)}
+.r3-panel.is-plant>h2{margin-bottom:8px}
+.r3m-plant{margin:0 0 12px;font:11px var(--font-mono);letter-spacing:.1em;color:#90928a}
+.r3m-note{margin:0 0 14px;font:16px/1.9 var(--font-literary)}
+.r3m-water{margin-top:6px;padding-top:14px;border-top:1px solid #e8e3d6}
+.r3m-can{min-height:0;display:flex;align-items:center;gap:10px;padding:6px 4px;color:#5f7f8a;font:14px var(--font-ui);letter-spacing:.12em;transition:color .2s,transform .2s}
+.r3m-can:hover{color:#3f6472;transform:rotate(-4deg)}
+.r3m-can svg{width:28px;height:20px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.r3m-recall{animation:r3-recall .5s var(--ease,ease-out)}
+.r3m-recall img{display:block;width:100%;max-height:30svh;object-fit:cover;border-radius:3px;background:#ece6d8}
+.r3m-recall strong{font:400 17px/1.5 var(--font-literary)}
+.r3m-recall blockquote{margin:0;font:15px/1.9 var(--font-literary)}
+.r3m-recall p{margin:8px 0 0;font:11px/1.6 var(--font-mono);letter-spacing:.08em;color:#90928a}
+@keyframes r3-recall{from{opacity:0;transform:translateY(6px)}}
+@media(prefers-reduced-motion:reduce){.r3m-recall{animation:none}}
+/* 今天谁浇过：名字前一个小水滴，浇过的是实心 */
+.r3m-today{display:flex;gap:16px;margin:0 0 4px;font:12px var(--font-ui);letter-spacing:.06em;color:#90928a}
+.r3m-today span:before{content:'';display:inline-block;width:7px;height:9px;margin-right:6px;border:1.2px solid currentColor;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;vertical-align:-1px}
+.r3m-today span.is-done{color:#3f6472}.r3m-today span.is-done:before{background:currentColor}
+.r3m-offline{margin:4px 0;font:13px var(--font-ui);color:#90928a}
+.r3-key-lock.is-quiet{color:#90928a;font-size:13px}
+.r3-who{gap:6px;padding-right:20px}
+.r3-who-ask{font:14px var(--font-ui);letter-spacing:.1em;color:#90928a;margin-right:6px}
+.r3-who .r3-key-lock{padding:6px 12px;border-radius:999px;box-shadow:inset 0 0 0 1px #e0d8c6}
+.r3-who .r3-key-lock:hover{background:#f6f1e4}
+/* 编辑：右上角的「+」、读信 / 看大图时的笔、一张简单的表单 */
+.r3m-add,.r3m-pen{min-height:0;width:40px;height:40px;display:grid;place-items:center;color:#6f716a;opacity:.75;transition:opacity .2s}
+.r3m-add{position:absolute;right:50px;top:14px}
+.r3m-add:hover,.r3m-pen:hover{opacity:1}
+.r3m-add svg,.r3m-pen svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.r3m-tools{display:flex;justify-content:space-between;align-items:center;margin:-6px -10px 4px}
+.r3m-tools .r3m-back{margin:0}
+.r3m-row{min-height:0;width:100%;display:grid;grid-template-columns:auto 1fr;column-gap:14px;padding:0;text-align:left;font:inherit;color:inherit;border-radius:3px;transition:background .2s}
+.r3m-row:hover{background:#f6f1e4}
+.r3m-rows li:has(.r3m-row){display:block}
+.r3m-rows .r3m-row time{grid-row:1/3;padding-top:4px;font:11px/1.4 var(--font-mono);letter-spacing:.12em;color:#90928a}
+.r3m-rows .r3m-row span{grid-column:2;color:#6f716a;font-size:14px;line-height:1.7}
+.r3m-rows .r3m-row:not(:has(time)) strong,.r3m-rows .r3m-row:not(:has(time)) span{grid-column:1/3}
+.r3m-body>.r3m-row{display:block;padding:10px 0;color:#6f716a}
+button.r3m-count{min-height:0;width:100%;font:inherit;color:inherit;border-radius:4px;transition:background .2s}
+button.r3m-count:hover{background:#f6f1e4}
+.r3m-form{display:grid;gap:10px;padding:4px 0}
+.r3m-form input,.r3m-form textarea,.r3m-form select{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid #d9d1bf;background:none;padding:8px 2px;font:15px/1.7 var(--font-ui);color:inherit;outline:none;border-radius:0}
+.r3m-form textarea{resize:vertical;font-family:var(--font-literary);line-height:1.9}
+.r3m-form input:focus,.r3m-form textarea:focus,.r3m-form select:focus{border-bottom-color:#8a8d82}
+.r3m-form-row{display:flex;align-items:center;gap:14px;margin-top:6px}
+.r3m-save{min-height:0;padding:7px 18px;border-radius:999px;background:#343832;color:#fdfaf3;font:14px var(--font-ui);letter-spacing:.1em}
+.r3m-save:disabled{opacity:.5}
+.r3m-drop{min-height:0;margin-left:auto;padding:7px 4px;color:#90928a;font:13px var(--font-ui)}
+.r3m-drop.is-sure{color:#b34934}
+.r3m-form-note,.r3m-uploading{font:13px var(--font-ui);color:#90928a}
+.r3m-uploading{margin:0 0 10px}
+.r3-panel:has(.r3m-form) .r3m-add{display:none}
+/* 花园木牌：经验条、三格数字、种花时的品种选择；送花按钮；花瓶里的花束 */
+.r3m-xp{height:6px;border-radius:3px;background:#ece6d8;overflow:hidden;margin:2px 0 8px}
+.r3m-xp i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#9fcf6a,#6f9a4a)}
+.r3m-stats{display:grid;grid-template-columns:repeat(3,1fr);margin:10px 0 14px;border-top:1px solid #e8e3d6;border-bottom:1px solid #e8e3d6}
+.r3m-stats div{display:grid;justify-items:center;padding:10px 0}
+.r3m-stats div+div{border-left:1px solid #e8e3d6}
+.r3m-stats b{font:400 26px/1.1 var(--font-literary)}
+.r3m-stats span{font:11px var(--font-mono);letter-spacing:.14em;color:#90928a}
+.r3m-give{min-height:0;margin-top:10px;padding:8px 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #d9d1bf;font:14px var(--font-ui);letter-spacing:.1em;color:#3f6472;transition:background .2s}
+.r3m-give:hover{background:#f6f1e4}
+.r3m-chips{display:flex;flex-wrap:wrap;gap:8px}
+.r3m-chip{min-height:0;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;box-shadow:inset 0 0 0 1px #e0d8c6;font:13px var(--font-ui);color:#6f716a}
+.r3m-chip i,.r3m-bouquets i{width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);display:inline-block}
+.r3m-chip.is-on{background:#343832;color:#fdfaf3;box-shadow:none}
+.r3m-bouquets strong{display:inline-flex;align-items:center;gap:8px}
+.r3m-bouquets li.is-new strong:after{content:'';width:6px;height:6px;border-radius:50%;background:#b34934}
+/* 小纸条：屏幕上方居中，几秒后自己消失 */
+.r3-notice{position:absolute;z-index:5;left:50%;top:max(96px,12svh);display:flex;align-items:center;gap:14px;padding:10px 12px 10px 18px;border-radius:999px;background:#fdfaf3;color:#343832;font:14px var(--font-ui);letter-spacing:.06em;box-shadow:0 14px 36px rgba(20,14,10,.36);opacity:0;transform:translate(-50%,-8px);transition:opacity .3s,transform .4s var(--ease,ease-out)}
+.r3-notice.is-on{opacity:1;transform:translate(-50%,0)}
+.r3-notice button{min-height:0;padding:5px 12px;border-radius:999px;background:#343832;color:#fdfaf3;font:13px var(--font-ui)}
+@media(prefers-reduced-motion:reduce){.r3-notice{transition:none}}
+/* 手账：两个标签；图鉴里每种颜色一个小圆点，见过的是实心，稀有色带一颗星 */
+.r3m-tabs{display:flex;gap:4px;margin:-4px 0 10px;padding:3px;border-radius:999px;background:#f1ebde;width:max-content}
+.r3m-tab{min-height:0;padding:5px 14px;border-radius:999px;font:13px var(--font-ui);letter-spacing:.08em;color:#8a8d82}
+.r3m-tab.is-on{background:#fdfaf3;color:#343832;box-shadow:0 1px 2px rgba(60,40,20,.15)}
+.r3m-catalog li{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.r3m-catalog em{margin-left:8px;font:11px var(--font-mono);font-style:normal;letter-spacing:.1em;color:#90928a}
+.r3m-swatches{display:flex;gap:6px}
+.r3m-swatches i{position:relative;width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 1.2px var(--c);opacity:.55}
+.r3m-swatches i.is-seen{background:var(--c);opacity:1;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.r3m-swatches i.is-rare:after{content:'✦';position:absolute;right:-7px;top:-8px;font-size:9px;color:#c99a45}
+.r3m-small{font:13px/1.7 var(--font-ui);color:#90928a;margin-top:12px}

@@ -1,0 +1,2 @@
+// 你们的回忆（AES-GCM 密文）。原文在 memories/，改完运行 node scripts/seal-memories.mjs。不要手改。
+export default {"salt":"nnrpiiJeuFDUdWhDkl77Xg==","iterations":600000,"lock":"d62f5a48c714780e8ad23143b6fc9d2713afba674f0dcc78cd4a5090468be409","iv":"ZTXRRXuNbvorY1V6","data":"ScxVpHiAIAWCLzwLAWDPGt+H9Em2bTqUKJvuJaW4NIIHDmRsUVvDuhPiEdBnpI9Kjq+GqeOaB53E0EYawTkZcCuU0sp88KkCoOtamvx+cuVKb7IbZlh7p6VTg511d0xi7x3y79/q84EWS8Aajy8xDrKBEmznVLB//Znagp8hcv1AoK8ffk1PnRiqqg55ybzwJN6jldG7oKOwT2MpgJdfJcN/NvCvO+KsMFFNrDo8F/E="};

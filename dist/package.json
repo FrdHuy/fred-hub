@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "dist/ 是网站本身（不是构建产物）。这个文件只告诉 Vercel：dist/api 里的线上接口是 ES 模块。没有任何依赖。"
+}

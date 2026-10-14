@@ -3,6 +3,7 @@
 import * as THREE from './three.js';
 import { mat, tone, tones, glow, satin, box, cyl, ball, group, anchor, contact, rng, pick, tilt } from './kit.js';
 import { GRASS, ISLAND, ROOM } from './scene.js';
+import { inBed } from './growth.js';
 
 const PETALS = ['#f4c95d', '#f08a5d', '#f6e7c1', '#e56b6f', '#f2a9b8', '#b79ad6', '#fff4d8'];
 const STONES = ['#cfc4b2', '#bfb3a0', '#d8cebd'];
@@ -12,7 +13,7 @@ const LEAVES = ['#7fae52', '#95bd60', '#6c9c4a', '#a6c86c'];
 function spot(random, margin = .5) {
   for (;;) {
     const x = ISLAND.min + margin + random() * (ISLAND.max - ISLAND.min - margin * 2), z = ISLAND.min + margin + random() * (ISLAND.max - ISLAND.min - margin * 2);
-    if (Math.max(Math.abs(x), Math.abs(z)) > ROOM.half + .55) return [x, z];
+    if (Math.max(Math.abs(x), Math.abs(z)) > ROOM.half + .55 && !inBed(x, z)) return [x, z];      // 不长进屋里，也不长进花圃里
   }
 }
 function instances(geometry, material, count, place) {
@@ -59,13 +60,14 @@ export function buildGarden() {
   [[.9, 3.75], [1.05, 4.4], [1.35, 5.0], [1.25, 5.65], [1.6, 6.2], [1.5, 6.8]].forEach(([x, z], i) => {
     const s = cyl(.34 + random() * .08, .36, .05, stone[i % 3], x + (random() - .5) * .1, GRASS - .005, z, 7); s.rotation.y = random() * 3; s.scale.x = 1.15; garden.add(s);
   });
-  garden.add(tree(-2.3, 5.5), tree(-4.5, -4.5, .78), lantern(2.3, 5.1), bench(-1.2, 3.75, 0));
-  for (const [x, z, size] of [[3.75, -2.6, .42], [3.9, -1.5, .3], [4.3, 2.9, .5], [-3.6, 4.2, .4], [6.3, 6.2, .55], [5.6, -3.3, .5], [6.5, 1.2, .36], [3.6, 6.4, .34], [-1.4, -4.4, .45], [1.6, -4.7, .34], [3.4, -4.3, .4], [-4.6, .6, .4], [-4.4, 2.6, .32]]) garden.add(bush(x, z, size, random));
+  const ours = tree(-2.3, 5.5); garden.userData.tree = ours;       // 花圃旁的这棵是「你们的树」（plots.js 让它一年长大一圈）
+  garden.add(ours, tree(-4.5, -4.5, .78), lantern(2.3, 5.1), bench(-1.2, 3.75, 0));
+  for (const [x, z, size] of [[3.75, -2.6, .42], [3.9, -1.5, .3], [-3.6, 4.2, .4], [6.3, 6.2, .55], [5.6, -3.3, .5], [6.5, 1.2, .36], [-1.4, -4.4, .45], [1.6, -4.7, .34], [3.4, -4.3, .4], [-4.6, -.4, .4]]) garden.add(bush(x, z, size, random));
   for (const [x, z, r] of [[5.2, 4.6, .22], [5.45, 4.85, .13], [-3.5, 6.5, .2], [6.4, -1.6, .18]]) garden.add(ball(r, mat('#b9ae9c'), x, GRASS + r * .5, z, 0));
 
   // 花：一丛一丛地开——屋侧的花坛、小径两边、树下，再零星撒一些。
   const beds = [[3.6, 4.1, -.6, 2.6, 26], [.1, .75, 4.1, 6.4, 12], [1.9, 2.7, 3.9, 6.6, 14], [-3.6, -1.2, 4.6, 6.6, 12], [4.2, 6.8, 3.4, 6.8, 22], [4.4, 6.9, -3.8, 2.6, 18], [-.6, 3.0, -5.2, -3.7, 20], [-5.2, -3.8, -2.6, 3.4, 18], [4.0, 6.8, -5.2, -3.9, 12]];
-  const flowers = beds.flatMap(([x0, x1, z0, z1, n]) => Array.from({ length: n }, () => [x0 + random() * (x1 - x0), z0 + random() * (z1 - z0), .2 + random() * .24, pick(random, PETALS)]));
+  const flowers = beds.flatMap(([x0, x1, z0, z1, n]) => Array.from({ length: n }, () => [x0 + random() * (x1 - x0), z0 + random() * (z1 - z0), .2 + random() * .24, pick(random, PETALS)])).filter(([x, z]) => !inBed(x, z));
   garden.add(
     instances(new THREE.CylinderGeometry(.016, .02, 1, 4), tone('stem', '#5f8a44'), flowers.length, (d, i) => { const [x, z, h] = flowers[i]; d.position.set(x, GRASS + h / 2, z); d.scale.set(1, h, 1); d.rotation.set(0, 0, 0); }),
     instances(new THREE.IcosahedronGeometry(.09, 0), tone('petal', '#ffffff'), flowers.length, (d, i) => { const [x, z, h, tint] = flowers[i]; d.position.set(x, GRASS + h + .03, z); d.scale.set(1, .7, 1); d.rotation.set(random(), random() * 3, 0); return tint; }),
@@ -92,11 +94,11 @@ export function buildGarden() {
   fallen.castShadow = false; fallen.count = 0; garden.add(fallen);
   // 树下的一圈：春天是落花，秋天是落叶——比别处密得多，一眼能看出是从这棵树上掉下来的。
   const under = [[-2.3, 5.5, 2.3, 170], [-4.5, -4.5, 1.4, 60]].flatMap(([cx, cz, r, n]) => Array.from({ length: n }, () => { const a = random() * 6.28, d = Math.sqrt(random()) * r; return [cx + Math.cos(a) * d, cz + Math.sin(a) * d, pick(random, ['#ffffff', '#ececec', '#dcdcdc', '#f7f7f7'])]; }))
-    .filter(([x, z]) => Math.max(Math.abs(x), Math.abs(z)) > ROOM.half + .3 && Math.max(x, z) < ISLAND.max - .3 && Math.min(x, z) > ISLAND.min + .3);
+    .filter(([x, z]) => Math.max(Math.abs(x), Math.abs(z)) > ROOM.half + .3 && Math.max(x, z) < ISLAND.max - .3 && Math.min(x, z) > ISLAND.min + .3 && !inBed(x, z));
   const carpet = instances(new THREE.BoxGeometry(.14, .01, .09), tone('carpet', '#ffffff'), under.length, (d, i) => { const [x, z, tint] = under[i]; d.position.set(x, GRASS + .016, z); d.rotation.set(0, random() * 6.28, 0); d.scale.set(1, 1, 1); return tint; });
   carpet.castShadow = false; carpet.count = 0; garden.add(carpet);
   // 冬天的积雪：长椅、庭院灯顶、石头上各一小堆，平时不显示。
-  const white = mat('#f4f7fa', { roughness: .9 }), snow = group(box(1.42, .06, .42, white, -1.2, GRASS + .46, 3.75), box(1.42, .05, .1, white, -1.2, GRASS + .84, 3.49), box(.34, .05, .34, white, 2.3, GRASS + 1.6, 5.1),
+  const white = mat('#f4f7fa', { roughness: .9 }), snow = group(box(.95, .06, .42, white, -.97, GRASS + .46, 3.75), box(1.42, .05, .1, white, -1.2, GRASS + .84, 3.49), box(.34, .05, .34, white, 2.3, GRASS + 1.6, 5.1),
     ...[[5.2, 4.6, .2], [-3.5, 6.5, .18], [6.4, -1.6, .16]].map(([x, z, r]) => { const cap = ball(r, white, x, GRASS + r * 1.05, z, 0); cap.scale.y = .5; return cap; }));
   snow.traverse(o => { o.castShadow = false; }); snow.visible = false; garden.add(snow);
   const meshes = garden.children.filter(o => o.isInstancedMesh);

@@ -34,10 +34,14 @@ export function createView({ camera, scene, renderer }, host, still = false) {
     } else if (!saved) controls.update();
   }
   // 推近到一个物件：center / radius 是它的包围球，azimuth 是从哪个方向看它。
-  function closeUp(center, radius, azimuth) {
+  // aside = true：给回忆面板让位——电脑上面板在右边，物件就偏到画面左边；手机上面板在下面，物件就偏到上面。
+  function closeUp(center, radius, azimuth, polar = 64, aside = false) {
     saved ??= pose(); controls.enabled = false;
     const distance = Math.min(fit * .8, Math.max(radius * 6.5, 5.5) * Math.max(1, .9 / camera.aspect));
-    return fly({ target: center, azimuth, polar: rad(64), distance }, 950);
+    const target = center.clone(), half = Math.tan(rad(camera.fov / 2)) * distance;
+    if (aside && host.clientWidth > 700) target.addScaledVector(new THREE.Vector3(Math.cos(azimuth), 0, -Math.sin(azimuth)), half * camera.aspect * .4);
+    else if (aside) target.y -= half * .55;
+    return fly({ target, azimuth, polar: rad(polar), distance }, 950);
   }
   // 拉回全景（回到推近前用户自己转到的角度），然后把镜头交还给 OrbitControls。
   function back(ms = 900) {

@@ -38,8 +38,8 @@ const build = {
     }
     // 花坛边：洒水壶、两盆小苗。
     const can = group(cyl(.11, .12, .2, satin('#9fb6a8'), 0, 0, 0, 10), tilt(cyl(.02, .03, .26, satin('#9fb6a8'), .17, .08, 0, 6), 0, 0, -1), tilt(rod(.012, .2, satin('#9fb6a8'), -.12, .16, 0, 'x', 5), 0, 0, 0), contact(.5, .5, .3, 0, 0, .008));
-    can.position.set(4.55, G, 2.2); can.rotation.y = .6; all.add(can);
-    for (const [px, pz] of [[4.6, 2.7], [4.85, 2.45]]) all.add(cyl(.08, .06, .1, mat('#c9764f'), px, G, pz, 8), ball(.05, mat('#8fc35a'), px, G + .16, pz, 0), ball(.035, mat('#a3d06b'), px + .04, G + .2, pz + .02, 0));
+    can.position.set(4.4, G, 1.75); can.rotation.y = .6; all.add(can);
+    for (const [px, pz] of [[4.3, 1.35], [4.55, 1.2]]) all.add(cyl(.08, .06, .1, mat('#c9764f'), px, G, pz, 8), ball(.05, mat('#8fc35a'), px, G + .16, pz, 0), ball(.035, mat('#a3d06b'), px + .04, G + .2, pz + .02, 0));
     return { group: all, update(time) {
       for (const m of moving) {
         if (m.kind === 'cloth') { m.node.rotation.z = Math.sin(time * 1.1 + m.phase) * .12; continue; }
@@ -56,7 +56,7 @@ const build = {
     const pile = (x, z, size) => { const p = group(contact(size * 2.6, size * 2.6, .32, 0, 0, .01)); for (let i = 0; i < 9; i++) { const lump = ball(size * (.35 + random() * .3), mat(pick(random, leaves)), (random() - .5) * size * 1.3, size * (.12 + random() * .22), (random() - .5) * size * 1.3, 0); lump.scale.y = .55; lump.rotation.y = random() * 6; p.add(lump); } p.position.set(x, G, z); return p; };
     all.add(pile(3.9, 4.7, .62), pile(-3.6, 3.2, .42));
     const rake = group(cyl(.018, .018, 1.5, mat('#b98a5e'), 0, 0, 0, 5), box(.36, .03, .03, mat('#7d5237'), 0, 0, 0), ...Array.from({ length: 7 }, (_, i) => box(.012, .09, .012, satin('#8f8c86'), -.16 + i * .053, -.08, 0)));
-    rake.position.set(4.55, G + .1, 4.3); rake.rotation.set(.1, .5, .38); all.add(rake);
+    rake.position.set(3.3, G + .1, 4.15); rake.rotation.set(.1, .5, .38); all.add(rake);
     // 南瓜：门口一堆，长椅上一个。
     const pumpkin = (x, y, z, r, color = '#e8822c') => { const p = group(ball(r, mat(color, { roughness: .6 }), 0, r * .72, 0, 1), cyl(.012, .02, r * .4, mat('#6f7d45'), 0, r * 1.3, 0, 5)); p.children[0].scale.y = .74; p.position.set(x, y, z); p.rotation.y = random() * 6; return p; };
     all.add(pumpkin(1.95, G, 3.75, .22), pumpkin(2.3, G, 3.6, .15, '#f0a03c'), pumpkin(2.12, G, 4.05, .12, '#d96a24'), pumpkin(-1.55, G + .5, 3.72, .13, '#f0a03c'), pumpkin(-.2, G, 4.0, .17), contact(.9, .8, .3, 2.1, 3.8, G + .01));
@@ -67,7 +67,7 @@ const build = {
       ball(.15, mat('#e9d29a'), 0, 1.45, 0, 1), cyl(.3, .3, .02, mat('#c99a45'), 0, 1.55, 0, 10), cyl(.12, .16, .16, mat('#c99a45'), 0, 1.57, 0, 8), contact(.8, .8, .3, 0, 0, .01));
     scarecrow.position.set(5.9, G, -1.7); scarecrow.rotation.y = -.7; all.add(scarecrow);
     // 树下的蘑菇。
-    for (const [mx, mz, s] of [[-1.5, 5.9, 1], [-1.3, 6.1, .7], [-3.1, 5.0, .8], [-1.75, 6.15, .55]]) all.add(cyl(.03 * s, .04 * s, .1 * s, mat('#f1e5d0'), mx, G, mz, 6), tilt(cyl(.02 * s, .1 * s, .07 * s, mat('#c4472a'), mx, G + .09 * s, mz, 7), 0, 0, 0));
+    for (const [mx, mz, s] of [[-3.0, 6.0, 1], [-2.8, 6.2, .7], [-3.1, 5.0, .8], [-3.25, 6.2, .55]]) all.add(cyl(.03 * s, .04 * s, .1 * s, mat('#f1e5d0'), mx, G, mz, 6), tilt(cyl(.02 * s, .1 * s, .07 * s, mat('#c4472a'), mx, G + .09 * s, mz, 7), 0, 0, 0));
     // 一队南飞的雁：远远地从屋后的天上飞过，约一分钟一趟。
     const flock = group(), dark = mat('#4a4658');
     for (let i = 0; i < 7; i++) { const side = i % 2 ? 1 : -1, back = Math.ceil(i / 2), goose = group(tilt(box(.34, .02, .07, dark, .15, 0, 0), 0, .5, 0), tilt(box(.34, .02, .07, dark, -.15, 0, 0), 0, -.5, 0)); goose.position.set(-back * .55, (i % 3) * .05, side * back * .5); goose.traverse(o => { o.castShadow = false; }); flock.add(goose); }
@@ -98,7 +98,7 @@ const build = {
       const cap = alongX ? box(to - from, .04, .07, white, (from + to) / 2, G + .5, edge) : box(.07, .04, to - from, white, edge, G + .5, (from + to) / 2); cap.castShadow = false; all.add(cap);
     }
     // 雪堆、小径上的一串脚印、雪橇、盖着雪的柴堆。
-    for (const [x, z, r] of [[6.2, 6.3, .8], [-4.8, 6.2, .7], [6.4, -4.6, .75], [3.9, 3.9, .5], [-4.6, 3.3, .55], [4.2, -3.9, .5], [-1.0, -4.6, .6]]) { const drift = ball(r, white, x, G - r * .12, z, 1); drift.scale.y = .34; drift.rotation.y = random() * 6; drift.castShadow = false; all.add(drift); }
+    for (const [x, z, r] of [[6.2, 6.3, .8], [-4.8, 6.2, .7], [6.5, -2.6, .7], [3.9, 3.9, .5], [-4.6, 3.3, .55], [4.2, -3.9, .5], [-1.0, -4.6, .6]]) { const drift = ball(r, white, x, G - r * .12, z, 1); drift.scale.y = .34; drift.rotation.y = random() * 6; drift.castShadow = false; all.add(drift); }
     [[1.62, 6.5], [1.42, 6.1], [1.56, 5.7], [1.3, 5.3], [1.42, 4.9], [1.14, 4.5], [1.22, 4.1], [.96, 3.75]].forEach(([x, z], i) => { const step = box(.09, .012, .17, mat('#b4c2d4', { roughness: 1 }), x, G + .004, z); step.rotation.y = .25 + (i % 2 ? .12 : -.12); step.castShadow = false; all.add(step); });
     const sled = group(box(.34, .03, .8, mat('#c4472a')), box(.03, .09, .86, mat('#7d5237'), -.14, -.09, 0), box(.03, .09, .86, mat('#7d5237'), .14, -.09, 0), contact(.7, 1.1, .28, 0, 0, -.1));
     sled.position.set(3.25, G + .12, 4.6); sled.rotation.y = -.6; all.add(sled);
@@ -112,7 +112,7 @@ const build = {
     const random = rng(41), all = group(), rings = [];
     // 水洼：深色、很光滑的一片，会映出灯光；上面一圈圈涟漪不断扩开。
     const water = mat('#4a5f8e', { roughness: .1, metalness: .3, emissive: '#1b2a4c', emissiveIntensity: .9 }), ripple = new THREE.MeshBasicMaterial({ color: '#b9c9ea', transparent: true, opacity: .5, depthWrite: false, fog: false });
-    for (const [x, z, r] of [[2.9, 4.7, .62], [.2, 5.6, .5], [4.9, 2.2, .7], [5.6, 5.9, .55], [-3.4, 4.4, .5], [4.6, -2.4, .6], [1.9, 6.2, .38], [-.6, -4.6, .5]]) {
+    for (const [x, z, r] of [[2.55, 4.4, .55], [.45, 4.7, .5], [5.5, 1.1, .7], [5.6, 5.9, .55], [-3.4, 4.4, .5], [4.6, -2.4, .6], [1.9, 6.2, .38], [-.6, -4.6, .5]]) {
       const pool = cyl(r, r, .012, water, x, G + .002, z, 12); pool.scale.z = .72; pool.rotation.y = random() * 3; pool.castShadow = false; all.add(pool);
       for (let i = 0; i < 3; i++) {
         const ring = new THREE.Mesh(new THREE.RingGeometry(.9, 1, 20), ripple.clone()); ring.rotation.x = -Math.PI / 2; ring.position.set(x + (random() - .5) * r * .9, G + .018, z + (random() - .5) * r * .5);

@@ -1,6 +1,8 @@
 // 3D 小屋的入口。main.js 在进入 #/room 时才动态加载这个文件（以及 Three.js），其他页面不受影响。
 //
-//   config.js    物件 ↔ 模块映射（增删模块改这里）
+//   config.js    物件 ↔ 回忆的对应（增删物件改这里）
+//   growth.js    花园的规则（按天数生长、里程碑、浇水）；plots.js 花圃和植物
+//   memory.js    回忆锁着还是开着（暗号、记住 7 天）；vault.js 加解密；panel.js 回忆面板和钥匙；memories/ 密文
 //   scene.js     渲染器、天空、悬浮地块、小屋
 //   garden.js    花园
 //   decor.js     不对应模块的摆设
@@ -28,6 +30,8 @@ import { createEffects } from './effects.js';
 import { createView } from './view.js';
 import { createCutaway } from './cutaway.js';
 import { createInteract } from './interact.js';
+import { createMemory } from './memory.js';
+import { createPlots } from './plots.js';
 import { detect, createQuality } from './quality.js';
 
 // options：{ open(entry), tint(moduleId), sound(name) }，由 main.js 提供（见 interact.js）。
@@ -43,7 +47,14 @@ export function mountRoom(host, options = {}) {
   const effects = createEffects(stage, lights.sunDirection, still);
   const view = createView(stage, host, still);
   const cutaway = createCutaway(house, decor.userData.onWall, placed);
-  const interact = createInteract({ stage, view, placed, host, still, open: () => {}, tint: () => '#100e0c', ...options });
+  // 回忆：锁着时屋子是空的；开锁后每件物件把自己「住进人」的样子显出来（物件上的 userData.setUnlocked）。
+  const memory = createMemory(), lived = [...placed, decor];
+  memory.onChange(data => { for (const object of lived) object.userData.setUnlocked?.(data, memory, () => { if (!frame) render(); }); plots.set(data); host.dataset.home = data ? 'open' : 'locked'; if (!frame) render(); });
+  // 花圃：锁着时是空的土；开锁后按日期长出植物。可以点的植物变了就告诉 interact。
+  let interact = null;
+  const plots = createPlots(scene, garden, list => interact?.setPlants(list), decor);
+  interact = createInteract({ stage, view, placed, host, still, memory, plots, sound: options.sound });
+  plots.set(null);                                                // 先登记花园木牌（锁着时点它会提示去拿钥匙）
   const clock = new THREE.Clock();
 
   // 渲染循环：只有「在小屋这一页」并且「标签页可见」时才跑，其余时间完全停下，不耗电。
@@ -52,7 +63,7 @@ export function mountRoom(host, options = {}) {
   // 性能档位：先按设备给一个起点，跑起来之后帧率不够再自动往下降。
   const quality = createQuality(options.quality ?? detect(), { renderer, sun: lights.sun, shadowLamps: lights.shadowLamps, effects: { setBloom: effects.setBloom, setDust(share) { effects.setDust(share); weather.setShare(share); } } }, fitCanvas);
   fitCanvas();
-  const render = () => { view.update(); cutaway.update(camera, view.look); interact.update(); const time = clock.getElapsedTime(); effects.update(time); weather.update(time); sky.update(time, camera); seasonal.update(time); effects.render(); };
+  const render = () => { view.update(); cutaway.update(camera, view.look); interact.update(); const time = clock.getElapsedTime(); effects.update(time); weather.update(time); sky.update(time, camera); seasonal.update(time); plots.update(time); effects.render(); };
   let last = 0;
   const tick = now => { frame = requestAnimationFrame(tick); if (last) quality.sample(now - last); last = now; render(); };
   const sync = () => { cancelAnimationFrame(frame); frame = 0; last = 0; quality.rest(); if (wanted && !document.hidden) frame = requestAnimationFrame(tick); };
@@ -65,7 +76,7 @@ export function mountRoom(host, options = {}) {
   try { const saved = localStorage.getItem('fred-room-mood'); if (saved && MOODS[saved]) current = saved; } catch {}
   function applyMood(name) {
     const look = lights.setMood(name); current = name;
-    setSeason(garden, house, look.garden); effects.setSun(lights.sunDirection, look.sun.color, look.beam, look.dust); weather.set(look.weather); sky.set(look, lights.sunDirection); seasonal.set(name);
+    setSeason(garden, house, look.garden); effects.setSun(lights.sunDirection, look.sun.color, look.beam, look.dust); weather.set(look.weather); sky.set(look, lights.sunDirection); seasonal.set(name); plots.setDormant(!!look.garden.snow);
     host.style.background = look.sky[1]; host.style.setProperty('--r3-ink', look.ink ?? '#f6efe2');
     if (!frame) render();
   }
@@ -78,10 +89,11 @@ export function mountRoom(host, options = {}) {
     host.classList.add('is-turning'); turning = setTimeout(() => { applyMood(name); host.classList.remove('is-turning'); }, 240);
   });
   applyMood(current);
+  host.dataset.home = 'locked'; memory.resume();                  // 这台设备 7 天内开过锁：直接打开
   render();                                                       // 先画一帧（顺便编译着色器），main.js 再把画布淡入
 
   return {
-    stage, view, placed, quality, applyMood,
+    stage, view, placed, quality, applyMood, memory,
     // from：来处页面的底色（幕布从这个颜色淡开）。
     start(from) { wanted = true; fitCanvas(); interact.arrive(from); sync(); },
     stop() { wanted = false; sync(); },
