@@ -5,7 +5,7 @@ import { sealJSON, openJSON, writeToken } from './vault.js';
 
 export function createCloud() {
   let key = null, token = '', version = 0, state = null, online = false;
-  const api = (init = {}) => fetch(new URL('../api/cabin', import.meta.url), { ...init, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, cache: 'no-store' });
+  const api = ({ query, ...init } = {}) => fetch(new URL(`../api/cabin${query ? `?photo=${encodeURIComponent(query)}` : ''}`, import.meta.url), { ...init, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, cache: 'no-store' });
   const open = async data => data ? openJSON(key, JSON.parse(data)) : null;
   return {
     get online() { return online; },                   // false：没有网、接口不在（比如用 scripts/preview.py 预览）或暗号对不上
@@ -31,6 +31,10 @@ export function createCloud() {
       }
       throw new Error('小屋太忙了，稍后再试');
     },
+    // 照片的密文单独存（name 形如 <id>-t / <id>-f）。内容是「12 字节 iv + 密文」转成的 base64。
+    async getPhoto(name) { const response = await api({ method: 'GET', query: name }); return response.ok ? (await response.json()).data : null; },
+    async putPhoto(name, data) { const response = await api({ method: 'PUT', query: name, body: JSON.stringify({ data }) }); if (!response.ok) throw new Error((await response.json()).error || `HTTP ${response.status}`); },
+    async deletePhoto(name) { await api({ method: 'DELETE', query: name }); },
     forget() { key = null; token = ''; version = 0; state = null; online = false; },
   };
 }

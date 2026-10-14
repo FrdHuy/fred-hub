@@ -6,6 +6,7 @@ import { readRoute } from '../dist/router.js';
 import { objects, mood, MEMORIES } from '../dist/room/config.js';
 import { deriveKey, sealJSON, openJSON, exportKey, importKey } from '../dist/room/vault.js';
 import { dayCount, nextAnniversary } from '../dist/room/memory.js';
+import { stampIds, upsert, remove, listOf, toParagraphs } from '../dist/room/edits.js';
 import { SLOTS, BEDS, inBed, stageOf, yearsOf, speciesOf, plantsFrom, milestonesOf, recall, water, wateredBy, wateredToday } from '../dist/room/growth.js';
 import { parseList, parseLetter, parseDays } from './seal-memories.mjs';
 
@@ -78,6 +79,17 @@ let shared = { water: { '2025-01-01': { Fred: ['old'] } } };
 shared = water(shared, 'rose', 'Fred', day); shared = water(shared, 'rose', 'Fred', day); shared = water(shared, 'rose', 'M', day);
 assert.deepEqual(wateredBy(shared, 'rose', day), ['Fred', 'M']); assert.deepEqual(shared.totals, { Fred: 1, M: 1, together: 1 }); assert.ok(wateredToday(shared, day).has('rose'));
 assert.ok(!shared.water['2025-01-01'], '90 天以前的明细会被清掉');
+// 改回忆：按 id 改、按 id 删；新条目自动有 id；补 id 不重复；各列的排序。
+{
+  const state = { places: [{ title: '旧的', date: '2025-01-01' }], days: { timeline: [] } };
+  assert.equal(stampIds(state), 1); assert.equal(stampIds(state), 0, '补过的不再补');
+  upsert(state, 'places', { title: '大理', date: '2026-08-01', note: 'a' }, 'Fred');
+  const added = state.places.find(p => p.title === '大理'); assert.ok(added.id && added.by === 'Fred' && state.places[0] === added, '有日期的新的在前');
+  upsert(state, 'places', { ...added, note: 'b' }, 'M'); assert.equal(state.places.length, 2); assert.equal(state.places[0].note, 'b'); assert.equal(state.places[0].by, 'M');
+  remove(state, 'places', added.id); assert.deepEqual(state.places.map(p => p.title), ['旧的']);
+  upsert(state, 'timeline', { title: '后', date: '2026-01-02' }, 'F'); upsert(state, 'timeline', { title: '前', date: '2025-01-02' }, 'F'); assert.deepEqual(listOf(state, 'timeline').map(t => t.title), ['前', '后'], '时间线旧的在前');
+  assert.deepEqual(toParagraphs('第一段\n接着写\n\n\n第二段\n'), ['第一段接着写', '第二段']);
+}
 // 线上接口：带对凭证才能读写；版本号不对时拒绝并交回最新的那份。（用本地的假存储跑一遍真正的 dist/api/cabin.js）
 {
   const store = new Map(), realFetch = globalThis.fetch;
@@ -99,4 +111,4 @@ const box = readFileSync('dist/room/memories/sealed.js', 'utf8');
 assert.ok(/"salt":"[^"]+","iterations":600000,"lock":"[0-9a-f]{64}","iv":"[^"]+","data":"[^"]+"/.test(box), 'memories/sealed.js 应该只有密文');
 assert.ok(readFileSync('.gitignore', 'utf8').split('\n').includes('/memories/'), '根目录的 memories/ 必须被 git 忽略（dist/room/memories/ 里的密文要进仓库）');
 if (existsSync('memories/暗号.txt')) { const phrase = readFileSync('memories/暗号.txt', 'utf8').split('\n').map(l => l.trim()).find(l => l && !l.startsWith('#')); for (const file of sources) assert.ok(!readFileSync(file, 'utf8').includes(phrase), `${file}: 暗号不能出现在 dist/ 里`); }
-console.log(`PASS: room config (${objects.length} objects), sealed memories round trip, garden rules, shared watering, online API, vendored three@0.170.0, no external sources`);
+console.log(`PASS: room config (${objects.length} objects), sealed memories round trip, garden rules, shared watering, edits, online API, vendored three@0.170.0, no external sources`);

@@ -3,7 +3,9 @@
 //   · 之后以线上为准：两个人在小屋里添加 / 修改 / 删除、浇水，彼此都看得到；sealed.js 只剩初始导入和连不上时的只读备份
 // 「记住」：解锁后把密钥存在这台设备上（localStorage），7 天后失效，要重新输入暗号。
 // 「我是谁」：每台设备选一次（localStorage fred-cabin-me），浇水、送花、写信都标上名字。
-import { deriveKey, exportKey, importKey, openJSON, openBytes, toBase64 } from './vault.js';
+import { deriveKey, exportKey, importKey, openJSON, openBytes, sealBytes, toBase64, fromBase64 } from './vault.js';
+import { stampIds, upsert, remove } from './edits.js';
+import { preparePhoto } from './pictures.js';
 import { createCloud } from './cloud.js';
 
 const KEY = 'fred-cabin-key', ME = 'fred-cabin-me', REMEMBER = 7 * 24 * 3600 * 1000, REFRESH = 45000;
@@ -22,6 +24,8 @@ export function createMemory() {
     if (remote === null) data = await cloud.change(() => ({ ...opened, water: {}, totals: {} }));
     else if (remote) data = remote;
     else return;
+    // 从文件导入的旧条目没有 id：补上（之后才能按 id 改、删）。
+    if (stampIds(structuredClone(data))) data = await cloud.change(state => { stampIds(state); return state; });
     tell(); clearInterval(timer); timer = setInterval(() => { if (!document.hidden) self.refresh(); }, REFRESH);
   }
   const self = {
@@ -54,6 +58,22 @@ export function createMemory() {
       if (!cloud.online) return false;
       data = await cloud.change(mutate); tell(); return true;
     },
+    // 新增 / 修改 / 删除一条回忆（name：letters、timeline、places……，见 edits.js）。
+    save(name, item) { return self.change(state => upsert(state, name, item, self.me)); },
+    remove(name, id) { return self.change(state => remove(state, name, id)); },
+    // 从小屋里加照片：缩小、加密、上传，再记进相册。progress(第几张, 一共几张)。返回放进去了几张。
+    async addPhotos(files, progress) {
+      let done = 0;
+      for (const [index, file] of [...files].entries()) {
+        progress?.(index + 1, files.length);
+        const picture = await preparePhoto(file); if (!picture) continue;
+        const id = [...crypto.getRandomValues(new Uint8Array(10))].map(b => b.toString(16).padStart(2, '0')).join('');
+        for (const [size, bytes] of [['t', picture.thumb], ['f', picture.full]]) { const { iv, data: sealed } = await sealBytes(held, bytes); const joined = new Uint8Array(12 + sealed.length); joined.set(fromBase64(iv)); joined.set(sealed, 12); await cloud.putPhoto(`${id}-${size}`, toBase64(joined)); }
+        await self.save('photos', { id, w: picture.w, h: picture.h, date: picture.date, caption: '', cloud: true }); done++;
+      }
+      return done;
+    },
+    async removePhoto(photo) { await self.remove('photos', photo.id); if (photo.cloud) for (const size of ['t', 'f']) await cloud.deletePhoto(`${photo.id}-${size}`); },
     // 再看一眼线上（对方可能刚浇过水）：有变化才通知。小屋开着时每 45 秒、回到这个标签页时各一次。
     async refresh() { if (!held || !cloud.online) return; const before = cloud.version, next = await cloud.pull(); if (next && cloud.version !== before) { data = next; tell(); } },
     // 一张照片：size 't' 小图（墙上、相册格子）/ 'f' 大图。取回密文、解开、给一个只在这个页面里有效的地址。
@@ -61,7 +81,10 @@ export function createMemory() {
       const name = `${id}.${size}`;
       if (!pictures.has(name)) pictures.set(name, (async key => {
         if (!key) return null;
-        const file = new Uint8Array(await (await fetch(new URL(`./memories/p/${name}.bin`, import.meta.url))).arrayBuffer());
+        // 从小屋里加的照片在线上（cloud）；从文件导入的在网站的 memories/p/ 里。
+        const online = data?.photos?.find(p => p.id === id)?.cloud;
+        const file = online ? fromBase64((await cloud.getPhoto(`${id}-${size}`)) ?? '') : new Uint8Array(await (await fetch(new URL(`./memories/p/${name}.bin`, import.meta.url))).arrayBuffer());
+        if (file.length < 13) return null;
         const bytes = await openBytes(key, toBase64(file.subarray(0, 12)), file.subarray(12));     // 文件 = 12 字节 iv + 密文
         return bytes && URL.createObjectURL(new Blob([bytes], { type: 'image/jpeg' }));
       })(held).catch(() => null));
