@@ -71,6 +71,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const payload = {
     letters: (existsSync(letterDir) ? readdirSync(letterDir).filter(f => f.endsWith('.md')).sort() : []).map(f => parseLetter(readFileSync(join(letterDir, f), 'utf8'), f)).sort((a, b) => b.date.localeCompare(a.date)),
     days: parseDays(read('纪念日.md')),
+    garden: parseList(read('花园.md')).filter(item => item.date),
     places: parseList(read('去过的地方.md')), watched: parseList(read('一起看过的.md')), wishes: parseList(read('想去的地方.md')), things: parseList(read('小物件.md')),
   };
   // 盐沿用上一次的：只要暗号没换，已经在设备上记住的钥匙就继续有效。
@@ -82,5 +83,5 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (!(await openJSON(key, sealed))) throw new Error('seal round trip failed');
   writeFileSync(file, `// 你们的回忆（AES-GCM 密文）。原文在 memories/，改完运行 node scripts/seal-memories.mjs。不要手改。\nexport default ${JSON.stringify(sealed)};\n`);
   console.log(`✓ ${source === real ? 'memories/' : 'memories.example/（占位内容，暗号 cabin）'} → dist/room/memories/sealed.js`);
-  console.log(`  信 ${payload.letters.length} · 时间线 ${payload.days.timeline.length}${payload.days.since ? `（在一起 ${payload.days.since}）` : ''} · 去过 ${payload.places.length} · 看过 ${payload.watched.length} · 想去 ${payload.wishes.length} · 小物件 ${payload.things.length} · 照片 ${payload.photos.length}（新加密 ${album.fresh} 张）`);
+  console.log(`  信 ${payload.letters.length} · 时间线 ${payload.days.timeline.length}${payload.days.since ? `（在一起 ${payload.days.since}）` : ''} · 去过 ${payload.places.length} · 看过 ${payload.watched.length} · 想去 ${payload.wishes.length} · 小物件 ${payload.things.length} · 手动种的 ${payload.garden.length} · 照片 ${payload.photos.length}（新加密 ${album.fresh} 张）`);
 }

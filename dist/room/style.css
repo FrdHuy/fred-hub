@@ -107,3 +107,19 @@
 .r3m-turn:hover{opacity:1}
 .r3m-turn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .r3m-turn.is-prev{left:6px}.r3m-turn.is-next{right:6px}.r3m-turn.is-next svg{transform:scaleX(-1)}
+/* 植物的小纸牌：比回忆面板窄一点；浇水按钮是一只水壶的线稿 */
+.r3-panel.is-plant{width:min(340px,92vw)}
+.r3-panel.is-plant>h2{margin-bottom:8px}
+.r3m-plant{margin:0 0 12px;font:11px var(--font-mono);letter-spacing:.1em;color:#90928a}
+.r3m-note{margin:0 0 14px;font:16px/1.9 var(--font-literary)}
+.r3m-water{margin-top:6px;padding-top:14px;border-top:1px solid #e8e3d6}
+.r3m-can{min-height:0;display:flex;align-items:center;gap:10px;padding:6px 4px;color:#5f7f8a;font:14px var(--font-ui);letter-spacing:.12em;transition:color .2s,transform .2s}
+.r3m-can:hover{color:#3f6472;transform:rotate(-4deg)}
+.r3m-can svg{width:28px;height:20px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.r3m-recall{animation:r3-recall .5s var(--ease,ease-out)}
+.r3m-recall img{display:block;width:100%;max-height:30svh;object-fit:cover;border-radius:3px;background:#ece6d8}
+.r3m-recall strong{font:400 17px/1.5 var(--font-literary)}
+.r3m-recall blockquote{margin:0;font:15px/1.9 var(--font-literary)}
+.r3m-recall p{margin:8px 0 0;font:11px/1.6 var(--font-mono);letter-spacing:.08em;color:#90928a}
+@keyframes r3-recall{from{opacity:0;transform:translateY(6px)}}
+@media(prefers-reduced-motion:reduce){.r3m-recall{animation:none}}

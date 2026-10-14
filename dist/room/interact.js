@@ -6,7 +6,8 @@ import { createPanel } from './panel.js';
 const WARM = new THREE.Color('#ffb066');
 
 // options：memory 回忆的状态（memory.js）；sound(name) 站内音效；still 减少动态效果。
-export function createInteract({ stage, view, placed, host, memory, sound, still }) {
+// plots：花圃（plots.js），浇水后要告诉它。
+export function createInteract({ stage, view, placed, host, memory, plots, sound, still }) {
   const { camera, scene, renderer } = stage, canvas = renderer.domElement, abort = new AbortController(), signal = abort.signal;
   const label = Object.assign(document.createElement('div'), { className: 'r3-label' }); label.setAttribute('aria-hidden', 'true');
   const veil = Object.assign(document.createElement('div'), { className: 'r3-veil' }); veil.setAttribute('aria-hidden', 'true');
@@ -20,7 +21,9 @@ export function createInteract({ stage, view, placed, host, memory, sound, still
   const info = new Map(), level = new Map(), isKey = object => object.userData.entry.action === 'unlock';
   // 名字：门垫锁着时叫「钥匙」，开着时叫「锁门」；别的物件就是自己的名字。
   const nameOf = object => isKey(object) ? (memory.data ? '锁门' : '钥匙') : object.userData.entry.label;
-  for (const object of placed) {
+  let things = [...placed];                                 // 可以点的东西：按配置摆的物件 + 花圃里的植物（setPlants 会换掉后面这部分）
+  function enrol(object) {
+    object.updateWorldMatrix(true, true);
     const bounds = new THREE.Box3(); object.traverse(o => { if (o.isMesh && !o.material.isMeshBasicMaterial) bounds.expandByObject(o); });
     const sphere = bounds.getBoundingSphere(new THREE.Sphere()), item = Object.assign(document.createElement('button'), { type: 'button' });
     item.addEventListener('focus', () => { if (!busy) { hot = object; byKey = true; } }, { signal });
@@ -30,7 +33,13 @@ export function createInteract({ stage, view, placed, host, memory, sound, still
     info.set(object, { center: sphere.center, radius: sphere.radius, top: new THREE.Vector3(sphere.center.x, bounds.max.y + .14, sphere.center.z), item });
     level.set(object, 0);
   }
-  const name = () => { for (const object of placed) info.get(object).item.textContent = nameOf(object) + (!isKey(object) && !memory.data ? '（锁着）' : ''); shown = null; };
+  placed.forEach(enrol);
+  // 花圃里的植物换了一批（开锁、锁门、入冬）：旧的注销，新的登记。
+  function setPlants(list) {
+    for (const object of things) if (!placed.includes(object)) { info.get(object)?.item.remove(); info.delete(object); level.delete(object); if (hot === object) hot = null; }
+    things = [...placed, ...list]; list.forEach(enrol); name(); dirty = true;
+  }
+  const name = () => { for (const object of things) info.get(object).item.textContent = nameOf(object) + (!isKey(object) && !memory.data ? '（锁着）' : ''); shown = null; };
 
   let hot = null, shown = null, byKey = false, busy = false, dirty = false, down = null, linger = 0;
   name(); memory.onChange(name);
@@ -39,7 +48,7 @@ export function createInteract({ stage, view, placed, host, memory, sound, still
   // 指针下面是哪件物件：射线打到的第一个网格，顺着父节点往上找到带配置的那一层。随墙隐去的东西不算。
   function pick() {
     raycaster.setFromCamera(pointer, camera);
-    for (const hit of raycaster.intersectObjects(placed.filter(o => !o.userData.hidden), true)) {
+    for (const hit of raycaster.intersectObjects(things.filter(o => !o.userData.hidden), true)) {
       for (let o = hit.object; o; o = o.parent) if (o.userData.entry) return o;
     }
     return null;
@@ -72,8 +81,9 @@ export function createInteract({ stage, view, placed, host, memory, sound, still
     if (!isKey(object) && !memory.data) { hot = placed.find(isKey) ?? object; byKey = false; linger = performance.now() + 1800; return; }
     hot = object; busy = true; sound?.('key'); canvas.style.cursor = '';
     const facing = entry.turn || 0, azimuth = (entry.view ?? facing + (45 - facing) * .35) * Math.PI / 180;       // 从物件正面偏向默认视角的方向看过去
-    await view.closeUp(center, Math.max(radius, entry.memory ? 1.5 : 1), azimuth, entry.wall ? 77 : 64, !isKey(object));       // 挂在墙上的东西平着看；给面板让出位置
+    await view.closeUp(center, Math.max(radius, entry.memory ? 1.5 : entry.plant ? .75 : 1), azimuth, entry.wall ? 77 : 64, !isKey(object));       // 挂在墙上的东西平着看；给面板让出位置
     if (isKey(object)) { if (memory.data) panel.askLock(() => memory.lock(), leave(object)); else panel.askKey(async phrase => { const right = await memory.unlock(phrase); sound?.(right ? 'ok' : 'error'); return right; }, leave(object)); }
+    else if (entry.plant) panel.showPlant(entry.plant, memory.data, () => { sound?.('ok'); plots.watered(object); }, leave(object));
     else panel.showMemory(entry, memory.data, leave(object));
   }
   // 回到小屋（从别的页面进来）：幕布从来处的底色淡开；面板关掉，镜头如果还停在特写就拉回全景。
@@ -88,17 +98,17 @@ export function createInteract({ stage, view, placed, host, memory, sound, still
     if (dirty && !busy) { dirty = false; hot = pick(); canvas.style.cursor = hot ? 'pointer' : ''; }
     if (linger && performance.now() > linger) { linger = 0; if (!byKey && !busy) { hot = null; dirty = true; } }
     // 高亮：被指着的物件泛起一层暖光、微微放大（灯和屏幕则更亮一点）；离开后慢慢退回去。
-    for (const object of placed) {
+    for (const object of things) {
       const now = level.get(object), want = object === hot && !object.userData.hidden ? 1 : 0;
       if (Math.abs(want - now) < .002) continue;
       const h = still ? want : now + (want - now) * .16; level.set(object, Math.abs(want - h) < .002 ? want : h);
       for (const m of object.userData.materials) { if (!m.emissive) continue; const glow = m.userData.base.glow; if (glow) m.emissiveIntensity = glow * (1 + .7 * h); else { m.emissive.copy(WARM); m.emissiveIntensity = .3 * h; } }
-      object.scale.setScalar(1 + .02 * h);
+      object.scale.setScalar((object.userData.baseScale ?? 1) * (1 + .02 * h));
     }
     // 名称标签：把物件头顶的三维位置投影到屏幕，HTML 标签跟着走。锁着的回忆带一把小锁。
     const named = hot && !panel.open && !hot.userData.hidden && !(busy && !linger) ? hot : null;
     if (named !== shown) { shown = named; label.classList.toggle('is-on', !!named); if (named) { label.textContent = nameOf(named); label.classList.toggle('is-locked', !isKey(named) && !memory.data); } }
     if (shown) { spot.copy(info.get(shown).top).project(camera); label.style.transform = `translate(${((spot.x + 1) / 2 * host.clientWidth).toFixed(1)}px,${((1 - spot.y) / 2 * host.clientHeight).toFixed(1)}px) translate(-50%,-100%)`; }
   }
-  return { update, arrive, dispose() { abort.abort(); panel.close(); label.remove(); veil.remove(); nav.remove(); } };
+  return { update, arrive, setPlants, dispose() { abort.abort(); panel.close(); label.remove(); veil.remove(); nav.remove(); } };
 }

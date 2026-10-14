@@ -38,8 +38,8 @@ const build = {
     }
     // 花坛边：洒水壶、两盆小苗。
     const can = group(cyl(.11, .12, .2, satin('#9fb6a8'), 0, 0, 0, 10), tilt(cyl(.02, .03, .26, satin('#9fb6a8'), .17, .08, 0, 6), 0, 0, -1), tilt(rod(.012, .2, satin('#9fb6a8'), -.12, .16, 0, 'x', 5), 0, 0, 0), contact(.5, .5, .3, 0, 0, .008));
-    can.position.set(4.55, G, 2.2); can.rotation.y = .6; all.add(can);
-    for (const [px, pz] of [[4.6, 2.7], [4.85, 2.45]]) all.add(cyl(.08, .06, .1, mat('#c9764f'), px, G, pz, 8), ball(.05, mat('#8fc35a'), px, G + .16, pz, 0), ball(.035, mat('#a3d06b'), px + .04, G + .2, pz + .02, 0));
+    can.position.set(4.4, G, 1.75); can.rotation.y = .6; all.add(can);
+    for (const [px, pz] of [[4.3, 1.35], [4.55, 1.2]]) all.add(cyl(.08, .06, .1, mat('#c9764f'), px, G, pz, 8), ball(.05, mat('#8fc35a'), px, G + .16, pz, 0), ball(.035, mat('#a3d06b'), px + .04, G + .2, pz + .02, 0));
     return { group: all, update(time) {
       for (const m of moving) {
         if (m.kind === 'cloth') { m.node.rotation.z = Math.sin(time * 1.1 + m.phase) * .12; continue; }
@@ -67,7 +67,7 @@ const build = {
       ball(.15, mat('#e9d29a'), 0, 1.45, 0, 1), cyl(.3, .3, .02, mat('#c99a45'), 0, 1.55, 0, 10), cyl(.12, .16, .16, mat('#c99a45'), 0, 1.57, 0, 8), contact(.8, .8, .3, 0, 0, .01));
     scarecrow.position.set(5.9, G, -1.7); scarecrow.rotation.y = -.7; all.add(scarecrow);
     // 树下的蘑菇。
-    for (const [mx, mz, s] of [[-1.5, 5.9, 1], [-1.3, 6.1, .7], [-3.1, 5.0, .8], [-1.75, 6.15, .55]]) all.add(cyl(.03 * s, .04 * s, .1 * s, mat('#f1e5d0'), mx, G, mz, 6), tilt(cyl(.02 * s, .1 * s, .07 * s, mat('#c4472a'), mx, G + .09 * s, mz, 7), 0, 0, 0));
+    for (const [mx, mz, s] of [[-3.0, 6.0, 1], [-2.8, 6.2, .7], [-3.1, 5.0, .8], [-3.25, 6.2, .55]]) all.add(cyl(.03 * s, .04 * s, .1 * s, mat('#f1e5d0'), mx, G, mz, 6), tilt(cyl(.02 * s, .1 * s, .07 * s, mat('#c4472a'), mx, G + .09 * s, mz, 7), 0, 0, 0));
     // 一队南飞的雁：远远地从屋后的天上飞过，约一分钟一趟。
     const flock = group(), dark = mat('#4a4658');
     for (let i = 0; i < 7; i++) { const side = i % 2 ? 1 : -1, back = Math.ceil(i / 2), goose = group(tilt(box(.34, .02, .07, dark, .15, 0, 0), 0, .5, 0), tilt(box(.34, .02, .07, dark, -.15, 0, 0), 0, -.5, 0)); goose.position.set(-back * .55, (i % 3) * .05, side * back * .5); goose.traverse(o => { o.castShadow = false; }); flock.add(goose); }
@@ -112,7 +112,7 @@ const build = {
     const random = rng(41), all = group(), rings = [];
     // 水洼：深色、很光滑的一片，会映出灯光；上面一圈圈涟漪不断扩开。
     const water = mat('#4a5f8e', { roughness: .1, metalness: .3, emissive: '#1b2a4c', emissiveIntensity: .9 }), ripple = new THREE.MeshBasicMaterial({ color: '#b9c9ea', transparent: true, opacity: .5, depthWrite: false, fog: false });
-    for (const [x, z, r] of [[2.9, 4.7, .62], [.2, 5.6, .5], [4.9, 2.2, .7], [5.6, 5.9, .55], [-3.4, 4.4, .5], [4.6, -2.4, .6], [1.9, 6.2, .38], [-.6, -4.6, .5]]) {
+    for (const [x, z, r] of [[2.9, 4.7, .62], [.45, 4.7, .5], [5.5, 1.1, .7], [5.6, 5.9, .55], [-3.4, 4.4, .5], [4.6, -2.4, .6], [1.9, 6.2, .38], [-.6, -4.6, .5]]) {
       const pool = cyl(r, r, .012, water, x, G + .002, z, 12); pool.scale.z = .72; pool.rotation.y = random() * 3; pool.castShadow = false; all.add(pool);
       for (let i = 0; i < 3; i++) {
         const ring = new THREE.Mesh(new THREE.RingGeometry(.9, 1, 20), ripple.clone()); ring.rotation.x = -Math.PI / 2; ring.position.set(x + (random() - .5) * r * .9, G + .018, z + (random() - .5) * r * .5);

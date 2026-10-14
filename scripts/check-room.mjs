@@ -6,6 +6,7 @@ import { readRoute } from '../dist/router.js';
 import { objects, mood, MEMORIES } from '../dist/room/config.js';
 import { deriveKey, sealJSON, openJSON, exportKey, importKey } from '../dist/room/vault.js';
 import { dayCount, nextAnniversary } from '../dist/room/memory.js';
+import { SLOTS, BEDS, inBed, stageOf, yearsOf, speciesOf, plantsFrom, milestonesOf, recall } from '../dist/room/growth.js';
 import { parseList, parseLetter, parseDays } from './seal-memories.mjs';
 
 assert.deepEqual(readRoute('#/room'), { type: 'room' });
@@ -43,7 +44,7 @@ for (const file of sources) {
 for (const file of readdirSync(`${vendor}/addons`, { recursive: true }).filter(f => f.endsWith('.js'))) assert.ok(!/from\s+'three'/.test(readFileSync(`${vendor}/addons/${file}`, 'utf8')), `${file}: 仍在用裸模块名 three`);
 // 降级：静态截图在；判断设备和静态版的代码不能依赖 Three.js（否则低端设备还是要下载它）。
 assert.ok(existsSync('dist/room/fallback.jpg'), '缺静态截图 dist/room/fallback.jpg');
-for (const file of ['enter.js', 'quality.js', 'flat.js', 'config.js', 'vault.js', 'memory.js']) assert.ok(!/from\s+'\.\/(three|index|scene|kit)\.js'/.test(readFileSync(`dist/room/${file}`, 'utf8')), `${file}: 不能静态导入 3D 代码`);
+for (const file of ['enter.js', 'quality.js', 'flat.js', 'config.js', 'vault.js', 'memory.js', 'growth.js']) assert.ok(!/from\s+'\.\/(three|index|scene|kit)\.js'/.test(readFileSync(`dist/room/${file}`, 'utf8')), `${file}: 不能静态导入 3D 代码`);
 assert.ok(readFileSync('dist/main.js', 'utf8').includes('./room/enter.js'), 'main.js 通过 enter.js 进小屋');
 const html = readFileSync('dist/index.html', 'utf8');
 assert.ok(html.includes('id="room-view"') && html.includes('./room/style.css'));
@@ -59,8 +60,21 @@ assert.deepEqual(nextAnniversary('2025-01-01', new Date(2025, 11, 31)), { days: 
 assert.deepEqual(parseList('# 注释\n2025-03-15 京都 ｜ 樱花\n海边\n'), [{ date: '2025-03-15', title: '京都', note: '樱花' }, { date: '', title: '海边', note: '' }]);
 assert.deepEqual(parseLetter('标题：你好\n来自：Fred\n\n第一段\n\n第二段\n', 'x.md'), { title: '你好', date: '', from: 'Fred', paragraphs: ['第一段', '第二段'] });
 assert.deepEqual(parseDays('在一起：2025-01-01\n2025-03-15 旅行\n2024-11-03 见面\n').timeline.map(t => t.title), ['见面', '旅行']);
+// 花园：只看天数、不会死；时间线自动种 + 手动种；坑不够时最早和最新的都留着。
+assert.deepEqual([1, 2, 3, 9, 10, 29, 30, 4000].map(stageOf), ['mound', 'mound', 'sprout', 'sprout', 'bud', 'bud', 'bloom', 'bloom'], '长到哪一步只看天数，之后一直开着');
+assert.deepEqual([1, 365, 366, 731].map(yearsOf), [0, 0, 1, 2]);
+assert.equal(SLOTS.length, 24); assert.ok(SLOTS.every(([x, z]) => inBed(x, z, 0)) && new Set(SLOTS.map(String)).size === 24); assert.ok(!inBed(0, 0) && inBed((BEDS[0].x[0] + BEDS[0].x[1]) / 2, (BEDS[0].z[0] + BEDS[0].z[1]) / 2));
+assert.ok(BEDS.some(b => SLOTS[0][0] > b.x[0] && SLOTS[0][0] < b.x[1]) && !(SLOTS[1][0] > BEDS[0].x[0] && SLOTS[1][0] < BEDS[0].x[1]), '两片花圃轮流种');
+assert.equal(speciesOf({ date: '2025-01-01', title: '一株向日葵' }), 'sunflower'); assert.equal(speciesOf({ date: '2025-01-01', title: '第一次见面' }), speciesOf({ date: '2025-01-01', title: '第一次见面' }));
+const day = new Date(2026, 0, 10), grown = plantsFrom({ days: { timeline: [{ date: '2025-01-01', title: '在一起', note: '' }, { date: '2027-01-01', title: '还没到', note: '' }] }, garden: [{ date: '2026-01-05', title: '玫瑰', note: '' }] }, day);
+assert.deepEqual(grown.map(p => [p.title, p.days, p.stage, p.years, p.from]), [['在一起', 375, 'bloom', 1, 'day'], ['玫瑰', 6, 'sprout', 0, 'hand']], '还没到的日子不种');
+const many = plantsFrom({ garden: Array.from({ length: 40 }, (_, i) => ({ date: `2025-01-${String(i % 28 + 1).padStart(2, '0')}`, title: `花${String(i).padStart(2, '0')}`, note: '' })) }, day);
+assert.equal(many.length, 24); assert.equal(new Set(many.map(p => String(p.at))).size, 24);
+assert.deepEqual(milestonesOf(99), []); assert.deepEqual(milestonesOf(520), ['birdhouse', 'swing', 'lights']);
+const pool = { photos: [{ id: 'a' }], letters: [{ from: 'F', date: '', paragraphs: ['一', '二'] }], days: { timeline: [{ title: 't' }] } };
+assert.deepEqual(recall(pool, 'x', day), recall(pool, 'x', day), '同一株同一天带出同一段回忆'); assert.equal(recall({}, 'x', day), null);
 const box = readFileSync('dist/room/memories/sealed.js', 'utf8');
 assert.ok(/"salt":"[^"]+","iterations":600000,"iv":"[^"]+","data":"[^"]+"/.test(box), 'memories/sealed.js 应该只有密文');
 assert.ok(readFileSync('.gitignore', 'utf8').split('\n').includes('/memories/'), '根目录的 memories/ 必须被 git 忽略（dist/room/memories/ 里的密文要进仓库）');
 if (existsSync('memories/暗号.txt')) { const phrase = readFileSync('memories/暗号.txt', 'utf8').split('\n').map(l => l.trim()).find(l => l && !l.startsWith('#')); for (const file of sources) assert.ok(!readFileSync(file, 'utf8').includes(phrase), `${file}: 暗号不能出现在 dist/ 里`); }
-console.log(`PASS: room config (${objects.length} objects), sealed memories round trip, vendored three@0.170.0, no external sources`);
+console.log(`PASS: room config (${objects.length} objects), sealed memories round trip, garden rules, vendored three@0.170.0, no external sources`);
